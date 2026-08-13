@@ -55,18 +55,6 @@
         ]
       },
       {
-        "tab": "API Reference",
-        "icon": "code",
-        "groups": [
-          {
-            "group": "Endpoints",
-            "icon": "terminal",
-            "openapi": "api-reference/openapi.yaml",
-            "pages": []
-          }
-        ]
-      },
-      {
         "tab": "Help Center",
         "icon": "help-circle",
         "pages": [
