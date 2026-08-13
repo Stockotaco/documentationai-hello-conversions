@@ -1,0 +1,110 @@
+---
+title: A report number looks wrong
+description: Symptom-by-symptom causes for disputed figures in every Hello Conversions report — empty pages, missing spend, numbers that moved, and two reports disagreeing.
+---
+
+Find the report, find the symptom. Most disputed numbers are a definition difference rather than a bug.
+
+## Two reports disagree
+
+The most common complaint, and usually neither report is wrong.
+
+| Pair | Why they differ |
+| --- | --- |
+| Revenue Overview vs Marketing Efficiency | Revenue Overview counts every settled transaction in any currency and prefers Stripe's figure for Stripe-processed charges. Marketing Efficiency counts **USD GoHighLevel transactions with a contact attached** and nothing else |
+| Lead LTV vs Marketing Efficiency | Same lead data, different revenue counting: Lead LTV follows leads forward from capture, Marketing Efficiency counts transactions inside the window. Agreement would be the surprise |
+| Email Stats vs the Revenue reports | Email attributes revenue in a 7-day post-email window, not the CRM's own attribution |
+| Any report vs the client's CRM lead count | A lead is a contact **with an email address**. Compare against a GoHighLevel view filtered the same way |
+| Creatives vs Meta Ads Manager | Different attribution window or date range, or an ad-level number compared against a creative-level total |
+
+## Revenue Overview
+
+| Symptom | Cause |
+| --- | --- |
+| Everything is zero | No revenue source connected, or the first sync hasn't landed. Check **Settings → Integrations → Sources** |
+| Revenue is there but forms and products are empty | The project is on Stripe alone; those panels are built from GoHighLevel data |
+| Page views, unique visitors and conversion rate are zero | The [tracking script](/help-center/guides/install-tracking-script) isn't installed, or isn't on the pages people land on |
+| Page views right for recent dates, gone for older ones | Pixel data only reaches back **90 days**; revenue goes back as far as your source synced. A 6-month range shows revenue throughout and page views only recently, which also drags conversion rate |
+| A past day's revenue changed since last time | Refunds are netted against the day of the original transaction, not the day the refund was issued, so historical days move and an old screenshot can legitimately disagree |
+| A sale is on the wrong day | Days are cut in the **project's timezone**, set under **Settings → Project → General** |
+| Form Submission Pages revenue doesn't add up to total revenue | It isn't meant to. A page is credited with every purchase its contacts have ever made, before and after your window, and a contact who submitted forms on three pages is credited on all three. Rank pages against each other, don't total them |
+| The same form name appears twice in Top Forms | Rows are per form *and* per page. A form embedded on two pages produces one row each, figures split between them, not duplicated |
+
+## Marketing Efficiency
+
+| Symptom | Cause |
+| --- | --- |
+| Sales lower than Revenue Overview | Expected on some accounts — see the pair table above |
+| New Leads lower than the CRM's contact count | Contacts without an email address aren't leads. Lead LTV shows the same shortfall |
+| Ad spend zero but the platform shows spend | The ad source isn't connected, or its sync hasn't landed |
+| Attributed sales far below the platform's reported conversions | The platform credits a click; this credits a lead record carrying a source, so leads arriving without UTMs are invisible to the join |
+| A campaign shows spend and a blank attributed sales cell | Nothing matched through any of the four attribution routes. Check the ads carry UTMs and the name or ID matches what the platform reports |
+| The numbers moved and nobody changed anything | The daily rebuild landed, or a source finished a sync. The header chip gives the time |
+
+## Lead LTV
+
+| Symptom | Cause |
+| --- | --- |
+| Report is empty, header says Stripe-only | GoHighLevel isn't connected |
+| Lead counts lower than the client's own CRM count | Contacts without an email address are not leads here |
+| A known customer shows as a zero-value lead | Their payments predate their contact record; revenue only counts from the capture date forward |
+| Ad spend missing but leads and revenue are fine | Meta Ads or Google Ads isn't connected, or hasn't synced. Spend, CAC, Payback and LROAS go blank together, which is the tell |
+| Everything went to zero after a client shared a link | A shared URL carries its filters. An amber banner names each filter that matched no leads, with a one-click clear |
+
+## Creatives
+
+| Symptom | Most likely cause |
+| --- | --- |
+| Every conversion, cost-per and ROAS is zero | Wrong objective for the account — a lead-gen account left on the default Purchases never records `purchase` results |
+| ROAS column missing entirely | Objective is not Purchases. Expected |
+| Report is completely empty | No spend in the range, or the first Meta sync hasn't finished |
+| A creative you know is running isn't listed | It spent nothing in the range, or its spend landed after the last daily sync |
+| Yesterday's spend missing | The 02:00 UTC sync hasn't run since that spend was recorded |
+| Numbers changed since this morning | Meta revised its own attribution, or the 15-minute cache expired |
+| Verdicts flipped between two views | Different date range or format filter — the comparison set changed |
+| Cost-per shows `--` | Zero conversions |
+| One creative shows several campaign names | It genuinely ran in all of them |
+| A blank thumbnail tile | The creative arrived after the last sync, or its media failed to copy. Metrics are still correct |
+
+## Creative Tracking
+
+| Symptom | Cause |
+| --- | --- |
+| Table is empty | No creative spent in the range, or the first Meta sync hasn't finished |
+| A creative you fixed still shows red | The fix hasn't synced yet — sync is daily at 02:00 UTC, plus a 30-minute result cache |
+| A tagged creative shows as untagged | The parameters were appended to the website URL rather than entered in the URL parameters field |
+| Missing UTMs card is lower than the Issues row count | The card counts creatives with *no* UTM at all; Issues counts any missing one, so a creative with only `utm_source` is in Issues but not on the card |
+| Landing page shows only a hostname | Only the hostname is displayed; the link goes to the full URL |
+| A creative appears here but not in the Creatives grid | Same source data, but the Creatives grid paginates and can be filtered by format or verdict |
+
+## Email Stats
+
+| Symptom | Cause |
+| --- | --- |
+| Whole page empty, amber banner | No GoHighLevel integration connected on this project |
+| CTR much lower than the client's other dashboard | Theirs is probably click-to-open (clicks ÷ opens); this is clicks ÷ delivered |
+| Open rate looks implausibly high | Apple MPP inflation is already excluded here, but not everywhere — compare like for like |
+| List Health is high but something feels wrong | A component with no data scores as full credit, so very low volume inflates the score. Check the Accepted count |
+| Top Movers is empty | No email cleared 100 delivered in both the current and previous periods |
+| Delivered plus clicked revenue exceeds total revenue | They overlap by design; don't sum them |
+| A recent send is missing | Events are live, but the page caches for five minutes — hit refresh |
+| An email appears under "Other" | GoHighLevel didn't classify it as a workflow or a campaign |
+
+## Workflow Performance
+
+| Symptom | Cause |
+| --- | --- |
+| The whole screen is empty | No runs exist in the window. Events are only recorded once they reach an enabled connection — an event no connection listens for, an order not in a completed state, or an opportunity in an untargeted stage produces no run |
+| One panel empty, the rest fine | Each section loads by its own query and a failed query returns empty rather than breaking the page. Hit **Refresh** first |
+| Counters don't match the tables | Counters come from an hourly rollup; tables and chart read individual runs. At the edge of a long window counters can trail by up to an hour. A few events' difference is this; hundreds isn't |
+| Filtered looks low on a pipeline-driven project | Pipeline-managed connections fan out across stages, and non-matching ones are deliberately not logged. Filtered reflects your own rules, not that internal partitioning |
+
+## Numbers that move on their own
+
+| Cause | Which reports |
+| --- | --- |
+| Daily snapshot rebuild, project timezone | Marketing Efficiency, Lead LTV |
+| Meta sync at 02:00 UTC | Creatives, Creative Tracking, Frameworks |
+| Short result caches — 15 minutes on creatives, 30 on tracking, 5 on email | Creatives, Creative Tracking, Email Stats |
+| A range ending today keeps moving until the day closes | All of them |
+| Refunds netted against the original transaction date | Revenue Overview |

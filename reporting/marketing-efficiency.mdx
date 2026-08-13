@@ -91,14 +91,4 @@ Expect Sales to drop when you apply your first filter. The denominator changed; 
 
 Spend and lead data come from a snapshot rebuilt **once a day in the project's timezone**; the sales side is queried live per page load. The header chip shows the last successful rebuild, or **Refresh failed** if the latest attempt errored — in which case spend and lead figures are the last good build. The refresh button re-runs queries; it does not rebuild the snapshot.
 
-## When a number looks wrong
-
-| Symptom | Cause |
-| --- | --- |
-| Sales lower than [Revenue Overview](/reporting/revenue-overview) | Expected on some accounts. This report counts USD-only, contact-attached GoHighLevel transactions; Revenue Overview counts everything settled and prefers Stripe's figure for charges Stripe processed |
-| New Leads lower than the CRM's contact count | Contacts without an email address aren't leads. [Lead LTV](/reporting/lead-ltv) shows the same shortfall |
-| Ad spend zero but the platform shows spend | The ad source isn't connected, or its sync hasn't landed. Check **Settings → Integrations → Sources** |
-| Attributed sales far below the platform's reported conversions | The platform credits a click; this credits a lead record carrying a source, so leads arriving without UTMs are invisible to the join |
-| A campaign shows spend and a blank attributed sales cell | Nothing matched through any of the four routes. Check the ads carry UTMs and that the name or ID matches what the platform reports |
-| The numbers moved and nobody changed anything | The daily rebuild landed, or a source finished a sync. The header chip gives the time |
-| Marketing Efficiency and Lead LTV disagree about revenue | Different measures on the same leads: this counts transactions inside your window, Lead LTV counts revenue from leads captured in your window whenever it arrived. A long sales cycle makes them diverge sharply |
+Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.

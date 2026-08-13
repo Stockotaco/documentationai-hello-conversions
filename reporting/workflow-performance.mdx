@@ -84,14 +84,7 @@ A destination that fails loudly is easy. One that simply stops costs a client mo
   </Step>
 </Steps>
 
-## When the numbers look wrong
-
-| Symptom | Cause |
-| --- | --- |
-| The whole screen is empty | No runs exist in the window. Events are only recorded once they reach an enabled connection — an event no connection listens for, an order not in a completed state, or an opportunity in an untargeted stage produces no run. Usually a configuration gap, not a delivery failure |
-| One panel empty, the rest fine | Each section loads by its own query and a failed query returns empty rather than breaking the page. Hit **Refresh** first |
-| Counters don't match the tables | Counters come from an hourly rollup; tables and chart read individual runs. At the edge of a long window counters can trail by up to an hour. A few events' difference is this; hundreds isn't |
-| Filtered looks low on a pipeline-driven project | Pipeline-managed connections fan out across stages, and non-matching ones are deliberately not logged. Filtered reflects your own rules, not that internal partitioning |
+Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.
 
 This screen tells you *whether* something is wrong and *where*, never why. The Failed counter and **View all** both land you in the Activity Log pre-filtered.
 

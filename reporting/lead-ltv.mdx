@@ -104,13 +104,4 @@ Lead LTV reads a snapshot rebuilt **once a day, at a set hour in the project's o
   The refresh button re-runs the queries against the current snapshot; it does not rebuild it. If the header shows **Refresh failed**, you're on the last good build until the next scheduled rebuild succeeds.
 </Callout>
 
-## When a number looks wrong
-
-| Symptom | Cause |
-| --- | --- |
-| Report is empty, header says Stripe-only | GoHighLevel isn't connected |
-| Lead counts lower than the client's own CRM count | Contacts without an email address are not leads here. Compare against a GoHighLevel view filtered to contacts with an email |
-| A known customer shows as a zero-value lead | Their payments predate their contact record; revenue only counts from the capture date forward |
-| Ad spend missing but leads and revenue are fine | Meta Ads or Google Ads isn't connected, or hasn't synced. Spend, CAC, Payback and LROAS go blank together, which is the tell |
-| Everything went to zero after a client shared a link | A shared URL carries its filters. If they match nothing in the current window, an amber banner names each filter that matched no leads, with a one-click clear |
-| Numbers don't match [Marketing Efficiency](/reporting/marketing-efficiency) | Same lead data, different revenue counting: this report follows leads forward from capture, that one counts transactions inside the window. The two agreeing would be the surprise |
+Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.

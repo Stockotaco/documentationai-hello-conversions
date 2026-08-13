@@ -66,17 +66,4 @@ Four cards on a **7-day lookback**:
 
 Three tables by origin: **Workflows**, **Campaigns**, and **Other**. Each row is one email, with its latest event date, delivered count, failed / hard bounce / soft bounce / complained / unsubscribed counts each with their rate, and open rate and CTR. Workflows and Campaigns also get **Delivered $** and **Clicked $** columns; **Other** has no attribution columns, because attribution is only produced for workflow and campaign email. Every table has search, sortable columns, paging and CSV export.
 
-## When a number is disputed
-
-| Symptom | Cause |
-| --- | --- |
-| Whole page empty, amber banner | No GoHighLevel integration connected on this project |
-| CTR much lower than the client's other dashboard | Theirs is probably click-to-open (clicks ÷ opens); this is clicks ÷ delivered |
-| Open rate looks implausibly high | Apple MPP inflation is already excluded here, but not everywhere — compare like for like |
-| List Health is high but something feels wrong | A component with no data scores as full credit, so very low volume inflates the score. Check the Accepted count |
-| Top Movers is empty | No email cleared 100 delivered in both the current and previous periods |
-| Attributed revenue doesn't match the Revenue reports | Different question — this is a 7-day post-email window, not the CRM's own attribution |
-| Delivered plus clicked revenue exceeds total revenue | They overlap by design; don't sum them |
-| A recent send is missing | Events are live, but the page caches for five minutes — hit refresh |
-| Numbers changed while you were looking | Live data. A range ending today keeps moving until the day closes |
-| An email appears under "Other" | GoHighLevel didn't classify it as a workflow or a campaign |
+Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.

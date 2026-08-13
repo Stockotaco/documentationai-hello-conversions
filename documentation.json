@@ -284,6 +284,10 @@
               {
                 "title": "No Conversions Showing",
                 "path": "help-center/troubleshooting/no-conversions-showing"
+              },
+              {
+                "title": "A Report Number Looks Wrong",
+                "path": "help-center/troubleshooting/report-numbers"
               }
             ]
           },

@@ -74,20 +74,6 @@ Data sufficiency is rated **low** below a quarter of the average spend (floor $1
 
 **Today is never included** — the end of the range is clamped to yesterday in the project's timezone, because Meta's same-day numbers are incomplete. Platform admins get a **Clear cache** button, which drops the 15-minute cache but does not pull new data from Meta.
 
-## When a number looks wrong
-
-| Symptom | Most likely cause |
-| --- | --- |
-| Every conversion, cost-per and ROAS is zero | Wrong objective for the account — a lead-gen account left on the default Purchases never records `purchase` results. Check the Meta Ads source row first |
-| ROAS column missing entirely | Objective is not Purchases. Expected |
-| Report is completely empty | No spend in the range, or the first Meta sync hasn't finished |
-| A creative you know is running isn't listed | It spent nothing in the range, or its spend landed after the last daily sync |
-| Yesterday's spend missing | The 02:00 UTC sync hasn't run since that spend was recorded |
-| Numbers changed since this morning | Meta revised its own attribution, or the 15-minute cache expired |
-| Verdicts flipped between two views | Different date range or format filter — the comparison set changed |
-| Cost-per shows `--` | Zero conversions. Dividing by zero would be worse |
-| One creative shows several campaign names | It genuinely ran in all of them |
-| A blank thumbnail tile | The creative arrived after the last sync, or its media failed to copy. Metrics are still correct |
-| Meta Ads Manager shows different totals | Different attribution window or date range in Ads Manager, or you're comparing an ad-level number against a creative-level total |
+Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.
 
 For quadrants, fatigue curves and the campaign-by-format matrix see [Frameworks](/reporting/frameworks); for whether creatives are tagged well enough to attribute at all, see [Tracking](/reporting/creative-tracking).

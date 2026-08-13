@@ -42,13 +42,4 @@ The UTM checks are case-insensitive presence tests on the creative's **URL param
 
 Rows with an issue **and** more than $100 of spend are tinted red and carry an amber warning triangle. Sort by spend and work down. Every failure is fixed in Meta Ads Manager, at ad level, in the **URL parameters** field — and the same creative may be used by several ads, each needing the fix.
 
-## When the audit looks wrong
-
-| Symptom | Cause |
-| --- | --- |
-| Table is empty | No creative spent in the range, or the first Meta sync hasn't finished |
-| A creative you fixed still shows red | The fix hasn't synced yet — sync is daily at 02:00 UTC, plus a 30-minute result cache |
-| A tagged creative shows as untagged | The parameters were appended to the website URL rather than entered in the URL parameters field |
-| Missing UTMs card is lower than the Issues row count | The card counts creatives with *no* UTM at all; Issues counts any missing one, so a creative with only `utm_source` is in Issues but not on the card |
-| Landing page shows only a hostname | Only the hostname is displayed; the link itself goes to the full URL |
-| A creative appears here but not in the Creatives grid | The two use the same source data, but the Creatives grid paginates and can be filtered by format or verdict |
+Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.

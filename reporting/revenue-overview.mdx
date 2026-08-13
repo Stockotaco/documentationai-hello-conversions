@@ -68,16 +68,4 @@ Only live, settled money counts: GoHighLevel transactions at status `succeeded` 
 
 Most tiles and table cells are clickable, opening the actual contacts or transactions behind the figure. If a client disputes New Customers, open the drill and read them the list.
 
-## When a number looks wrong
-
-| Symptom | Cause |
-| --- | --- |
-| Everything is zero | No revenue source connected, or the first sync hasn't landed. Check **Settings → Integrations → Sources** |
-| Revenue is there but forms and products are empty | The project is on Stripe alone; those panels are built from GoHighLevel data |
-| Page views, unique visitors and conversion rate are zero | The [tracking script](/help-center/guides/install-tracking-script) isn't installed, or isn't on the pages people land on |
-| Page views right for recent dates, gone for older ones | Pixel data only reaches back **90 days**; revenue goes back as far as your source synced. A 6-month range shows revenue throughout and page views only recently, which also drags conversion rate |
-| A past day's revenue changed since last time | Refunds are netted against the day of the original transaction, not the day the refund was issued, so historical days move and an old screenshot can legitimately disagree |
-| A sale is on the wrong day | Days are cut in the **project's timezone**, set under **Settings → Project → General** |
-| Revenue doesn't match [Marketing Efficiency](/reporting/marketing-efficiency) | Neither is wrong. This report counts every settled transaction in any currency and prefers Stripe's figure for Stripe-processed charges; Marketing Efficiency counts **USD GoHighLevel transactions with a contact attached** and nothing else |
-| Form Submission Pages revenue doesn't add up to total revenue | It isn't meant to. A page is credited with every purchase its contacts have ever made, before and after your window, and a contact who submitted forms on three pages is credited on all three. Rank pages against each other, don't total them. The Customers column has the same lifetime framing |
-| The same form name appears twice in Top Forms | Rows are per form *and* per page. A form embedded on two pages produces one row each, figures split between them, not duplicated |
+Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.
