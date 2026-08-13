@@ -1,0 +1,79 @@
+---
+title: Stripe
+description: Connect Stripe as a source so charges, invoices, customers, and subscriptions feed the revenue reports.
+---
+
+Connect Stripe when payments happen in Stripe rather than — or as well as — inside your CRM. It gives the revenue reports a payment-processor view of what was actually collected. It's per **project** — one client account, or just your business if you're not an agency.
+
+Unlike the ad platforms, Stripe has no authorization redirect. You paste in two values and it connects on the spot.
+
+## What it lights up
+
+| Report | What Stripe provides |
+| --- | --- |
+| Revenue Overview | Charges as a revenue source — daily revenue, transaction counts, new vs returning customers, average order value. |
+| Lead LTV | Payment history used to build lifetime value per lead. |
+| Sources page | A 14-day sparkline with the total and trend, on the Stripe row. |
+
+Hello Conversions works out where revenue should come from based on what's actually there. If only Lead Connector transactions have data, it uses those. If only Stripe does, it uses Stripe. If both do, it uses both and de-duplicates them, matching a Lead Connector transaction to the Stripe charge that paid it — so connecting Stripe on top of an existing Lead Connector setup doesn't double-count your revenue.
+
+<Callout kind="warning">
+  Only **live-mode** charges count. Test-mode data in your Stripe account is ignored entirely, which is why test API keys are rejected at the point of connecting.
+</Callout>
+
+## Connect it
+
+<Steps>
+  <Step title="Get your Stripe account ID">
+    In the Stripe Dashboard, open [Account settings](https://dashboard.stripe.com/settings/account). The ID starts with `acct_`.
+  </Step>
+  <Step title="Create an API key">
+    In [API keys](https://dashboard.stripe.com/apikeys), create a **restricted key with read-only permissions**. A restricted key starts with `rk_live_`; a standard secret key starts with `sk_live_`. Either is accepted, but the restricted key is the one to use — it can't move money.
+  </Step>
+  <Step title="Start the connection">
+    In Hello Conversions, go to **Settings → Integrations → Sources**. Stripe is under **CRM & Revenue**. Click **Connect**.
+  </Step>
+  <Step title="Paste both values">
+    Enter the account ID and the API key, then click **Connect**. There's no redirect — the connection is made immediately.
+  </Step>
+  <Step title="Confirm">
+    A "Stripe Connected" toast confirms it, and an initial sync starts right away.
+  </Step>
+</Steps>
+
+<Callout kind="alert">
+  Test keys are refused with "Only live API keys are accepted (`sk_live_*` or `rk_live_*`). Test keys are not supported." If you get that message, you copied the key from test mode — flip the Stripe Dashboard to live mode and copy again.
+</Callout>
+
+Your API key is passed straight through to the sync service and is not stored by Hello Conversions.
+
+## How often it syncs
+
+An initial sync runs on connect and pulls history back to **1 January 2023**. After that, Stripe syncs **daily at 02:00 UTC**, re-checking the last 7 days each run so refunds and status changes on recent charges are picked up rather than frozen at their original values.
+
+## Telling it's working
+
+The Stripe row on the Sources page:
+
+| What you see | What it means |
+| --- | --- |
+| Green **Live** badge with a connection date | Connected and syncing. |
+| Sparkline with a total and a 14-day trend | Charge data has landed. |
+| "Awaiting first sync" | Connected, but the first sync hasn't finished. The initial backfill covers years of history, so give it time. |
+| "Sync failed" | The last sync errored — most often a revoked or rotated API key. Disconnect, create a fresh restricted key, and reconnect. |
+
+The other check is Revenue Overview: once the first sync completes, Stripe revenue appears there.
+
+## What gets pulled
+
+| Data | Used for |
+| --- | --- |
+| Charges | The core revenue figures — amount, status, refunds, timing |
+| Customers | Customer identity, used to attach payments to a person |
+| Invoices | Invoice-level detail behind charges |
+| Subscriptions | Recurring revenue |
+| Balance transactions | Movement of funds in your Stripe balance |
+
+## Disconnecting
+
+**Disconnect** on the Stripe row stops the sync and removes the connection. You'll be asked to confirm. If Lead Connector transactions are also present, revenue reporting falls back to those. Reconnecting later means creating and pasting a key again — the old one isn't retained.

@@ -1,0 +1,111 @@
+---
+title: Google Ads
+description: Link a Google Ads account to Hello Conversions and upload offline conversions — leads, purchases and pipeline stages — against the click that produced them.
+---
+
+Google Ads can only bid on conversions it knows about. A lead that closes a week later, an opportunity moved to Won, a purchase recorded in your CRM — none of that reaches Google on its own. A Google Ads destination uploads those conversions back to the click that produced them.
+
+You don't paste any credentials. You enter the account's Customer ID, we send a manager account link request, and you approve it inside Google Ads.
+
+<Callout kind="info">
+  This is the Google Ads **destination** — conversions going out to Google. Pulling ad spend and campaign performance *in* for reporting is a separate connection: see [Google Ads as a source](/connect/sources/google-ads).
+</Callout>
+
+## Before you start
+
+You need:
+
+- The **Customer ID** of the Google Ads account, with or without dashes. It's at the top of the Google Ads dashboard, formatted like `123-456-7890`.
+- Access to that Google Ads account with permission to accept a manager account request.
+
+## Link the account
+
+<Steps>
+  <Step title="Add the destination">
+    In your project — one client account, or just your business if you're not an agency — go to **Settings → Integrations → Destinations**, click **Add Destination**, and choose **Google Ads**. Give it a name, enter the **Customer ID**, and click **Create**.
+  </Step>
+  <Step title="Send the link request">
+    The new destination shows as **Not Linked** with a **Send Link Request** button. Click it. Hello Conversions sends a manager account link request from its manager account to that Customer ID, and the status changes to **Pending Approval**.
+  </Step>
+  <Step title="Approve it in Google Ads">
+    Sign in to the Google Ads account and accept the pending manager account request. Nothing else in Google Ads needs configuring.
+  </Step>
+  <Step title="Wait for it to flip to Connected">
+    Hello Conversions re-checks pending links about once a minute. When Google reports the link as active, the destination turns **Connected**, two conversion actions are created for you, and every owner on the organization gets an email confirming it.
+  </Step>
+</Steps>
+
+<Callout kind="warning">
+  The manager link belongs to the Customer ID, not to the project. If two projects have a Google Ads destination pointing at the same Customer ID, approving or removing the link in Google Ads affects both.
+</Callout>
+
+## Conversion actions
+
+When the link is approved, Hello Conversions creates two conversion actions in the Google Ads account. Both are offline click-upload actions (`UPLOAD_CLICKS`), set to the account's own currency:
+
+| Conversion action | Category | Counting |
+| --- | --- | --- |
+| `Purchases (Hello Conversions Server-Side)` | Purchase | Every conversion |
+| `New Contacts (Hello Conversions Server-side)` | Sign-up | One conversion |
+
+Both are created with a 30-day click-through window, a 1-day view-through window, and a data-driven attribution model. Neither is marked as a primary goal, so they don't change bidding on their own until you make them primary in Google Ads.
+
+### Choosing which action an event uploads to
+
+Each connection to a Google Ads destination gets its own **Conversion action** step (it replaces the custom event name step other destinations have — Google keys off the conversion action, not an event name). Open **Settings → Workflows → Connections**, edit or create a connection to the Google Ads destination, and pick an action from the dropdown. The list is fetched live from the account and shows every enabled conversion action, not just ours.
+
+You can also create a new one from that dropdown without leaving Hello Conversions. You choose the name, category, counting type, whether it counts as a primary goal, and how value is handled:
+
+| Value option | What it does |
+| --- | --- |
+| **Dynamic** | Uses the value we upload with each conversion. |
+| **Static** | Always uses the default value you set, ignoring the uploaded value. |
+| **None** | Uses a default value of zero. |
+
+If a connection has no conversion action set, uploads fall back to a default: `contact_created` events go to the New Contacts action, everything else goes to the Purchases action.
+
+## What gets uploaded
+
+Each delivered event becomes one offline click conversion upload containing:
+
+| Field | Source |
+| --- | --- |
+| Click ID | `gclid` from the event, or `gbraid` / `wbraid` for iOS app clicks |
+| Conversion action | The connection's action, or the fallback above |
+| Conversion time | The event's timestamp |
+| Value and currency | The event's value. Currency is the transaction's own currency, then the linked account's currency, then USD |
+| Order ID | The order ID — or the transaction ID for subscription rebills, since rebills reuse the original order's ID |
+
+The order ID is what stops double-counting: if the same sale is also counted by a tag on your site, Google collapses the two.
+
+<Callout kind="alert">
+  **An event with no Google click ID cannot be uploaded.** Google's offline conversion import requires a `gclid`, `gbraid` or `wbraid`. An event that has none — a lead who came from Meta, a pipeline stage change on a contact with no ad click, a walk-in — is skipped before the request is made and logged in the Activity Log as `filtered`, with the reason "No usable identifier for ingestion". This is expected behavior, not an error. Only the share of your CRM events that started with a Google ad click can be sent.
+</Callout>
+
+## Confirm it's working
+
+<Steps>
+  <Step title="Check the destination status">
+    On **Settings → Integrations → Destinations**, the card shows the link status: **Connected**, **Pending Approval**, **Access Revoked** or **Not Linked**. Use **Test Connection** on the edit panel to confirm the link is live.
+  </Step>
+  <Step title="Check the Activity Log">
+    **Reporting → Workflows → Activity Log** shows each event with its status and the exact payload we sent. `delivered` means Google accepted the upload; `filtered` usually means no click ID. See [Activity history](/conversion-tracking/activity-history).
+  </Step>
+  <Step title="Check Google Ads">
+    Open the conversion action in Google Ads and look at its recorded conversions. Offline conversion imports are not instant in reporting — give it time before concluding nothing arrived.
+  </Step>
+</Steps>
+
+<Callout kind="note">
+  Google reports an upload as accepted at the moment of the request. Accepted is not the same as attributed: if the click ID is older than the conversion action's 30-day click-through window, or belongs to a different account, Google accepts the upload and then doesn't count it.
+</Callout>
+
+## If the link is removed
+
+Hello Conversions re-checks connected accounts and notices when a manager link is removed or access is revoked. When that happens it:
+
+- flips the destination to **Access Revoked**,
+- disables every connection pointing at that destination, so nothing is silently dropped in the background,
+- emails every owner on the organization.
+
+To recover, click **Re-send Link** on the destination card, approve the request in Google Ads again, then re-enable the connections you want running under **Settings → Workflows → Connections**.

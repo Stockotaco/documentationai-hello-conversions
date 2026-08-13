@@ -1,0 +1,73 @@
+---
+title: Google Ads
+description: Connect a Google Ads account as a source so campaign and cost data feeds the Marketing Efficiency and Lead LTV reports.
+---
+
+Connecting Google Ads pulls your campaigns and daily cost into Hello Conversions, so Google spend lands alongside Meta spend and the revenue you're already tracking. It's per **project** — one client account, or just your business if you're not an agency.
+
+<Callout kind="warning">
+  This is the **source** side of Google Ads: reading cost and campaign data *out* of your account. It is not the same as the Google Ads destination, which sends offline conversions *into* a conversion action. Connecting one does not connect the other — see [Sources vs Destinations](/connect/sources-vs-destinations) and [Google Ads Conversions](/connect/destinations/google-ads).
+</Callout>
+
+## What it lights up
+
+| Report | What Google Ads provides |
+| --- | --- |
+| Marketing Efficiency | Per-campaign daily cost, clicks, and impressions — the cost half of every efficiency number for Google. |
+| Lead LTV | Daily Google spend, broken out by advertising channel type, so lifetime value can be read against acquisition cost. |
+| Sources page | A 14-day spend sparkline with the total and trend, on the Google Ads row. |
+
+## Connect it
+
+<Steps>
+  <Step title="Find your customer ID">
+    In Google Ads, click the help icon in the top right — your customer ID is shown there. It looks like `123-456-7890`.
+  </Step>
+  <Step title="Start the connection">
+    In Hello Conversions, go to **Settings → Integrations → Sources**. Google Ads is under **Ad Platforms**. Click **Connect**.
+  </Step>
+  <Step title="Enter the customer ID">
+    Paste it in with or without dashes — `123-456-7890` and `1234567890` both work. Click **Continue**.
+  </Step>
+  <Step title="Authorize Google">
+    You're sent to Google to approve access, then returned to the Sources page.
+  </Step>
+  <Step title="Confirm">
+    A "Google Ads Connected" toast confirms the account is linked and an initial sync has been kicked off.
+  </Step>
+</Steps>
+
+<Callout kind="tip">
+  Sign in to the Google authorization step with an account that already has access to that customer ID. Authorizing with the wrong Google login is the most common reason a connection completes but no data ever arrives.
+</Callout>
+
+## How often it syncs
+
+An initial sync runs the moment you connect. After that the account syncs **daily at 02:00 UTC**. Cost data in the reports is therefore up to a day behind — that's expected, not a fault.
+
+## Telling it's working
+
+The Google Ads row on the Sources page tells you where things stand:
+
+| What you see | What it means |
+| --- | --- |
+| Green **Live** badge with a connection date | Connected and syncing. |
+| Sparkline with a dollar total and a 14-day trend | Cost data has landed and the reports have something to read. |
+| "Awaiting first sync" | Connected, but the first sync hasn't finished yet. |
+| "Sync failed" | The last sync errored. Disconnect and reconnect; if it persists, contact support. |
+| Amber **Reconnect** badge | Access was revoked on the Google side. Reconnect to resume. |
+
+The other confirmation is Marketing Efficiency: once the first sync completes, Google campaigns appear there with cost against them.
+
+## What gets pulled
+
+| Data | Used for |
+| --- | --- |
+| Campaigns | Campaign names, IDs, channel type, and daily cost, clicks, and impressions |
+| Account performance | Account-level performance over time |
+| Customer | Account details for the connected customer ID |
+| Conversion actions | Conversions and conversion value by conversion action name and day |
+
+## Disconnecting
+
+**Disconnect** on the Google Ads row stops the sync and removes the connection. You'll be asked to confirm. Google cost disappears from new report runs, and data already synced stops updating. You can reconnect at any time — you'll be asked for the customer ID again.

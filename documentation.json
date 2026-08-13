@@ -27,28 +27,105 @@
                 "title": "Quick Start",
                 "path": "quickstart",
                 "icon": "zap"
+              },
+              {
+                "title": "Core Concepts",
+                "path": "getting-started/core-concepts",
+                "icon": "layers"
+              },
+              {
+                "title": "Plans & Billing",
+                "path": "account/plans-billing",
+                "icon": "credit-card"
               }
             ]
           },
           {
-            "group": "Core Concepts",
-            "icon": "layers",
+            "group": "Connect Your Data",
+            "icon": "plug",
             "pages": [
               {
-                "title": "Features",
-                "path": "features",
-                "icon": "star"
+                "title": "Sources vs Destinations",
+                "path": "connect/sources-vs-destinations",
+                "icon": "arrow-left-right"
               }
             ]
           },
           {
-            "group": "Guides",
-            "icon": "compass",
+            "group": "Sources",
+            "icon": "download",
             "pages": [
               {
-                "title": "Integrations",
-                "path": "integrations",
-                "icon": "plug"
+                "title": "GoHighLevel",
+                "path": "connect/sources/gohighlevel",
+                "icon": "contact"
+              },
+              {
+                "title": "Meta Ads",
+                "path": "connect/sources/meta-ads",
+                "icon": "facebook"
+              },
+              {
+                "title": "Google Ads",
+                "path": "connect/sources/google-ads",
+                "icon": "search"
+              },
+              {
+                "title": "Stripe",
+                "path": "connect/sources/stripe",
+                "icon": "credit-card"
+              }
+            ]
+          },
+          {
+            "group": "Destinations",
+            "icon": "upload",
+            "pages": [
+              {
+                "title": "Meta Conversions API",
+                "path": "connect/destinations/meta-capi",
+                "icon": "facebook"
+              },
+              {
+                "title": "Google Ads Conversions",
+                "path": "connect/destinations/google-ads",
+                "icon": "target"
+              }
+            ]
+          },
+          {
+            "group": "Conversion Tracking",
+            "icon": "activity",
+            "pages": [
+              {
+                "title": "How Delivery Works",
+                "path": "conversion-tracking/how-delivery-works",
+                "icon": "git-branch"
+              },
+              {
+                "title": "Connections",
+                "path": "conversion-tracking/connections",
+                "icon": "link"
+              },
+              {
+                "title": "Pipelines & Filters",
+                "path": "conversion-tracking/pipelines-filters",
+                "icon": "filter"
+              },
+              {
+                "title": "Event Types",
+                "path": "conversion-tracking/event-types",
+                "icon": "list"
+              },
+              {
+                "title": "Activity & Run History",
+                "path": "conversion-tracking/activity-history",
+                "icon": "history"
+              },
+              {
+                "title": "Match Quality",
+                "path": "conversion-tracking/match-quality",
+                "icon": "target"
               }
             ]
           }

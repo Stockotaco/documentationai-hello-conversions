@@ -1,0 +1,112 @@
+---
+title: Core Concepts
+description: The seven objects Hello Conversions is built from — organization, project, source, destination, connection, pipeline, and contact — and how they fit together.
+---
+
+Almost every screen in Hello Conversions is one of seven things. Learn these once and the rest of the product reads itself.
+
+The short version: an **organization** holds **projects**. A project pulls data in from **sources** and pushes conversions out to **destinations**. A **connection** is the rule that says which events go to which destination. **Pipelines** are a shortcut for building those rules from your CRM stages. **Contacts** are the people all of it is about.
+
+## Organization
+
+The organization is the top-level container. It owns your projects, your teammates, and your bill.
+
+Everything commercial lives here rather than on individual projects: the plan, the subscription status, the trial, and the contact count that sets your price. Add a project and it inherits the organization's plan automatically.
+
+Members hold one of two roles:
+
+| Role | What it means |
+| --- | --- |
+| **Owner** | Full control, and the only role that can see or change billing. |
+| **Member** | Works in the projects they've been given access to. |
+
+When you invite someone you choose whether they get access to every project in the organization or only to specific ones, which is what makes client-by-client separation possible for an agency. Members can also be set to join every new project automatically.
+
+<Callout kind="note">
+  Billing is owner-only and enforced on the server, not just hidden in the sidebar. A member who navigates straight to a billing URL gets a permission error, not a page.
+</Callout>
+
+## Project
+
+A project is one client account — or just your business, if you're not an agency.
+
+It is the unit of isolation. A project has its own sources, its own destinations, its own connections and pipeline configuration, its own tracking script, its own timezone, and its own reporting. Data never crosses between projects, so two clients on Meta never see each other's numbers.
+
+Project membership is separate from organization membership: being in the organization doesn't automatically mean seeing every project.
+
+In practice most people name a project after the domain it tracks — the creation form asks for a website URL for exactly that reason.
+
+## Source
+
+**A source is data coming in.** It is where Hello Conversions reads from.
+
+Sources are managed under **Settings → Integrations → Sources**, grouped by what they contribute:
+
+| Group | Sources | What it brings in |
+| --- | --- | --- |
+| CRM & Revenue | Lead Connector, Stripe | Contacts, pipelines, orders, webhook events, charges and subscriptions |
+| Ad Platforms | Meta Ads, Google Ads | Campaign data, ad spend, performance metrics |
+| Data Enrichment | PostHog | Session and product analytics attached to conversion data |
+
+**Lead Connector is GoHighLevel** — it's the in-app name for the same thing — and it is the source everything else depends on. It connects over OAuth to a single location, and it's what streams the contact, opportunity, tag and order events that become conversions.
+
+The ad platform and Stripe sources sync on a schedule rather than in real time, so a freshly connected one reads "Awaiting first sync" until its first run completes. Each project holds at most one connection per provider, and each shows a live status — connected, error, or a "Reconnect" state when the token was revoked on the provider's side.
+
+## Destination
+
+**A destination is conversions going out.** It is where Hello Conversions writes to.
+
+| Destination | What it does |
+| --- | --- |
+| Meta Conversions API | Sends server-side conversion events to a Meta pixel for ad optimization |
+| Google Ads | Uploads offline conversions against a Google Ads customer account |
+| Webhook | POSTs event payloads as JSON to any HTTP endpoint, optionally HMAC-signed |
+| PostHog | Forwards events into PostHog for product analytics and session replay |
+
+Destinations are configured under **Settings → Integrations → Destinations**. Each one has a name of your choosing, its own credentials, and its own delivery health — status, last error, and when it last delivered. You can create several of the same type in one project, which is why naming them ("Main Pixel", "Client Backup Pixel") is worth the ten seconds.
+
+<Callout kind="alert">
+  Meta Ads and Google Ads appear in both lists, and they are not the same setup. **Meta Ads the source** pulls your spend in. **Meta Conversions API the destination** pushes conversions out. Connecting one does nothing for the other — a project that has connected Meta Ads as a source but has no Meta Conversions API destination is sending Meta nothing.
+</Callout>
+
+## Connection
+
+A connection is the rule in the middle: **these source events go to that destination**.
+
+Each connection selects one or more Lead Connector events (a purchase, a tag being added, an opportunity changing stage) and points them at exactly one destination. On top of that it can carry:
+
+- **Filters** — only deliver when the event matches, such as an order above a value, one specific funnel, or one pipeline stage
+- **A custom event name** — override what the destination is told the event is called
+- **A conversion action** — for Google Ads, which conversion action the upload is counted against
+- **An enabled switch** — pause delivery without deleting the rule
+
+Connections live under **Settings → Workflows → Connections**, where a canvas shows source events on one side and destinations on the other. Drag between them to create a connection, or click an existing edge to configure it. The page also shows how each rule is behaving: active connections, events in the last 24 hours, failures, and failure rate.
+
+One destination can be fed by many connections, and one connection feeds exactly one destination. If the same event needs to reach both Meta and Google, that's two connections.
+
+## Pipeline
+
+A pipeline is a GoHighLevel pipeline and its stages — Lead, Booked, Showed, Closed, whatever yours are called.
+
+**Settings → Workflows → Pipelines** reads those pipelines live from your connected location and lets you turn any stage into a conversion: enable the stage, give it an event name (one is generated from the stage name), and choose which destinations it should reach. Saving generates one connection per enabled stage and destination, each filtered to that exact pipeline and stage.
+
+This is the fastest way to get meaningful conversions flowing, because pipeline stages are usually where the real business outcomes are recorded.
+
+<Callout kind="warning">
+  Connections created this way are managed by the pipeline config. They're regenerated from it every time you save the Pipelines page, so edits you make to them on the Connections page can be overwritten. Change pipeline-driven rules on the Pipelines page; use the Connections page for the rules you build by hand.
+</Callout>
+
+## Contact and person
+
+A **contact** is a person in your connected Lead Connector location — the CRM record with an email, a phone number, tags, opportunities and orders attached. Contacts are what conversions are about, and they're also the meter: each project's contact count is snapshotted daily, and the total across the organization's projects sets your billing tier. See [Plans and billing](/account/plans-billing) for how that works.
+
+A **person** is the other half of the same story: the visitor identity the tracking pixel builds from site activity, with its own timeline and attribution data. It's what lets a click on an ad and a purchase in the CRM be recognized as the same human, which is what the ad platforms need in order to credit the conversion.
+
+<Columns cols={2}>
+  <Card title="Sources vs destinations" icon="arrow-left-right" href="/connect/sources-vs-destinations" horizontal>
+    The distinction in more detail, with setup for each.
+  </Card>
+  <Card title="How delivery works" icon="git-branch" href="/conversion-tracking/how-delivery-works" horizontal>
+    What happens between a CRM event and a delivered conversion.
+  </Card>
+</Columns>

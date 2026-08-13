@@ -1,0 +1,120 @@
+---
+title: Meta Conversions API
+description: Add a Meta Conversions API destination in Hello Conversions so CRM conversions — leads, purchases, pipeline stages — reach your Meta pixel server-side.
+---
+
+Meta only optimizes on what it can see. Anything that happens after the click — a form filled in your CRM, an opportunity moved to Won, an order paid days later — never reaches the browser pixel. A Meta Conversions API destination sends those events to your pixel from our servers instead.
+
+Setup is two parts: create the destination (the pixel and token you're sending to), then create a connection that decides which events go there.
+
+<Callout kind="info">
+  This is the Meta **destination** — conversions going out to your pixel. Pulling ad spend and creative performance *in* for reporting is a separate connection: see [Meta Ads as a source](/connect/sources/meta-ads).
+</Callout>
+
+## Before you start
+
+You need two things from [Meta Events Manager](https://business.facebook.com/events_manager2):
+
+| What | Where to get it |
+| --- | --- |
+| **Pixel ID** | Events Manager, under Data Sources. A long numeric ID, e.g. `123456789012345`. |
+| **Conversions API access token** | Events Manager → Settings → Conversions API → generate an access token. |
+
+The token must be able to post events to that pixel. Hello Conversions never reads pixel metadata, so a token scoped only to sending events is enough.
+
+<Callout kind="warning">
+  Generate the token against the same pixel you enter as the Pixel ID. A token from a different pixel passes the connection test on the token but fails on the pixel, and the error Meta returns is not always obvious about which half is wrong.
+</Callout>
+
+## Add the destination
+
+<Steps>
+  <Step title="Open Destinations">
+    In your project — one client account, or just your business if you're not an agency — go to **Settings → Integrations → Destinations** and click **Add Destination**.
+  </Step>
+  <Step title="Choose Meta Conversions API">
+    Pick **Meta Conversions API** from the provider list.
+  </Step>
+  <Step title="Fill in the fields">
+    | Field | Notes |
+    | --- | --- |
+    | **Name** | Your label for this destination, e.g. `Main Pixel`. Shown in the destinations list and in the connection picker. |
+    | **Pixel ID** | From Events Manager. Dashes and spaces are not expected — paste the number. |
+    | **Conversions API Access Token** | Masked in the form. Click the eye icon to reveal what you typed. |
+    | **Website URL** | Used as `event_source_url` when the source event doesn't carry a page URL. Most CRM events don't, so set this. |
+    | **Default Currency** | Currency for events that carry no currency of their own — pipeline-stage conversions, for example. Sales that specify a currency in GHL keep theirs. |
+  </Step>
+  <Step title="Test the connection">
+    Click **Test Connection**. Hello Conversions posts a sample `PageView` to your pixel, tagged with a generated test event code so Meta treats it as a test rather than a live conversion. A pass reports how many events Meta accepted; a failure shows Meta's own error message.
+  </Step>
+  <Step title="Save">
+    Click **Create**. The destination appears under **Active** once a test succeeds.
+  </Step>
+</Steps>
+
+You can add more than one Meta destination to the same project — one per pixel — and route different events to each.
+
+## Point events at it
+
+A destination on its own sends nothing. It's the address, not the instruction. To start delivering, create a **connection** under **Settings → Workflows → Connections**: pick a source event type, pick this destination, and optionally set a custom event name and filters.
+
+The custom event name is what Meta receives as `event_name`. Set it to a standard Meta event where one applies — `Purchase`, `Lead`, `CompleteRegistration` — so Meta's optimization and reporting recognize it. Without one, the source event type is sent as-is (`made_purchase`, `contact_created`, and so on), which Meta accepts but treats as a custom event.
+
+See [Connections](/conversion-tracking/connections) for filters and routing, and [How delivery works](/conversion-tracking/how-delivery-works) for what happens between the CRM event and the API call.
+
+## What gets sent
+
+Each delivery is one `POST` to Meta's Conversions API for the pixel on the destination. The event carries:
+
+**Identity (`user_data`)** — email, phone, first name, last name, city, state, postal code and country are SHA-256 hashed before they leave our servers. Phone numbers are normalized to digits first, with a `1` prefix added to bare 10-digit US numbers. The contact ID is sent unhashed as `external_id`. IP address and user agent are sent unhashed, as Meta expects. `fbc` and `fbp` ride along when we have them.
+
+How complete this block is drives whether Meta can match the event to a person — see [Match quality](/conversion-tracking/match-quality).
+
+**Event details** — event name, event time, `action_source` (`website` by default), and `event_source_url` (the source event's page URL, else the destination's Website URL).
+
+**Value (`custom_data`)** — `value` and `currency` are always sent. Non-monetary events get `value: 0` rather than nothing, because Meta's diagnostics flag events missing either field. Currency resolution is: the event's own currency from GHL, then the destination's Default Currency, then USD. Meta converts to your ad account's currency itself.
+
+**Order contents** — when the source event carries line items, they're sent as `contents` with product ID, normalized title, item price and quantity, plus the order ID. Product names are lowercased with emoji and punctuation stripped.
+
+<Callout kind="note">
+  An order with line items also produces one extra event per item, named `{EventName}_{product_name}` with that item's own value. This is deliberate — it lets you build product-level custom conversions in Meta — but it does mean the event count in Events Manager is higher than your order count. Your main `Purchase` event still carries the full order value.
+</Callout>
+
+## Deduplication
+
+Every event we send carries an `event_id` of `hello-` plus the order ID (or the transaction ID for subscription rebills, since rebills reuse the original order's ID). Meta collapses events that share the same `event_name` and `event_id`.
+
+This matters when two connections can fire for the same sale — say a tag-triggered conversion and a pipeline-stage conversion for one order. They produce the same `event_id`, so Meta counts one conversion, not two.
+
+<Callout kind="alert">
+  This does **not** deduplicate against your browser pixel. A pixel event only collapses into ours if the browser sends the identical `event_id`, and Meta's standard pixel install does not send our `hello-` prefixed IDs. If your funnel already fires a browser `Purchase` on the thank-you page and you also send `Purchase` from here, expect both to be counted. Either send a different event name server-side, or stop firing the browser event for that conversion.
+</Callout>
+
+## Confirm events are arriving
+
+<Steps>
+  <Step title="Check the destination status">
+    On **Settings → Integrations → Destinations**, the destination should sit under **Active** with a green dot. If it shows **Error**, the last failure message is on the card — usually an expired or revoked token.
+  </Step>
+  <Step title="Check the Activity Log">
+    **Reporting → Workflows → Activity Log** lists every event we processed, with the delivered payload, Meta's response and the HTTP status. A row marked `delivered` means Meta accepted the event. See [Activity history](/conversion-tracking/activity-history).
+  </Step>
+  <Step title="Check Events Manager">
+    In Meta Events Manager, open your pixel and look at its recent activity. Server events from Hello Conversions arrive with `Hello Conversions` set as the event source in `custom_data`, which makes them easy to tell apart from browser events.
+  </Step>
+</Steps>
+
+If the Activity Log shows `delivered` but Events Manager shows nothing, the events reached the right API with the wrong pixel — re-check the Pixel ID on the destination.
+
+## When deliveries fail
+
+Repeated failures to the same destination trip a circuit breaker: after five consecutive failures, deliveries pause for five minutes before a single request is retried. The destination card flips to **Error** with the message from Meta.
+
+The two failures worth knowing:
+
+- **Token expired or permissions removed** — regenerate the token in Events Manager, edit the destination, paste the new one and test again.
+- **Pixel ID changed** — a new pixel is a new destination in practice. Update the Pixel ID and re-test; existing connections keep pointing at the same destination record.
+
+<Callout kind="tip">
+  Saving a destination clears the cached copy the delivery worker holds, so a new pixel, token or currency applies to the next event. Deliveries already in flight when you save finish with the old values.
+</Callout>

@@ -1,15 +1,20 @@
 #!/bin/sh
 # Enable with: git config core.hooksPath .githooks   (once per clone)
 #
-# The docs site validates on publish, so an unsupported component or a
-# comma-broken OpenAPI flow mapping is only discovered after the push, on a live
-# repo. These are those same checks, before the commit.
+# The docs site validates on publish, so an unsupported component, a dead nav
+# entry, or a comma-broken OpenAPI flow mapping is only discovered after the
+# push, on a live repo. These are those same checks, before the commit.
 set -e
 
 staged=$(git diff --cached --name-only --diff-filter=ACM)
 
 mdx=$(echo "$staged" | grep '\.mdx$' || true)
 [ -n "$mdx" ] && node scripts/check-components.mjs $mdx
+
+# Nav and files have to agree, so any change to either re-runs the whole check.
+if echo "$staged" | grep -qE '\.mdx$|documentation\.json$'; then
+  node scripts/check-nav.mjs
+fi
 
 yaml=$(echo "$staged" | grep '\.ya\?ml$' || true)
 [ -n "$yaml" ] && node scripts/check-openapi.mjs $yaml

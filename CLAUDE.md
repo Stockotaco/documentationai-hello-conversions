@@ -12,7 +12,9 @@ npm install                             # once per clone — the openapi check n
 npm run check                           # both checks over the whole repo
 ```
 
-Individually: `node scripts/check-components.mjs [file...]` (defaults to every `.mdx`) and `node scripts/check-openapi.mjs api-reference` (accepts files or dirs). The pre-commit hook runs each against the staged files of its kind.
+Individually: `node scripts/check-components.mjs [file...]` (defaults to every `.mdx`), `node scripts/check-nav.mjs` (nav ↔ files agree), and `node scripts/check-openapi.mjs <file|dir>`. The pre-commit hook runs each against the staged files of its kind.
+
+`api-reference/openapi.yaml` is currently **unreferenced by the nav on purpose** — there is no public REST API yet, only the MCP server. The file and its checker stay for when there is one.
 
 ## Components
 

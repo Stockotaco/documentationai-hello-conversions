@@ -1,0 +1,90 @@
+---
+title: Event Types
+description: Reference for every GoHighLevel event Hello Conversions can act on — what each one means, when it fires, and which underlying event it comes from.
+---
+
+These are the source events you can choose when building a [connection](/conversion-tracking/connections). Anything GoHighLevel emits that isn't on this list is ignored — it never creates a run and never reaches a destination.
+
+## The full list
+
+| Event | Category | Fires when | Underlying GoHighLevel event |
+| --- | --- | --- | --- |
+| **Made Any Purchase** | Commerce | An order completes. One event per completed order, carrying the order's line items. | `order_completed` |
+| **Product Purchased** | Commerce | A product purchase is recorded. | `product_purchased` |
+| **Subscription Started** | Commerce | A charge settles that is attached to a subscription and is *not* a rebill — the first payment of a new subscription. | `transaction_completed` |
+| **Subscription Rebilled** | Commerce | A charge settles that is attached to a subscription and *is* a rebill — a recurring renewal payment. | `transaction_completed` |
+| **Opportunity Changed** | Pipeline | An opportunity is created, or moves to a different stage. | `opportunity_created`, `opportunity_stage_changed` |
+| **Contact Created** | Contacts | A new contact is created in the location. | `contact_created` |
+| **Tag Added** | Contacts | A tag is applied to a contact. | `tag_added` |
+| **Tag Removed** | Contacts | A tag is removed from a contact. | `tag_removed` |
+
+<Callout kind="note">
+  The Activity Log labels each run with the *underlying* GoHighLevel event rather than the source event you picked — so a Made Any Purchase connection produces runs labelled "Order Completed", and an Opportunity Changed connection produces "Opportunity Created" or "Opportunity Stage Changed". Same event, different name for the same thing.
+</Callout>
+
+## Purchases come from two different places
+
+This is the part that trips people up, so it's worth being precise: purchase-type conversions reach Hello Conversions by two independent routes, and they behave differently.
+
+### Route 1 — the order event
+
+**Made Any Purchase** rides on GoHighLevel's order-completed event. It's real-time, it fires once per completed order, and it carries the order's line items, so the destination gets item-level detail as well as a total.
+
+Only orders that actually completed count. Hello Conversions reads the order's status and accepts:
+
+| Status | Counted as a purchase |
+| --- | --- |
+| `completed` | Yes |
+| `paid` | Yes |
+| `fulfilled` | Yes |
+| Anything else (`pending`, `cancelled`, `refunded`, …) | No — dropped before it reaches any connection |
+
+If the order carries no status at all, it is accepted rather than dropped, so events from older or unusual funnels don't silently disappear.
+
+### Route 2 — the transaction event
+
+**Subscription Started** and **Subscription Rebilled** both ride on GoHighLevel's transaction-completed event, which is the only source that says whether a charge belongs to a subscription and whether it's a renewal. Hello Conversions splits it:
+
+| The charge has… | Result |
+| --- | --- |
+| A subscription attached, not marked as a rebill | Subscription Started |
+| A subscription attached, marked as a rebill | Subscription Rebilled |
+| No subscription attached | Neither — a one-off charge is not a subscription event |
+
+A charge with a subscription but no rebill flag at all is treated as a first payment, not a renewal.
+
+### How the two routes differ
+
+| | Made Any Purchase | Subscription Started / Rebilled |
+| --- | --- | --- |
+| Source | Order event | Transaction event |
+| Timing | Real-time | **Later** — the transaction event arrives after the order event |
+| Covers | Completed orders | Subscription first payments and renewals |
+| Line items | Yes | Amount and identifiers, no per-item breakdown |
+| Filterable fields | Monetary Value, Funnel Name, Funnel ID, Facebook Click ID, Google Click ID | None |
+
+<Callout kind="warning">
+  These two routes can see the same money. A subscription's first payment is a completed charge, so it can surface on the order route *and* the transaction route. If you wire Made Any Purchase and Subscription Started to the same destination, watch the [Activity Log](/conversion-tracking/activity-history) for one contact producing two delivered runs at roughly the same time before you leave both switched on — Hello Conversions de-duplicates the same event to the same connection, but it can't know that two *different* events describe one sale.
+</Callout>
+
+**A reasonable default:** use **Made Any Purchase** as the single purchase signal you send to ad platforms, and reserve **Subscription Started** and **Subscription Rebilled** for cases where you specifically need to tell a new subscriber apart from a renewal, sending them to a different destination or a different conversion action.
+
+## Opportunity Changed
+
+One source event covers both an opportunity being created and an opportunity moving stage, because from a reporting point of view they're the same thing: an opportunity has arrived at a stage.
+
+You will rarely build this connection by hand. The [Pipelines](/conversion-tracking/pipelines-filters) screen is the practical way to use it — you switch on the stages that matter, and it builds the correctly-filtered connections for you. Build one manually only when you want behaviour the Pipelines screen doesn't offer, such as sending every stage change to a webhook.
+
+Filterable fields: Pipeline Name, Pipeline ID, Stage Name, Stage ID.
+
+## Contact and tag events
+
+| Event | Typical use | Filterable fields |
+| --- | --- | --- |
+| **Contact Created** | The broadest possible "lead" signal — every new contact, however they arrived. | Contact Source, Session Source |
+| **Tag Added** | A conversion your team marks by hand, or one a GoHighLevel workflow tags automatically. Filter by tag name so one connection maps to one tag. | Tag Name |
+| **Tag Removed** | Rarely used for ad platforms; useful for webhooks that keep another system in sync. | Tag Name |
+
+<Callout kind="tip">
+  Tag Added is the escape hatch. If a client's conversion doesn't map cleanly onto a pipeline stage or an order — a qualified enquiry, a show-up, a signed contract — have their GoHighLevel workflow apply a tag, then connect Tag Added filtered to that tag name. It turns any decision they can automate in GoHighLevel into a conversion you can send to Meta or Google.
+</Callout>

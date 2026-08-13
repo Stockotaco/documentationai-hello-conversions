@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node scripts/check-components.mjs && node scripts/check-openapi.mjs api-reference"
+    "check": "node scripts/check-components.mjs && node scripts/check-nav.mjs"
   },
   "devDependencies": {
     "yaml": "^2.7.0"
