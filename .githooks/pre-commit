@@ -1,0 +1,12 @@
+#!/bin/sh
+# Enable with: git config core.hooksPath .githooks   (once per clone)
+#
+# The docs site validates on publish, so an unsupported component is only
+# discovered after the push, on a live repo. This is that check, before the
+# commit.
+set -e
+
+mdx=$(git diff --cached --name-only --diff-filter=ACM | grep '\.mdx$' || true)
+[ -n "$mdx" ] && node scripts/check-components.mjs $mdx
+
+exit 0
