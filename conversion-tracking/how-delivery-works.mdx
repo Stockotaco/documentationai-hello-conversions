@@ -3,51 +3,41 @@ title: How Delivery Works
 description: The path a GoHighLevel event takes from firing in your client's account to landing in Meta or Google Ads, and what each delivery outcome means.
 ---
 
-When a lead books a call or a customer buys, that action happens inside GoHighLevel. Your ad platforms never see it — which is why Meta optimizes against pageviews and Google reports conversions you can't tie to revenue. Hello Conversions closes that gap: it watches the events in the connected Lead Connector (GoHighLevel) account and forwards the ones you care about to the ad platforms.
-
-This page is the mental model. Once you have it, the rest of this section is just the settings screens.
-
-## Everything is scoped to a project
-
-A **project** is one client account — or just your business, if you're not an agency. Each project has its own Lead Connector connection, its own destinations, its own rules, and its own activity history. Nothing crosses between projects.
+When a lead books a call or a customer buys, that happens inside GoHighLevel and your ad platforms never see it. Hello Conversions watches the events in the connected Lead Connector (GoHighLevel) account and forwards the ones you care about. Everything is scoped to a **project**: its own Lead Connector connection, destinations, rules and activity history, with nothing crossing between projects.
 
 ## The path an event takes
 
 <Steps>
   <Step title="Something happens in GoHighLevel">
-    A contact is created, an opportunity moves to a new stage, a tag is applied, an order completes. GoHighLevel emits an event for it.
+    A contact is created, an opportunity moves stage, a tag is applied, an order completes. GoHighLevel emits an event.
   </Step>
   <Step title="Hello Conversions recognizes the event">
-    Each raw GoHighLevel event is matched to one of the source event types Hello Conversions understands — Made Any Purchase, Opportunity Changed, Tag Added, and so on. Events that don't map to anything are ignored immediately. See [Event Types](/conversion-tracking/event-types) for the full list.
+    It's matched to one of the source event types we understand — Made Any Purchase, Opportunity Changed, Tag Added, and so on. Anything that doesn't map is ignored immediately. See [Event Types](/conversion-tracking/event-types).
   </Step>
   <Step title="It finds the connections that want it">
-    A **connection** wires one source event to one destination. Hello Conversions looks up every enabled connection in the project that listens for that event. If none do, the event stops here and nothing is recorded.
+    A **connection** wires one source event to one destination. Every enabled connection in the project listening for that event picks it up; if none do, the event stops here and nothing is recorded.
   </Step>
   <Step title="Filters decide whether it counts">
-    Each connection can carry filter rules — only this pipeline stage, only orders above a certain amount, only a specific tag. An event that fails the rules is marked **filtered** and never leaves the platform. See [Pipelines & Filters](/conversion-tracking/pipelines-filters).
+    An event that fails a connection's filter rules — only this pipeline stage, only orders above an amount, only a specific tag — is marked **filtered** and never leaves the platform. See [Pipelines & Filters](/conversion-tracking/pipelines-filters).
   </Step>
   <Step title="The person and the click are matched up">
-    Before sending, Hello Conversions enriches the event with everything it knows about that person: email, phone, name, address, the Meta click ID (`fbc`/`fbp`), the Google click ID (`gclid`), UTMs, IP and user agent. The more of these it can attach, the better the ad platform can match the conversion back to an ad click. See [Match Quality](/conversion-tracking/match-quality).
+    The event is enriched with what we know about that person: email, phone, name, address, the Meta click ID (`fbc`/`fbp`), the Google click ID (`gclid`), UTMs, IP and user agent. The more of these, the better the ad platform can match the conversion back to a click. See [Match Quality](/conversion-tracking/match-quality).
   </Step>
   <Step title="It's delivered to the destination">
-    The enriched event is reformatted into whatever the destination expects — a Meta Conversions API payload, a Google Ads conversion upload — and sent. The result is written to the Activity Log as a **run**.
+    The enriched event is reformatted into what the destination expects — a Meta Conversions API payload, a Google Ads conversion upload — and sent. The result is written to the Activity Log as a **run**.
   </Step>
 </Steps>
 
-One event can produce several runs. If three connections match the same event, you get three runs — one per connection — and each one succeeds or fails on its own.
+One event can produce several runs: three matching connections means three runs, each succeeding or failing on its own.
 
 ## How fast it happens
 
-Events flow continuously. There is no nightly batch and no "sync" button to press: an event is picked up as it arrives and delivery is normally attempted within seconds. Each run in the Activity Log records how long the delivery call itself took, in milliseconds.
-
-Two things can make an event show up later than you expect:
+Events flow continuously — no nightly batch, no "sync" button. Delivery is normally attempted within seconds, and each run records how long the delivery call took, in milliseconds. Two things delay an event:
 
 - **Subscription events lag.** Subscription Started and Subscription Rebilled ride on GoHighLevel's transaction event, which arrives later than the order event a one-off purchase uses. See [Event Types](/conversion-tracking/event-types).
-- **Failures are retried.** A failed delivery is retried several times with increasing backoff before it's given up on, so a run that eventually succeeds may be a minute behind the event.
+- **Failures are retried** several times with increasing backoff before being given up on.
 
 ## What each outcome means
-
-Every run ends in one of three states, and you'll see all three in the Activity Log and on the Workflows Overview.
 
 | Status | What happened |
 | --- | --- |
@@ -59,22 +49,17 @@ The Activity Log's success rate counts **delivered plus filtered** as success, b
 
 ### What "delivered" does and doesn't tell you
 
-Delivered means the destination's API accepted the payload. That is not the same as the platform crediting the conversion to an ad.
+Delivered means the destination's API accepted the payload — not that the platform credited the conversion to an ad. **Meta** receives the event immediately, but attribution depends on how well the person matched a Meta user and on the attribution window. **Google Ads** accepts conversions for asynchronous ingestion, so an accepted upload only means "received"; we record the request ID and reconcile the real per-event outcome afterwards.
 
-- **Meta** receives the event immediately, but whether it attributes it to a campaign depends on how well the person matched a Meta user, and on the attribution window.
-- **Google Ads** accepts conversions for asynchronous ingestion, so an accepted upload only means "received". Hello Conversions records the request ID and reconciles the real per-event outcome afterwards.
-
-If a client says "you show 40 conversions and Meta shows 31", delivered-vs-attributed is usually the reason, not a delivery bug. Start with the [Activity Log](/conversion-tracking/activity-history) to confirm the events left the platform.
+If a client says "you show 40 conversions and Meta shows 31", delivered-vs-attributed is usually the reason, not a delivery bug. Start with the [Activity Log](/conversion-tracking/activity-history).
 
 ## Duplicate protection
 
-The same event is only ever sent to the same connection once. If GoHighLevel redelivers an event, or something is retried internally, the duplicate is dropped rather than sent twice. This protection is per event and per connection — it does **not** stop you from double-counting by wiring two overlapping source events to the same destination. That's a configuration decision, and it's covered in [Event Types](/conversion-tracking/event-types).
+The same event is only ever sent to the same connection once — a redelivery from GoHighLevel or an internal retry is dropped. This is per event and per connection: it does **not** stop you double-counting by wiring two overlapping source events to the same destination, which is covered in [Event Types](/conversion-tracking/event-types).
 
 ## When a destination goes down
 
-If a destination fails repeatedly — five consecutive failures — Hello Conversions stops sending to it for five minutes, then lets one request through to test whether it has recovered. While that pause is on, runs to that destination are recorded as failed with a circuit-breaker message.
-
-This is why an expired Meta access token shows up as a wall of failures rather than a trickle: everything to that destination fails, the circuit opens, and it stays that way until the credentials are fixed.
+After five consecutive failures, sending to that destination stops for five minutes, then one request is let through to test recovery. Runs during that pause are recorded as failed with a circuit-breaker message — which is why an expired Meta access token shows up as a wall of failures rather than a trickle.
 
 ## Where to look in the app
 
@@ -84,8 +69,6 @@ This is why an expired Meta access token shows up as a wall of failures rather t
 | **Activity Log** | Reporting → Workflows → Activity Log | Tracing one specific event end to end. |
 | **Connections** | Settings → Workflows → Connections | Wiring source events to destinations. |
 | **Pipelines** | Settings → Workflows → Pipelines | Turning pipeline stages into conversions. |
-
-## Next
 
 <Columns cols={2}>
   <Card title="Connections" icon="link" href="/conversion-tracking/connections">

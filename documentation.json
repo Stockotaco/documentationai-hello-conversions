@@ -145,6 +145,32 @@
             ]
           },
           {
+            "group": "Team & Account",
+            "icon": "users",
+            "pages": [
+              {
+                "title": "Organizations & Projects",
+                "path": "account/organizations-projects",
+                "icon": "building"
+              },
+              {
+                "title": "Team & Roles",
+                "path": "account/team-roles",
+                "icon": "user-plus"
+              },
+              {
+                "title": "Project Settings",
+                "path": "account/project-settings",
+                "icon": "settings"
+              },
+              {
+                "title": "Notifications & Inbox",
+                "path": "account/notifications",
+                "icon": "bell"
+              }
+            ]
+          },
+          {
             "group": "Conversion Tracking",
             "icon": "activity",
             "pages": [
@@ -177,6 +203,54 @@
                 "title": "Match Quality",
                 "path": "conversion-tracking/match-quality",
                 "icon": "target"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "MCP & AI Access",
+        "icon": "bot",
+        "groups": [
+          {
+            "group": "Getting Connected",
+            "icon": "plug",
+            "pages": [
+              {
+                "title": "Overview",
+                "path": "mcp/overview",
+                "icon": "home"
+              },
+              {
+                "title": "Connect Your AI Client",
+                "path": "mcp/connect",
+                "icon": "zap"
+              },
+              {
+                "title": "Authentication",
+                "path": "mcp/authentication",
+                "icon": "key-round"
+              }
+            ]
+          },
+          {
+            "group": "Reference",
+            "icon": "book",
+            "pages": [
+              {
+                "title": "Tool Reference",
+                "path": "mcp/tools",
+                "icon": "wrench"
+              },
+              {
+                "title": "Data Model",
+                "path": "mcp/data-model",
+                "icon": "database"
+              },
+              {
+                "title": "Usage & Limits",
+                "path": "mcp/usage-limits",
+                "icon": "activity"
               }
             ]
           }

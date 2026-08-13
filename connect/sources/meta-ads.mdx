@@ -3,10 +3,10 @@ title: Meta Ads
 description: Connect a Meta ad account as a source so campaign, creative, and spend data feeds the Creatives and Marketing Efficiency reports.
 ---
 
-Connecting Meta Ads pulls your campaigns, ads, creatives, and daily spend into Hello Conversions so cost sits next to the revenue you're already tracking. It's per **project** — one client account, or just your business if you're not an agency — so each ad account gets connected to the project it belongs to.
+Connecting Meta Ads pulls your campaigns, ads, creatives and daily spend into Hello Conversions so cost sits next to the revenue you're already tracking. Each ad account is connected to the **project** it belongs to.
 
 <Callout kind="warning">
-  This is the **source** side of Meta: reading spend and campaign data *out* of your ad account. It is not the same as the Meta Conversions API destination, which sends conversions *into* your pixel. Connecting one does not connect the other — see [Sources vs Destinations](/connect/sources-vs-destinations) and [Meta Conversions API](/connect/destinations/meta-capi).
+  This is the **source** side of Meta: reading spend and campaign data *out* of your ad account. It is not the Meta Conversions API destination, which sends conversions *into* your pixel. Connecting one does not connect the other — see [Sources vs Destinations](/connect/sources-vs-destinations) and [Meta Conversions API](/connect/destinations/meta-capi).
 </Callout>
 
 ## What it lights up
@@ -27,31 +27,27 @@ Without it, those reports still load — they just have no Meta spend in them.
     In Meta Business Suite, open **Ad Account Settings**. The ID looks like `act_123456789`.
   </Step>
   <Step title="Start the connection">
-    In Hello Conversions, go to **Settings → Integrations → Sources**. Meta Ads is under **Ad Platforms**. Click **Connect**.
+    Go to **Settings → Integrations → Sources**. Meta Ads is under **Ad Platforms**. Click **Connect**.
   </Step>
   <Step title="Enter the account ID">
-    Paste the ID into the dialog. To pull several ad accounts into one project, separate them with commas — `act_123456789, act_987654321`. The `act_` prefix is optional; it's stripped either way. Click **Continue**.
+    Paste the ID into the dialog. For several ad accounts in one project, separate them with commas — `act_123456789, act_987654321`. The `act_` prefix is optional; it's stripped either way. Click **Continue**.
   </Step>
   <Step title="Authorize Meta">
-    You're sent to Meta to approve access, then returned to the Sources page.
+    Approve access on Meta, then you're returned to the Sources page.
   </Step>
   <Step title="Confirm">
-    A "Meta Ads Connected" toast confirms the account is linked and an initial sync has already been kicked off.
+    A "Meta Ads Connected" toast confirms the account is linked and an initial sync has been kicked off.
   </Step>
 </Steps>
 
 ## How often it syncs
 
-An initial sync runs the moment you connect. After that the account syncs **daily at 02:00 UTC**.
+An initial sync runs on connect. After that the account syncs **daily at 02:00 UTC**.
 
-Two things worth knowing about what lands:
-
-- **Insights use a 28-day lookback.** Each run re-pulls the last 28 days of performance data, so Meta's late attribution corrections show up in your reports instead of freezing at whatever the number was on day one.
-- **Only active, paused, and in-process campaigns sync.** Archived and deleted campaigns are not pulled, so historical spend on a campaign you archived won't appear.
+- **Insights use a 28-day lookback.** Each run re-pulls the last 28 days of performance data, so Meta's late attribution corrections show up instead of freezing at day-one numbers.
+- **Only active, paused, and in-process campaigns sync.** Archived and deleted campaigns are not pulled, so historical spend on an archived campaign won't appear.
 
 ## Telling it's working
-
-The Meta Ads row on the Sources page is the status readout:
 
 | What you see | What it means |
 | --- | --- |
@@ -62,16 +58,16 @@ The Meta Ads row on the Sources page is the status readout:
 | Amber **Reconnect** badge | Access was revoked on the Meta side. Reconnect to resume. |
 
 <Callout kind="tip">
-  A brand-new connection typically shows "Awaiting first sync" for a while, and the first sync has to finish before the Creatives reports have anything to show. Don't judge the connection in the first ten minutes.
+  A brand-new connection typically shows "Awaiting first sync" for a while, and that sync has to finish before the Creatives reports have anything to show. Don't judge the connection in the first ten minutes.
 </Callout>
 
 ## Set the primary objective
 
-Once Meta Ads is connected, an **Objective** dropdown appears on its row. This tells the Creatives reports which Meta result to treat as the headline conversion — the one performance is judged on.
+Once connected, an **Objective** dropdown appears on the Meta Ads row. It tells the Creatives reports which Meta result to treat as the headline conversion.
 
-The options are Purchases, Leads, Registrations, Add to Carts, Checkouts, Content Views, Contacts, Subscriptions, and Trial Starts. It defaults to **Purchases**. Changes save immediately and a small "Saved" marker confirms it.
+The options are Purchases, Leads, Registrations, Add to Carts, Checkouts, Content Views, Contacts, Subscriptions, and Trial Starts. It defaults to **Purchases**. Changes save immediately, with a small "Saved" marker.
 
-Pick whatever the account is actually optimizing for. A lead-gen client set to Purchases will show a Creatives report full of zeros.
+Pick what the account is actually optimizing for — a lead-gen client set to Purchases will show a Creatives report full of zeros.
 
 ## What gets pulled
 
@@ -85,4 +81,4 @@ Pick whatever the account is actually optimizing for. A lead-gen client set to P
 
 ## Disconnecting
 
-**Disconnect** on the Meta Ads row stops the sync and removes the connection to your ad account. You'll be asked to confirm. Reports that depend on Meta spend go quiet, and data already synced stops updating. You can reconnect at any time — you'll be asked for the ad account ID again.
+**Disconnect** on the Meta Ads row stops the sync and removes the connection, after a confirmation. Reports that depend on Meta spend go quiet and synced data stops updating. Reconnecting means entering the ad account ID again.

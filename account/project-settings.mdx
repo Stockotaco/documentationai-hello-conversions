@@ -1,0 +1,55 @@
+---
+title: Project Settings
+description: The settings on Settings → Project → General — name, description, timezone and deletion — and what the project timezone actually changes.
+---
+
+**Settings → Project → General** holds the project's name, its reporting timezone, and the button that deletes it. Any project member can edit these. Only an organization owner can delete the project.
+
+## Project details
+
+The top of the page summarizes the project as it stands: name, timezone, creation date, and the **Project ID** with a copy button. Your description appears here too, if you've written one.
+
+The Project ID is the UUID that identifies this project in support conversations and MCP tooling.
+
+## Editing the project
+
+| Field | What it does |
+| --- | --- |
+| **Project Name** | What the project is called throughout the app, up to 100 characters. Usually the domain you're tracking. |
+| **Description** | Free text. Optional, and shown only on this page. |
+| **Timezone** | The reporting timezone. See below. |
+
+**Save Changes** applies all three at once. Renaming also renames the connected ad-platform and Stripe syncs, so a rename doesn't leave stale names behind.
+
+## The timezone, and why it matters
+
+The picker offers UTC, the four US zones (Eastern, Central, Mountain, Pacific), London, Paris and Tokyo. New projects start on **UTC**.
+
+This is not a display preference. The project's timezone defines **when a day starts and ends** for that project: revenue, spend and event data are bucketed into local dates computed with it, and the reporting views are built with it baked in.
+
+A purchase at 9pm Pacific on a Tuesday lands on Wednesday under UTC, and on Tuesday under `America/Los_Angeles` — which is the day the client will call it. Set the timezone to the client's business timezone when you create the project.
+
+It also sets the weekly recap email's send time, Friday at 9am local. See [Notifications](/account/notifications).
+
+<Callout kind="warning">
+  Changing the timezone rebuilds the project's reporting views in the background, and that rebuild is what re-buckets the data. Give it a few minutes, and expect historical daily totals to shift — the same events are being assigned to different days. Change it once, early, rather than experimenting on a live account.
+</Callout>
+
+## Deleting a project
+
+The **Danger Zone** is visible to organization owners only, and you type the project's name to confirm. Deleting takes the tracking client offline, tears down the connected platform syncs, and removes the project's integrations, destinations, connections and settings. It cannot be undone.
+
+To stop a project without erasing it, disconnect its sources under **Settings → Integrations → Sources** instead.
+
+## The rest of the Project section
+
+<Columns cols={2}>
+  <Card title="Team" icon="users" href="/account/team-roles" horizontal>
+    Who has access to this project, and how to invite someone to it.
+  </Card>
+  <Card title="Notifications" icon="bell" href="/account/notifications" horizontal>
+    The weekly recap email and Slack routing for this project.
+  </Card>
+</Columns>
+
+Everything else lives in the other Settings groups: **Integrations** for sources and destinations, **Workflows** for connections and pipelines, and **Developer** for MCP access — see [MCP authentication](/mcp/authentication) for API keys.

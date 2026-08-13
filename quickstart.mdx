@@ -3,106 +3,77 @@ title: Quickstart
 description: Create a project, connect GoHighLevel and an ad platform, add a destination, and confirm your first conversion was delivered.
 ---
 
-This is the shortest path from an empty account to a conversion that actually lands in Meta or Google Ads. Budget about fifteen minutes, most of it waiting on OAuth screens.
-
-You'll need admin access to the GoHighLevel location you want to track, and access to the ad account you want to send conversions to.
+About fifteen minutes. You need admin access to the GoHighLevel location you want to track, and to the ad account you're sending conversions to.
 
 <Steps>
   <Step title="Create a project" icon="folder-plus">
 
-    A project is one client account — or just your business, if you're not an agency. From your projects list, click **New Project**.
-
-    The form asks for a **Website URL** (the domain you're tracking, like `example.com`) and an optional description. Click **Create Project** and you land on the setup flow for that project.
+    Click **New Project**, enter a **Website URL** (the domain you're tracking, like `example.com`) and an optional description, then **Create Project**.
 
     <Callout kind="note">
-      Projects live inside an organization, and the organization is what carries the plan and the bill. If the app shows you a subscription notice instead of your project, start at [Plans and billing](/account/plans-billing) — billing pages stay reachable even when the rest of the app is gated.
+      The organization, not the project, carries the plan and the bill. If you see a subscription notice instead of your project, start at [Plans and billing](/account/plans-billing) — billing pages stay reachable even when the rest of the app is gated.
     </Callout>
 
   </Step>
 
   <Step title="Connect Lead Connector" icon="link">
 
-    Setup is two screens. The first is a welcome; click **Get Started**. The second, **Connect Integrations**, lists Lead Connector, Meta Ads, Google Ads and Stripe with a **Connect** button on each.
-
-    Connect **Lead Connector** first — this is GoHighLevel, and it's the source of every conversion event you're going to send. The button sends you to GoHighLevel's authorization screen. Approve it for the location you want to track, and you'll be returned to Hello Conversions with the integration marked connected.
-
-    Nothing else works without this one. Contacts, opportunities, tags and orders all arrive through it.
+    Click **Get Started**, then **Connect** on **Lead Connector**, and approve it for the location you want to track. This is GoHighLevel, the source of every conversion event you'll send. Nothing else works without it.
 
   </Step>
 
   <Step title="Connect an ad platform" icon="megaphone">
 
-    Still on the **Connect Integrations** screen, connect **Meta Ads** or **Google Ads**.
+    Connect **Meta Ads** (ad account ID, from Meta Business Suite → Ad Account Settings, like `act_123456789`) or **Google Ads** (customer ID, under the help icon top right, like `123-456-7890`), then authorize on the platform. Click **Complete Setup**.
 
-    - **Meta Ads** asks for your ad account ID first — you'll find it in Meta Business Suite under Ad Account Settings, formatted `act_123456789` or just the digits. Then it hands off to Meta for authorization.
-    - **Google Ads** asks for your customer ID, shown under the help icon in the top right of Google Ads as `123-456-7890`. Then it hands off to Google.
-
-    This connection brings **spend and campaign data in**. It is not what sends conversions out — that's the next step, and it's a separate piece of setup even for the same platform.
-
-    You can skip any integration here and add it later under **Settings → Integrations → Sources**. Click **Complete Setup** when you're done; you'll land on the project's revenue overview.
+    This brings spend and campaign data **in**, not conversions out — that's the next step, and separate setup even for the same platform.
 
     <Callout kind="info">
-      Ad platform data arrives on a sync schedule, not instantly. Until the first sync finishes, the source row on **Settings → Integrations → Sources** reads "Awaiting first sync". That's expected and doesn't block the rest of this guide.
+      Ad platform data syncs on a schedule. The source row reads "Awaiting first sync" until the first run finishes.
     </Callout>
 
   </Step>
 
   <Step title="Add a destination" icon="upload">
 
-    Go to **Settings → Integrations → Destinations** and click **Add Destination**, then pick a provider.
+    At **Settings → Integrations → Destinations**, click **Add Destination** and pick a provider. Use **Test Connection** before saving.
 
     <Tabs>
       <Tab title="Meta Conversions API">
 
-        You'll need two things from Meta Events Manager: the **Pixel ID** (under Data Sources) and a **Conversions API access token** (Settings → Conversions API). Paste both in.
-
-        You can also set a **Website URL**, used as the event source URL when an event doesn't carry its own, and a **Default Currency** for events that have no currency of their own. Sales that already specify a currency in GoHighLevel keep it.
-
-        Give the destination a name you'll recognize later — you can create several of the same type, so "Main Pixel" beats "Meta".
+        Paste the **Pixel ID** (Events Manager → Data Sources) and a **Conversions API access token** (Settings → Conversions API). Optionally set a **Website URL**, used as the event source URL when an event carries none, and a **Default Currency** for events with no currency of their own.
 
       </Tab>
 
       <Tab title="Google Ads">
 
-        You only enter your **Customer ID**. Hello Conversions uploads conversions through its own manager account, so after saving the destination you send a linking request from the destination card and approve it inside Google Ads.
+        Enter only your **Customer ID**, then send a linking request from the destination card and approve it inside Google Ads.
 
         <Callout kind="warning">
-          Until that manager account link is approved in your Google Ads account, conversion uploads have nowhere to land. If deliveries are failing on a brand new Google Ads destination, check the link request first.
+          Until that manager account link is approved in Google Ads, conversion uploads have nowhere to land. If deliveries fail on a brand new Google Ads destination, check the link request first.
         </Callout>
 
       </Tab>
     </Tabs>
 
-    Use **Test Connection** on the form before you save. A passing test sets the destination to connected; a failing one records the error on the destination itself, so you're not guessing later.
-
   </Step>
 
   <Step title="Connect an event to the destination" icon="git-branch">
 
-    A destination on its own delivers nothing. You have to say which events go to it.
-
-    Go to **Settings → Workflows → Connections**. Drag from a source event to your destination on the canvas, or click **New Connection**, and pick the Lead Connector events that should fire it — for example **Made Any Purchase** for orders, or **Opportunity Changed** for pipeline movement.
-
-    From the same panel you can add filters (only orders above a value, only one funnel, only one pipeline stage) and override the event name sent to the destination. Save it, and it starts routing live events immediately.
+    A destination on its own delivers nothing. At **Settings → Workflows → Connections**, drag from a source event to your destination, or click **New Connection**, then pick the event — **Made Any Purchase** for orders, **Opportunity Changed** for pipeline movement. The same panel carries filters and an event-name override.
 
   </Step>
 
   <Step title="Verify a delivery" icon="check-circle">
 
-    Trigger the real thing in GoHighLevel — move a test opportunity into the stage you connected, or place a test order.
-
-    Then open **Reporting → Workflows → Activity Log**. It lists every event processed through your connections, newest first, and you can click a row to see what was actually sent and what the destination replied. Turn on **Auto** to refresh it every 30 seconds while you test.
-
-    The **Connections** page carries the same signal in summary: active connections, events in the last 24 hours, failures, and failure rate.
+    Trigger the event in GoHighLevel, then open **Reporting → Workflows → Activity Log**: every processed event, newest first, with what was sent and what the destination replied. **Auto** refreshes it every 30 seconds.
 
     <Callout kind="success">
-      An event in the Activity Log with a successful delivery is the finish line. From here it's Meta and Google's own reporting delay before the conversion shows up on their side.
+      A successful delivery is the finish line. From here it's Meta and Google's own reporting delay before the conversion shows up on their side.
     </Callout>
 
   </Step>
 </Steps>
-
-## Where to go next
 
 <Columns cols={2}>
   <Card title="Core concepts" icon="layers" href="/getting-started/core-concepts" horizontal>

@@ -3,13 +3,9 @@ title: Reporting
 description: What each report in Hello Conversions measures, which connected source it needs before it shows a number, and how date ranges and filters behave across the section.
 ---
 
-**Reporting** is the read-only half of a project. Everything here is derived from the data your sources send — no report has its own settings, and none of them can show you a number the underlying source never sent.
-
-That single fact explains most "why is this empty?" questions, so it's worth stating plainly: **a report stays blank until the source it reads from is connected and has synced.** The rest of this page is the map of which report needs what.
+**A report stays blank until the source it reads from is connected and has synced.** Reporting is the read-only half of a project: every figure is derived from what your sources send, no report has its own settings, and none can show a number the source never sent.
 
 ## What's in the section
-
-Open a project and pick **Reporting** from the icon rail. The section nav groups the reports:
 
 | Group | Report | What it answers |
 | --- | --- | --- |
@@ -23,13 +19,11 @@ Open a project and pick **Reporting** from the icon rail. The section nav groups
 | **Workflows** | Overview | Delivered, failed and filtered conversion volume. |
 | | Activity Log | One row per delivery attempt, for tracing a single event. |
 
-**Reporting → Revenue → Overview** is the default — landing on Reporting without picking a report takes you there.
-
-The Workflows pair is different in kind from the rest. Those two read from the conversion-delivery pipeline rather than from a warehouse, so they populate as soon as a [connection](/conversion-tracking/connections) starts producing runs. [Activity & Run History](/conversion-tracking/activity-history) covers them in detail.
+**Revenue → Overview** is the default landing page. The Workflows pair reads from the conversion-delivery pipeline rather than a warehouse, so those two populate as soon as a [connection](/conversion-tracking/connections) starts producing runs — [Activity & Run History](/conversion-tracking/activity-history) covers them in detail.
 
 ## What each report needs connected
 
-Everything under Revenue, Meta Ads and Email is built from the data your [sources](/connect/sources-vs-destinations) sync. Connect the source, wait for the first sync, then the report fills in.
+Everything under Revenue, Meta Ads and Email is built from what your [sources](/connect/sources-vs-destinations) sync.
 
 | Report | Needs | Without it |
 | --- | --- | --- |
@@ -44,27 +38,23 @@ Everything under Revenue, Meta Ads and Email is built from the data your [source
 | **Email Stats** | GoHighLevel | Nothing to show |
 
 <Callout kind="warning">
-  **Stripe alone is not enough for Lead LTV or Marketing Efficiency.** Both reports work by tying revenue back to the contact who produced it, and Stripe charges arrive without a contact link. On a Stripe-only project Lead LTV shows an explicit "Stripe-only — Lead LTV unsupported" chip rather than silently reporting zeros. Revenue → Overview does work on Stripe alone — its revenue, customer and transaction figures are built directly from Stripe charges.
+  **Stripe alone is not enough for Lead LTV or Marketing Efficiency.** Both tie revenue back to the contact who produced it, and Stripe charges arrive without a contact link. A Stripe-only project shows an explicit "Stripe-only — Lead LTV unsupported" chip rather than silently reporting zeros. Revenue → Overview does work on Stripe alone, built directly from Stripe charges.
 </Callout>
 
-When a project has both GoHighLevel and Stripe, Revenue → Overview uses both: Stripe is treated as the truth for money it processed, matched to the GoHighLevel transaction that shares its payment intent, and GoHighLevel supplies anything Stripe never saw — cash, other processors, and the contact attribution.
+With both connected, Revenue → Overview uses Stripe as the truth for money it processed, matched to the GoHighLevel transaction sharing its payment intent, and GoHighLevel for anything Stripe never saw — cash, other processors, and the contact attribution.
 
 ## Date ranges
 
-All three Revenue reports default to **the last 30 days** and are filtered by a date range you control at the top of the page. Revenue → Overview also offers 7d / 30d / 90d shortcuts.
+All three Revenue reports default to **the last 30 days**; Revenue → Overview also offers 7d / 30d / 90d shortcuts.
 
-Two things about that window are worth knowing before you argue with a client about a number:
+- **Days are cut in the project's timezone**, not yours and not UTC. A sale at 11pm on the 31st in a project set to `America/New_York` belongs to the 31st, even if you're reading in London. Set it under **Settings → Project → General**.
+- **The comparison period is the same length, immediately before.** Pick 12 days and every trend arrow compares against the 12 days before that — not last month, not the same period last year.
 
-- **Days are cut in the project's timezone**, not yours and not UTC. A sale at 11pm on the 31st in a project set to `America/New_York` belongs to the 31st, even if the person reading the report is in London. The timezone is a project setting, under **Settings → Project → General**.
-- **The comparison period is the same length, immediately before.** Every trend arrow and "vs. previous" figure compares your window against a window of identical length ending the day before your start date. Pick 12 days and you're compared against the 12 days before that — not against last month, and not against the same period last year.
-
-Revenue → Overview and Marketing Efficiency also have a day / week / month granularity toggle, which changes how the chart and the breakdown table bucket the same underlying data. It does not change the window.
+Revenue → Overview and Marketing Efficiency also have a day / week / month granularity toggle, which changes how the chart and breakdown table bucket the data, not the window.
 
 ## Filters
 
-Revenue → Overview has no filters beyond the date range — it is the whole project.
-
-Lead LTV and Marketing Efficiency both filter on attribution:
+Revenue → Overview has no filters beyond the date range. Lead LTV and Marketing Efficiency both filter on attribution:
 
 | Filter | What it does |
 | --- | --- |
@@ -77,12 +67,10 @@ Lead LTV and Marketing Efficiency both filter on attribution:
 Marketing Efficiency lets you pick several values per filter; Lead LTV takes one of each.
 
 <Callout kind="tip">
-  Lead LTV keeps its full filter state in the page URL and has a **Copy link** button. Paste that link into a client email or a Slack thread and the recipient opens exactly the view you were looking at — same dates, same filters, same attribution mode. If a link is old enough that its filters no longer match any lead in the window, the page says so in an amber banner rather than showing an unexplained empty report.
+  Lead LTV keeps its full filter state in the page URL and has a **Copy link** button, so the recipient opens exactly the view you were looking at. If a link is old enough that its filters no longer match any lead in the window, an amber banner says so rather than showing an unexplained empty report.
 </Callout>
 
 ## Freshness
-
-The reports don't all read from the same place, and it shows up in how current they are.
 
 | Report | How current |
 | --- | --- |
@@ -90,27 +78,27 @@ The reports don't all read from the same place, and it shows up in how current t
 | **Lead LTV** | Built from a snapshot rebuilt once a day, in the project's local timezone. |
 | **Marketing Efficiency** | Spend and lead data from that same daily snapshot; sales figures queried live. |
 
-Lead LTV and Marketing Efficiency each show a **Data as of …** chip in the page header with the exact time of the last successful rebuild, and a **Refresh failed** chip if the most recent attempt errored — in which case you're looking at the previous good snapshot, not at nothing.
+Lead LTV and Marketing Efficiency each show a **Data as of …** chip with the last successful rebuild time, and a **Refresh failed** chip if the most recent attempt errored — in which case you're looking at the previous good snapshot, not at nothing.
 
 <Callout kind="note">
-  The refresh button on those two pages re-runs the report's queries against the current snapshot. It does not rebuild the snapshot, so a figure that's stale because yesterday's rebuild failed won't move until the next rebuild succeeds.
+  The refresh button re-runs the report's queries against the current snapshot. It does not rebuild the snapshot, so a figure that's stale because yesterday's rebuild failed won't move until the next rebuild succeeds.
 </Callout>
 
-Behind all of it sits your source sync schedule. A report can only be as current as the last sync from GoHighLevel, Meta or Google — if ad spend looks a day behind, check the source before you suspect the report.
+A report can only be as current as the last source sync — if ad spend looks a day behind, check the source before you suspect the report.
 
 ## Where to go next
 
 <Columns cols={2}>
   <Card title="Revenue Overview" icon="dollar-sign" href="/reporting/revenue-overview" horizontal>
-    Revenue, customers and transactions, and where each number comes from.
+    Revenue, customers and transactions.
   </Card>
   <Card title="Lead LTV" icon="heart-pulse" href="/reporting/lead-ltv" horizontal>
-    What a lead is worth over time, by cohort, form and source.
+    What a lead is worth over time.
   </Card>
   <Card title="Marketing Efficiency" icon="gauge" href="/reporting/marketing-efficiency" horizontal>
-    Spend against revenue, per channel and per campaign.
+    Spend against revenue, per channel and campaign.
   </Card>
   <Card title="Connect a source" icon="download" href="/connect/sources-vs-destinations" horizontal>
-    Nothing here populates until a source is connected and synced.
+    Nothing populates until a source is connected and synced.
   </Card>
 </Columns>

@@ -1,0 +1,499 @@
+---
+title: MCP Tool Reference
+description: Every tool the Hello Conversions MCP server exposes — exact names, parameters, return shapes, and which ones a read-only key cannot call.
+---
+
+The MCP server exposes **30 tools**: 12 analytics tools that read the project's BigQuery dataset, and 18 management tools that read and write sources, destinations, connections and pipeline config. An API key is bound to one project — no tool takes a project ID, and none can reach another project's data.
+
+## Rules that apply to every tool
+
+| Rule | Detail |
+| --- | --- |
+| **Rate limit** | 100 calls per 60 seconds per API key. Over it: `Rate limit exceeded. Retry after N seconds.` |
+| **Read-only keys** | May only call the tools marked read-only below. Others return `Tool "<name>" modifies data and this API key is read-only. Use a read-write key.` `report_bug` is the deliberate exception — read-only keys can still file reports. |
+| **Errors** | Returned as a tool result with `isError: true` and a plain-text message, not a protocol error. Fix the call rather than retrying it. |
+| **Dates** | `dateFrom` / `dateTo` are `YYYY-MM-DD` wall-clock dates in the **project timezone**, not UTC. |
+| **Audit trail** | Every call logs tool name, rows returned, bytes billed and duration. Management writes also land in the org activity log with the API key as actor. |
+
+## Analytics tools
+
+All 12 are read-only. They query the project's BigQuery dataset — see [Data model](/mcp/data-model). Every one returns `{ rows, total_rows }` except `list_tables`. Row columns are listed per tool.
+
+### `list_tables`
+
+Lists every table and view in the dataset with a column count and schema pointer. No parameters.
+
+Returns `{ tables: [{ table_name, table_type, column_count, schema_resource }], total_rows, hint }`. `schema_resource` is a URI like `hc://schema/transactions` — read it for the full column list before writing SQL.
+
+### `query`
+
+Runs read-only SQL against the project dataset.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `sql` | string | Yes | The query. `SELECT` or `WITH` only. |
+| `limit` | number | No | Max rows. Default 1,000, capped at 10,000. |
+
+Enforced before the query reaches BigQuery:
+
+- Must start with `SELECT` or `WITH`; leading comments are fine.
+- Rejected outside comments and string literals: `INSERT`, `UPDATE`, `DELETE`, `DROP`, `CREATE`, `ALTER`, `TRUNCATE`, `MERGE`, `GRANT`, `REVOKE`, `CALL`, `EXECUTE`.
+- One statement — a `;` anywhere but the end is rejected.
+- Bare names after `FROM` / `JOIN` are scoped to the dataset, so write `FROM contacts`. `UNNEST(...)`, `INFORMATION_SCHEMA` and CTE names are left alone.
+- Any other dataset is rejected: `Access denied: queries can only reference tables in your project dataset.`
+- A missing `LIMIT` is appended.
+
+### `search_contacts`
+
+Searches contacts/leads.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `name` | string | No | Partial, case-insensitive match on first + last name. |
+| `email` | string | No | Partial, case-insensitive match on email. |
+| `source` | string | No | Exact match on lead source. |
+| `dateFrom` | string | No | Earliest `date_added`. |
+| `dateTo` | string | No | Latest `date_added`. |
+| `limit` | number | No | Max rows. Default 100. |
+
+Returns `contact_id`, `first_name`, `last_name`, `email`, `source`, `date_added` (UTC), `date_added_local` (project timezone), newest first. Report times from `date_added_local`.
+
+### `search_transactions`
+
+Searches transactions/charges. Reads GHL `transactions`; falls back to `stripe_charges` when that table is absent.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `minAmount` | number | No | Minimum amount. |
+| `maxAmount` | number | No | Maximum amount. |
+| `status` | string | No | Exact status match. |
+| `contactId` | string | No | Contact ID. **GHL path only** — ignored on the Stripe fallback. |
+| `dateFrom` | string | No | Earliest transaction date. |
+| `dateTo` | string | No | Latest transaction date. |
+| `limit` | number | No | Max rows. Default 100. |
+
+| Source | Columns | Notes |
+| --- | --- | --- |
+| GHL `transactions` | `contact_id`, `amount`, `currency`, `status`, `product_name`, `created_at`, `created_at_local` | Filtered to `live_mode = true`. `product_name` is `entity_source_name`. |
+| `stripe_charges` | `id`, `amount`, `currency`, `status`, `product_name`, `created_at`, `created_at_local`, `customer` | `amount` is net of refunds, converted from cents. `product_name` is the charge description. Deduplicated to the latest extract per charge. |
+
+### `search_events`
+
+Searches tracking-pixel events.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `eventName` | string | No | Exact event name, e.g. `$pageview`. |
+| `dateFrom` | string | No | Start date. **Defaults to 7 days ago.** |
+| `dateTo` | string | No | End date. Defaults to today. |
+| `userId` | string | No | Visitor/user ID. |
+| `limit` | number | No | Max rows. Default 100. |
+
+Returns `event_name`, `event_timestamp`, `event_timestamp_local`, `user_id`, `location_id`. A date range is always applied — omitting both dates gives the last 7 days, not all time.
+
+### `get_activity_stream`
+
+Queries the GoHighLevel activity stream: tag changes, stage moves, form submissions.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `eventType` | string | No | Exact raw GHL event type, e.g. `tag_added`, `opportunity_stage_changed`. |
+| `activityName` | string | No | Partial, case-insensitive match. |
+| `dateFrom` | string | No | Earliest `occurredAt`. |
+| `dateTo` | string | No | Latest `occurredAt`. |
+| `limit` | number | No | Max rows. Default 100. |
+
+Returns `eventType`, `activityName`, `activityValue`, `contactId`, `email`, `occurredAt`, `occurredAt_local`.
+
+<Callout kind="info">
+  The raw GHL `metadata` payload is omitted — it carries the full contact object plus every tag and custom field. If you need it, `query` the `ghl_activity` table and select `metadata`.
+</Callout>
+
+### `get_daily_kpis`
+
+One row per day: revenue, transactions, customers, page views, form submissions, ad spend.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `dateFrom` | string | No | Start date. Defaults to 30 days ago. |
+| `dateTo` | string | No | End date. Defaults to today. |
+
+Returns `day`, `total_revenue`, `new_revenue`, `existing_revenue`, `total_transactions`, `new_customers`, `returning_customers`, `avg_order_value`, `form_submissions`, `form_leads`, `page_views`, `unique_visitors`, `conversion_rate`, `meta_ad_spend`, `google_ad_spend`, `total_ad_spend`, `roas`, `cost_per_lead`. Up to 366 rows.
+
+With no ads tables, the tool retries without them: the three spend columns return `0`, `roas` returns `null`, the rest is unaffected.
+
+### `get_form_stats`
+
+Form performance, grouped by form name and page.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `dateFrom` | string | No | Earliest submission date. Defaults to 30 days ago. |
+| `dateTo` | string | No | Latest submission date. Defaults to today. |
+
+Returns `form_name`, `page_url`, `submissions`, `leads`, `customers`, `revenue_attributed`, sorted by submissions, up to 500 rows. `page_url` has its query string and fragment stripped, so UTM variants collapse into one row. Revenue counts each submitting contact's **lifetime** `succeeded`/`refunded` transactions — not limited to the date range, and counted once per form the contact submitted.
+
+### `get_product_stats`
+
+Revenue by product.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `dateFrom` | string | No | Earliest purchase date. Defaults to 30 days ago. |
+| `dateTo` | string | No | Latest purchase date. Defaults to today. |
+
+Returns `product_name`, `total_revenue`, `total_orders`, `avg_order_value`, `unique_customers`, up to 500 rows. Counts live-mode `succeeded`/`refunded` transactions, net of refunds.
+
+### `get_customer_ltv`
+
+Customer lifetime value. The filters choose *which customers* appear; the value reported is always their full lifetime revenue.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `dateFrom` | string | No | Start of cohort window. No default — all time unless set. |
+| `dateTo` | string | No | End of cohort window. No default. |
+| `dateField` | `first_purchase` \| `contact_created` | No | What the dates filter on. Default `first_purchase`. |
+| `product` | string | No | Only customers who bought this product (partial, case-insensitive). |
+| `funnel` | string | No | Only customers who bought via this funnel (partial, case-insensitive). |
+| `sortBy` | `lifetime_value` \| `total_orders` \| `last_purchase_date` \| `first_purchase_date` | No | Sort column, always descending. Default `lifetime_value`. |
+| `limit` | number | No | Max rows. Default 100. |
+
+Returns `contact_id`, `contact_name`, `contact_email`, `lifetime_value`, `total_orders`, `avg_order_value`, `first_purchase_date`, `last_purchase_date`.
+
+<Callout kind="warning">
+  Filtering by `product` or a date window does **not** narrow the money counted. Ask for customers who first bought Product A in March and you get their total spend on everything, before and after March.
+</Callout>
+
+### `get_ad_spend`
+
+Daily ad spend.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `platform` | `meta` \| `google` \| `all` | No | Default `all`. |
+| `dateFrom` | string | No | Start date. Defaults to 30 days ago. |
+| `dateTo` | string | No | End date. Defaults to today. |
+
+| `platform` | Columns |
+| --- | --- |
+| `meta` or `google` | `platform`, `day`, `spend`, `impressions`, `clicks`, `cpc` |
+| `all` | `day`, `spend`, `impressions`, `clicks`, `cpc`, `meta_spend`, `google_spend` — no `platform` column; one row per day, both platforms summed |
+
+Up to 366 rows.
+
+### `get_ad_campaigns`
+
+Per-campaign spend and delivery.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `platform` | `meta` \| `google` \| `all` | No | Default `all`. |
+| `dateFrom` | string | No | Start date. Defaults to 30 days ago. |
+| `dateTo` | string | No | End date. Defaults to today. |
+| `limit` | number | No | Max rows. Default 100. |
+
+| `platform` | Columns |
+| --- | --- |
+| `meta` | `platform`, `campaign_name`, `status`, `spend`, `impressions`, `clicks`, `cpc` |
+| `google` | the same, plus `conversions`, `conversions_value` |
+| `all` | `platform`, `campaign_name`, `status`, `spend`, `impressions`, `clicks`, `cpc` |
+
+Sorted by spend descending. Dates match the ad platform's own reporting date, not converted through the project timezone.
+
+<Callout kind="warning">
+  `platform: "all"` drops `conversions` and `conversions_value` — Meta's side of the union has no equivalent. For Google conversion counts, call with `platform: "google"`.
+</Callout>
+
+<Callout kind="tip">
+  "No ads data found" means the project has no Meta or Google Ads tables — the source was never connected, or its first sync hasn't landed. Confirm with `list_tables`.
+</Callout>
+
+## Management tools
+
+| Tool | What it does | Read-only key? |
+| --- | --- | --- |
+| `list_integrations` | List data source integrations | Yes |
+| `disconnect_integration` | Disconnect a source — **destructive** | No |
+| `list_destinations` | List delivery destinations | Yes |
+| `get_destination` | Full detail for one destination | Yes |
+| `create_destination` | Create a destination | No |
+| `update_destination` | Edit a destination | No |
+| `delete_destination` | Delete a destination — **destructive** | No |
+| `test_destination` | Send a live test event | No |
+| `list_connections` | List workflow connections | Yes |
+| `get_connection` | Full detail for one connection | Yes |
+| `create_connection` | Create a connection | No |
+| `update_connection` | Edit a connection | No |
+| `toggle_connection` | Flip a connection on/off | No |
+| `delete_connection` | Delete a connection — **destructive** | No |
+| `get_connection_stats` | Volume and failure-rate summary | Yes |
+| `get_pipeline_config` | Read pipeline stage config | Yes |
+| `update_pipeline_config` | Replace pipeline stage config | No |
+| `report_bug` | File a bug report — writes, but allowed from read-only keys | Yes |
+
+<Callout kind="alert">
+  The three destructive tools each require `confirm` set to literally `true`. There is no undo, no soft delete, no second prompt. Deleting a destination deletes every connection pointing at it; replacing pipeline config deletes the pipeline-managed connections it no longer wants.
+</Callout>
+
+### Sources
+
+#### `list_integrations`
+
+Lists every data source integration (Lead Connector, Meta Ads, Google Ads, Stripe, PostHog). No parameters. Read-only.
+
+Returns `{ integrations: [...] }` with `id`, `project_id`, `provider`, `status`, `account_id`, `config`, `has_airbyte_source`, `has_airbyte_connection`, `connected_at`, `last_sync_at`, `error_message`, `created_at`, `updated_at`. Credentials are never returned.
+
+#### `disconnect_integration`
+
+Disconnects a source: archives the Airbyte connection, deletes the Airbyte source, clears stored credentials, marks the integration `disconnected`.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `provider` | string | Yes | Provider to disconnect, e.g. `meta_ads`, `google_ads`, `stripe`, `posthog`. |
+| `confirm` | `true` | Yes | Must be exactly `true`. |
+
+Returns `{ provider, message }`, plus `warnings` if the Airbyte teardown partially failed — which still leaves the integration marked disconnected.
+
+<Callout kind="alert">
+  **Destructive and not reversible from MCP.** Syncing stops, and reconnecting requires the OAuth flow in the web UI. `provider: "ghl"` is refused outright — Lead Connector disconnects only in the web UI.
+</Callout>
+
+### Destinations
+
+Destination objects carry `id`, `project_id`, `provider`, `name`, `status`, `config`, `has_credentials`, `event_filters`, `field_mapping`, `connected_at`, `error_message`, `circuit_state`, `consecutive_failures`, `last_delivered_at`, `last_failed_at`, `created_at`, `updated_at`. Secrets are never returned; `has_credentials` is a boolean.
+
+#### `list_destinations`
+
+All delivery destinations. No parameters. Read-only. Returns `{ destinations: [...] }`.
+
+#### `get_destination`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `destination_id` | string (UUID) | Yes | Destination to fetch. |
+
+Read-only. Returns the destination object, or an error if the ID isn't in this project.
+
+#### `create_destination`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `provider` | `meta_capi` \| `google_ads` \| `webhook` \| `posthog` | Yes | Destination type. |
+| `name` | string (1–100) | Yes | Human-readable name. |
+| `config` | object of strings | No | Non-secret settings, e.g. `pixel_id`, webhook `url`. |
+| `credentials` | object of strings | No | Secrets, e.g. `access_token`, `api_key`. |
+| `event_filters` | array of strings | No | Event types to filter for this destination. |
+| `field_mapping` | array of `{ source, target }` | No | Field mapping rules. |
+
+Returns the created destination — `connected` if you supplied credentials, `disconnected` otherwise. Verify with `test_destination` before wiring connections to it.
+
+#### `update_destination`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `destination_id` | string (UUID) | Yes | Destination to update. |
+| `name` | string (1–100) | No | New name. |
+| `config` | object of strings | No | Replaces the whole config object. |
+| `credentials` | object of strings | No | Replaces the whole credentials object. |
+| `event_filters` | array of strings | No | Replaces the filter list. |
+| `field_mapping` | array of `{ source, target }` | No | Replaces the mapping list. |
+| `status` | string | No | Set manually, e.g. `connected`, `disconnected`. |
+
+Each supplied field replaces its stored value — send the complete object, not a patch. Credentials on a `disconnected` destination auto-promote it to `connected` and clear the error message. Delivery caches are invalidated immediately.
+
+#### `delete_destination`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `destination_id` | string (UUID) | Yes | Destination to delete. |
+| `confirm` | `true` | Yes | Must be exactly `true`. |
+
+Returns `{ message, id, provider, name }`.
+
+<Callout kind="alert">
+  **Destructive.** Every workflow connection routing to this destination is deleted with it. Run `list_connections` first if you want to know what you're losing.
+</Callout>
+
+#### `test_destination`
+
+Sends a live test and overwrites the destination's stored status from the result.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `destination_id` | string (UUID) | Yes | Destination to test. |
+
+Returns `{ success, message }`.
+
+| Provider | What happens |
+| --- | --- |
+| `meta_capi` | Posts a `PageView` to the Graph API with a generated `test_event_code`. Needs pixel ID and access token. |
+| `webhook` | Sends `{"test": true, "source": "hello_conversions"}` to the configured URL and method (default `POST`), 10s timeout. Any response under HTTP 500 counts as connected. |
+| `posthog` | Posts a `$hello_conversions_test` capture to the configured host (default `https://us.i.posthog.com`). Needs an API key. |
+| `google_ads` | Sends nothing — reports the stored MCC link status: connected, pending approval, or "send a linking request first via the web UI". |
+
+<Callout kind="warning">
+  Not read-only in either sense: it makes a real outbound call and rewrites `status` and `error_message`. Read-only keys cannot call it.
+</Callout>
+
+### Connections
+
+A connection routes source events to one destination with optional filters and transformations. Connection objects carry `id`, `project_id`, `destination_id`, `name`, `source_event_types`, `filters`, `transformations`, `conversion_action`, `custom_event_name`, `enabled`, `managed_by`, `created_at`, `updated_at`, plus a nested `destination` summary (`id`, `name`, `provider`, `status`).
+
+<Callout kind="note">
+  `managed_by: "pipeline"` means the pipeline config created it. Editing one directly is pointless — the next `update_pipeline_config` rewrites or deletes it. Change the pipeline config instead.
+</Callout>
+
+#### `list_connections`
+
+All connections with their destination summary. No parameters. Read-only. Returns `{ connections: [...] }`.
+
+#### `get_connection`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `connection_id` | string (UUID) | Yes | Connection to fetch. |
+
+Read-only. Returns the connection object.
+
+#### `create_connection`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `destination_id` | string (UUID) | Yes | Target destination. Must belong to this project. |
+| `source_event_types` | array of strings, min 1 | Yes | Events to route: `made_purchase`, `tag_added`, `tag_removed`, `opportunity_changed`, `product_purchased`, `contact_created`. |
+| `name` | string (max 100) | No | Human-readable name. |
+| `filters` | object | No | `{ logic: "and" \| "or", rules: [{ field, operator, value }] }`. |
+| `transformations` | array of `{ source, target }` | No | Field mappings. |
+| `conversion_action` | string | No | Google Ads conversion action resource name. |
+| `custom_event_name` | string | No | Overrides the event name sent to the destination. |
+| `enabled` | boolean | No | Default `true`. |
+
+Returns the created connection. See [Event types](/conversion-tracking/event-types) for what each source event means and which fields are filterable.
+
+#### `update_connection`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `connection_id` | string (UUID) | Yes | Connection to update. |
+| `name` | string (max 100) | No | New name. |
+| `source_event_types` | array of strings, min 1 | No | Replaces the event type list. |
+| `filters` | object or `null` | No | Replaces the filter config; `null` clears it. |
+| `transformations` | array of `{ source, target }` or `null` | No | Replaces the mappings; `null` clears them. |
+| `conversion_action` | string or `null` | No | `null` clears it. |
+| `custom_event_name` | string or `null` | No | `null` clears it. |
+| `enabled` | boolean | No | Enable or disable. |
+
+Returns the updated connection. Each supplied field replaces its stored value wholesale.
+
+#### `toggle_connection`
+
+Flips `enabled` to its opposite; a disabled connection stops processing events immediately.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `connection_id` | string (UUID) | Yes | Connection to toggle. |
+
+Returns the updated connection — read the returned `enabled` rather than assuming. For a specific end state, use `update_connection` with an explicit `enabled`.
+
+#### `delete_connection`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `connection_id` | string (UUID) | Yes | Connection to delete. |
+| `confirm` | `true` | Yes | Must be exactly `true`. |
+
+Returns `{ message, id, name }`.
+
+<Callout kind="alert">
+  **Destructive.** Matching events stop being routed immediately. To pause instead, use `toggle_connection`.
+</Callout>
+
+#### `get_connection_stats`
+
+Project-wide connection health. No parameters. Read-only.
+
+Returns `{ active_connections, total_connections, events_24h, failures_24h, failure_rate_24h }`, the last as a percentage to two decimal places. The 24-hour counts come from Redis hourly counters; if Redis is unreadable they return `0` rather than erroring, so a flat zero on a busy project means "counters unreadable" — cross-check the [Activity Log](/conversion-tracking/activity-history).
+
+### Pipelines
+
+#### `get_pipeline_config`
+
+Reads the mapping from CRM pipeline stages to conversion events and destinations.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `pipelineId` | string | No | Every stage, enabled and disabled, for one GHL pipeline. |
+| `includeDisabled` | boolean | No | Every stage in the project. Default `false`. |
+
+Read-only. Returns `{ stages, total_stages, enabled_stages, returned }`, plus a `pipelines` rollup of `{ pipelineId, pipelineName, stageCount, enabledCount }` when not scoped to one `pipelineId`.
+
+**Returns only enabled stages by default.** Projects routinely carry hundreds of disabled ones, so `returned` will be smaller than `total_stages`. Use the rollup to see what exists, then drill in with `pipelineId`.
+
+#### `update_pipeline_config`
+
+Replaces the stage configuration and re-syncs the connections it manages.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `stages` | array of stage objects | Yes | The complete stage list. |
+
+Every stage object requires all nine fields:
+
+<ParamField path="pipelineId" type="string" required>
+  GHL pipeline ID.
+</ParamField>
+
+<ParamField path="pipelineName" type="string" required>
+  GHL pipeline name.
+</ParamField>
+
+<ParamField path="stageId" type="string" required>
+  GHL stage ID.
+</ParamField>
+
+<ParamField path="stageName" type="string" required>
+  GHL stage name. Becomes the managed connection's name, as `Pipeline: <stageName>`.
+</ParamField>
+
+<ParamField path="eventName" type="string" required>
+  Conversion event name to send.
+</ParamField>
+
+<ParamField path="eventValue" type="number" required>
+  Default monetary value for the conversion.
+</ParamField>
+
+<ParamField path="useMonetaryValue" type="boolean" required>
+  Use the opportunity's own monetary value instead of `eventValue`.
+</ParamField>
+
+<ParamField path="enabled" type="boolean" required>
+  Whether this stage routes at all.
+</ParamField>
+
+<ParamField path="destinationIds" type="string[]" required>
+  Destination UUIDs to route this stage to.
+</ParamField>
+
+Each enabled stage with at least one destination gets exactly one `managed_by: "pipeline"` connection per destination, filtered to that pipeline and stage on `opportunity_changed`. Managed connections no longer matching a stage/destination pair are deleted.
+
+Returns `{ stages, sync_failed, message }`. `sync_failed: true` means **the config saved but the connections did not reconcile** — delivery no longer matches the stored config. Retry the call or fix it in the web UI.
+
+<Callout kind="alert">
+  **Full replace, not a merge.** Any stage missing from the array you send is gone. Call `get_pipeline_config` with `includeDisabled: true` first, edit that array, send it back whole.
+</Callout>
+
+### Bug reports
+
+#### `report_bug`
+
+Files a bug report against the project — for a missing table, a permission error, or results that can't be right.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `description` | string, min 1 char | Yes | What went wrong. |
+| `severity` | `low` \| `medium` \| `high` | No | Default `medium`. |
+| `tool_name` | string | No | The tool that failed, e.g. `query`, `list_tables`. |
+| `error_detail` | string | No | Raw error text or stack. |
+
+Returns `{ id, status, message }`. Writes a row but is exempt from the read-only check. If the organization has a bug-report webhook configured it also posts there; the report is stored either way.

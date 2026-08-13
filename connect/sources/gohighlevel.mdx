@@ -3,13 +3,11 @@ title: GoHighLevel (Lead Connector)
 description: Connect a GoHighLevel sub-account to Hello Conversions to sync contacts, opportunities, pipelines, transactions, and real-time events.
 ---
 
-GoHighLevel is the source everything else hangs off. It's where your contacts, opportunities, and purchases live, so it's what turns a raw ad click into a conversion Hello Conversions can report on and send back to Meta or Google.
+GoHighLevel is where your contacts, opportunities and purchases live, so it's the source everything else hangs off. One project connects to one GoHighLevel sub-account (location).
 
 <Callout kind="note">
   The app calls this integration **Lead Connector** — that's the name you'll see on the Sources page, in toasts, and in the sidebar. It's the same thing as GoHighLevel.
 </Callout>
-
-Everything here is per **project** — one client account, or just your business if you're not an agency. One project connects to one GoHighLevel sub-account (location).
 
 ## Connect it
 
@@ -21,10 +19,10 @@ Everything here is per **project** — one client account, or just your business
     You're sent to GoHighLevel to authorize Hello Conversions against the sub-account you want to track.
   </Step>
   <Step title="Approve the install">
-    GoHighLevel shows you what the app can access. Approve it and you're redirected back to Hello Conversions, which finishes the setup on its own.
+    Approve the access GoHighLevel shows you and you're redirected back, where setup finishes on its own.
   </Step>
   <Step title="Confirm it took">
-    You land back on the Sources page with a "Lead Connector Connected" toast. The row now shows a green **Live** badge, the date it connected, and your contact count.
+    A "Lead Connector Connected" toast appears, and the row shows a green **Live** badge, the date it connected, and your contact count.
   </Step>
 </Steps>
 
@@ -34,24 +32,20 @@ Everything here is per **project** — one client account, or just your business
 
 ### Installing from the GoHighLevel marketplace
 
-You can also install the app from inside GoHighLevel rather than starting in Hello Conversions. When you do, you're sent to a **Connect this Lead Connector location** screen and asked to pick which project the location belongs to. If that location is already connected to a project, you're taken straight to that project's Sources page instead.
+Installing from inside GoHighLevel sends you to a **Connect this Lead Connector location** screen, which asks which project the location belongs to. If it's already connected to a project, you go straight to that project's Sources page.
 
 ## What connecting sets up
 
-The first connection does a few things automatically, so you don't have to:
-
-- **Sets your project timezone** from the sub-account's timezone — but only if the project is still on the default UTC. If you've already changed the timezone yourself, your setting is kept.
+- **Sets your project timezone** from the sub-account's — but only if the project is still on the default UTC. A timezone you set yourself is kept.
 - **Provisions the reporting views** behind the Revenue, Lead LTV, and Marketing Efficiency reports.
-- **Pulls your live contact count**, which is what the Sources row shows and what your plan tier is based on.
-- **Carries over existing settings** if this location was previously set up on the older version of Hello Conversions — connected destinations and pipeline stage configuration are brought across, but only if the project doesn't already have its own.
+- **Pulls your live contact count**, shown on the Sources row and used for your plan tier.
+- **Carries over existing settings** if this location was set up on the older version of Hello Conversions — connected destinations and pipeline stage configuration, but only if the project doesn't already have its own.
 
 ## What syncs
 
-Two separate streams of data come from Lead Connector, and they answer different questions.
-
 ### Scheduled data sync
 
-Records are synced on a schedule into your project's reporting warehouse. These are what the reports read:
+Records synced on a schedule into your project's reporting warehouse. These are what the reports read:
 
 | Data | What it's used for |
 | --- | --- |
@@ -66,7 +60,7 @@ Records are synced on a schedule into your project's reporting warehouse. These 
 
 ### Real-time events
 
-Separately, Lead Connector sends events to Hello Conversions as they happen — a tag added, an opportunity created or moved to a new stage, an order completed, a contact created. These are what drive conversion delivery: they're matched against your connections and forwarded to your destinations within seconds, rather than waiting for the next scheduled sync.
+Lead Connector also sends events as they happen — a tag added, an opportunity created or moved, an order completed, a contact created. These drive conversion delivery: matched against your connections and forwarded to your destinations within seconds, not at the next scheduled sync.
 
 <Callout kind="info">
   The full list of events, what each one fires on, and how they map to conversions is in [Event Types](/conversion-tracking/event-types).
@@ -74,16 +68,10 @@ Separately, Lead Connector sends events to Hello Conversions as they happen — 
 
 ## When the connection drops
 
-If the app is uninstalled or the authorization is revoked from the GoHighLevel side, the Sources row turns amber and shows a **Reconnect** badge with "Disconnected externally". You'll also get a "Lead Connector Connection Lost" warning the next time you open the page.
-
-Nothing is lost — click **Reconnect** and run through the authorization again. Data that already synced stays where it is, but nothing new arrives while the connection is down, so conversions won't be delivered in that window.
+If the app is uninstalled or authorization is revoked on the GoHighLevel side, the Sources row turns amber with a **Reconnect** badge and "Disconnected externally", plus a "Lead Connector Connection Lost" warning next time you open the page. Click **Reconnect** and authorize again. Synced data stays, but nothing new arrives while the connection is down, so conversions won't be delivered in that window.
 
 ## Disconnecting
 
-**Disconnect** on the Lead Connector row stops the sync and revokes the connection. You'll be asked to confirm first. You can reconnect at any time.
+**Disconnect** on the Lead Connector row stops the sync and revokes the connection, after a confirmation. You can reconnect at any time.
 
-## Managing the connection
-
-Everything you manage for Lead Connector lives on **Settings → Integrations → Sources**: connecting, reconnecting, watching the status, and disconnecting. It's also where the authorization returns you when you connect. There's no separate settings screen to go looking for.
-
-Sync schedules, webhook delivery, and re-running a sync are handled by Hello Conversions on your behalf — if you need a sync re-run or a webhook checked for your account, that's a support request.
+Sync schedules, webhook delivery, and re-running a sync are handled by Hello Conversions on your behalf — if you need a sync re-run or a webhook checked, that's a support request.

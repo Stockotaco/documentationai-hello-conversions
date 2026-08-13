@@ -3,15 +3,11 @@ title: Match Quality
 description: How Hello Conversions scores the identifiers sent with each Meta conversion, what a low score means, and what to change on your forms and funnels to raise it.
 ---
 
-A conversion is only useful to Meta if Meta can work out *who* it belongs to. You send an event saying "this person bought"; Meta has to tie that back to someone who saw or clicked an ad. It does that by comparing the identifiers you send — hashed email, hashed phone, click IDs, IP address — against its own records.
-
-Send one weak identifier and a lot of your conversions match nobody. Send several strong ones and most of them land. Match quality is our measure of how much you're giving Meta to work with.
+A conversion is only useful to Meta if Meta can work out *who* it belongs to. It does that by comparing the identifiers you send — hashed email, hashed phone, click IDs, IP address — against its own records. Match quality is our measure of how much you're giving it to work with.
 
 ## What the score is
 
-Every Meta conversion we deliver gets a **match quality score from 0 to 100**, computed at the moment of delivery from the identifiers actually present in the payload we sent.
-
-It is a coverage score. It counts which of Meta's match parameters you supplied, weighted by how much matching power each one carries:
+Every Meta conversion we deliver gets a **match quality score from 0 to 100**, computed at delivery from the identifiers actually present in the payload. It's a coverage score: which of Meta's match parameters you supplied, weighted by matching power.
 
 | Identifier | Sent as | Weight |
 | --- | --- | --- |
@@ -31,22 +27,18 @@ It is a coverage score. It counts which of Meta's match parameters you supplied,
 | Gender | `ge` (hashed) | 1 |
 | Date of birth | `db` (hashed) | 1 |
 
-The weights add up to 22. Your score is the weight you supplied out of 22, scaled to 100 — so an event carrying email, phone, `fbc`, IP and user agent scores 45.
+The weights add up to 22. Your score is the weight you supplied out of 22, scaled to 100 — so an event carrying email, phone, `fbc`, IP and user agent scores 45. Google Ads deliveries are not scored; the column is blank for them.
 
 <Callout kind="note">
-  This is **our** number, not Meta's. Meta's Event Match Quality in Events Manager is Meta's own black box: it reflects whether events actually matched real people on their graph, which depends on data we can't see. Our score only says how much identity we handed over. High coverage is a precondition for a good EMQ, not a guarantee of one — and the two will not agree exactly.
+  This is **our** number, not Meta's. Meta's Event Match Quality reflects whether events actually matched real people on their graph, which depends on data we can't see. Ours only says how much identity we handed over: high coverage is a precondition for a good EMQ, not a guarantee, and the two won't agree exactly.
 </Callout>
-
-Google Ads deliveries are not scored. The column is blank for them.
 
 ## Where to see it
 
 Both live on **Reporting → Workflows → Activity Log**:
 
-- **Per event** — a coloured badge on each delivered Meta row. Hover it to see the exact list of parameters that event carried.
-- **Average** — the "avg match" figure in the header, averaged across scored Meta deliveries over the last 7 days. Seven days rather than 24 hours because purchases are sparse; a single day often has too few events to say anything.
-
-The colours are the same in both places:
+- **Per event** — a coloured badge on each delivered Meta row. Hover for the exact parameters that event carried.
+- **Average** — the "avg match" figure in the header, across scored Meta deliveries over the last 7 days. Seven days rather than 24 hours because purchases are sparse.
 
 | Score | Reads as |
 | --- | --- |
@@ -54,31 +46,29 @@ The colours are the same in both places:
 | 30 to 49 | Amber — matching, but leaving reach on the table |
 | Below 30 | Red — most of these events probably match nobody |
 
-Filtering the Activity Log to one connection re-scopes the average to that connection, which is how you find the one event type dragging the number down.
+Filtering the log to one connection re-scopes the average to it, which is how you find the event type dragging the number down.
 
 ## Where the identifiers come from
 
-You don't set these by hand. Each one is picked up during enrichment, from whichever source has it:
+You don't set these by hand — each is picked up during enrichment, from whichever source has it.
 
-**Email, phone and name** come from the CRM contact on the event. Email is lowercased and trimmed; phone is reduced to digits, with a `1` added to bare 10-digit US numbers, before hashing.
-
-**City, state, postal code and country** come from the contact record when GHL captured an address. Country falls back to `US` when there's nothing else, so it's effectively always present.
-
-**`fbc`, `fbp`, `fbclid`, IP address and user agent** come from GHL's attribution data first, then PostHog fills any gaps. GHL's captured IP and user agent are preferred deliberately: PostHog's last-touch IP is often the IP of Facebook's click redirector rather than the buyer's device, and sending that hurts matching rather than helping it.
-
-**`fbc`** is either passed through as captured, or synthesized from a raw `fbclid` when GHL recorded the click ID but not the formatted cookie value.
-
-**`external_id`** is the CRM contact ID, sent unhashed.
+| Identifiers | Source and handling |
+| --- | --- |
+| Email, phone, name | The CRM contact on the event. Email is lowercased and trimmed; phone is reduced to digits, with a `1` added to bare 10-digit US numbers, before hashing. |
+| City, state, postal code, country | The contact record when GHL captured an address. Country falls back to `US`, so it's effectively always present. |
+| `fbc`, `fbp`, `fbclid`, IP, user agent | GHL's attribution data first, then PostHog fills gaps. GHL's IP and user agent are preferred deliberately: PostHog's last-touch IP is often Facebook's click redirector rather than the buyer's device, and sending that hurts matching. |
+| `fbc` | Passed through as captured, or synthesized from a raw `fbclid` when GHL recorded the click ID but not the formatted cookie value. |
+| `external_id` | The CRM contact ID, sent unhashed. |
 
 <Callout kind="warning">
-  Meta rejects a `fbc` whose click is older than 90 days, and an expired one drags down matching instead of helping. We drop `fbc` values older than 85 days rather than send them — so a conversion that closes three months after the click legitimately scores lower, and there is nothing to fix on your end.
+  Meta rejects an `fbc` whose click is older than 90 days, and an expired one drags down matching instead of helping. We drop `fbc` values older than 85 days rather than send them — so a conversion that closes three months after the click legitimately scores lower, and there's nothing to fix on your end.
 </Callout>
 
 ## What a low score actually means
 
-A low score does **not** mean the delivery failed. The event reached Meta; the Activity Log will show it as `delivered`. What it means is that Meta had little to match on, so a larger share of those conversions will never be attributed to an ad — which shows up as Meta under-reporting your results and optimizing on a thinner signal.
+Not that the delivery failed — the event reached Meta and the Activity Log shows it as `delivered`. It means Meta had little to match on, so a larger share of those conversions will never be attributed to an ad, which surfaces as Meta under-reporting your results and optimizing on a thinner signal.
 
-Two events can score identically and behave differently. Email plus phone (score 27) will usually match better than city, state, zip, country, IP and user agent combined (also 27), because email and phone are the identifiers Meta actually keys on. Treat the score as a coverage check, not a ranking.
+Two events can score identically and behave differently: email plus phone (27) usually matches better than city, state, zip, country, IP and user agent combined (also 27), because email and phone are what Meta keys on. Treat the score as a coverage check, not a ranking.
 
 ## How to raise it
 
@@ -86,28 +76,28 @@ Ordered by how much they move the number.
 
 <Steps>
   <Step title="Collect email and phone on every form">
-    Together they're 6 of the 22 available weight, and they're the two identifiers Meta matches on most reliably. A form asking only for an email caps every conversion it produces well below 50. Making phone required on your main lead form is usually the single largest improvement available.
+    Together they're 6 of the 22 available weight, and the two identifiers Meta matches on most reliably. A form asking only for an email caps every conversion well below 50. Making phone required on your main lead form is usually the single largest improvement available.
   </Step>
   <Step title="Install the tracking script on every page of the funnel">
-    `fbp` and `fbc` — worth 4 together — only exist if the visitor's browser was seen before they converted. That includes the pages before the form, not just the thank-you page. See [Install the tracking script](/help-center/guides/install-tracking-script).
+    `fbp` and `fbc` — worth 4 together — only exist if the visitor's browser was seen before they converted, which includes the pages before the form. See [Install the tracking script](/help-center/guides/install-tracking-script).
   </Step>
   <Step title="Keep ad click IDs on your landing page URLs">
-    `fbc` comes from the `fbclid` Meta appends to the click. If a redirect, a URL shortener or a funnel step strips query parameters before the visitor lands, the click ID is gone and the conversion cannot carry it. Check that a real click on a live ad still shows `fbclid` in the address bar of the page the visitor lands on.
+    `fbc` comes from the `fbclid` Meta appends to the click. If a redirect, URL shortener or funnel step strips query parameters, it's gone. Check that a real click on a live ad still shows `fbclid` in the landing page's address bar.
   </Step>
   <Step title="Ask for the fields you can justify asking for">
-    First name, last name, city, state and postal code are 1 each — five points of coverage for fields many forms already have. Don't add friction for its own sake, but if the contact record has them, they're sent automatically.
+    First name, last name, city, state and postal code are 1 each — five points of coverage for fields many forms already have. If the contact record has them, they're sent automatically.
   </Step>
   <Step title="Fix the contacts, not the conversions">
-    Everything above is read from the CRM contact at delivery time. A GHL workflow that fills in missing contact fields — from a booking form, a call, a checkout — raises the score of every future conversion for that contact.
+    Everything above is read from the CRM contact at delivery time, so a GHL workflow that fills in missing contact fields raises the score of every future conversion for that contact.
   </Step>
 </Steps>
 
 <Callout kind="tip">
-  Changes only affect conversions delivered from that point on. Events already sent keep the score they were delivered with, so give it a few days of new volume before judging whether a fix worked — and compare using the 7-day average rather than individual rows.
+  Changes only affect conversions delivered from that point on. Events already sent keep their score, so give it a few days of new volume before judging a fix, and compare using the 7-day average rather than individual rows.
 </Callout>
 
 ## What won't help
 
-- **Re-sending old events.** The identifiers won't be any better the second time, and you'll create duplicates that Meta may or may not collapse.
+- **Re-sending old events.** The identifiers won't be better the second time, and you'll create duplicates Meta may or may not collapse.
 - **Filling in fake values.** A placeholder phone number is a hash that matches nobody, and it costs you the honest signal that the field is missing.
-- **Chasing 100.** Gender and date of birth are never sent, so those two points are out of reach, and a conversion that legitimately has no ad click can't carry `fbc`. A consistent green average is the goal, not a full house.
+- **Chasing 100.** Gender and date of birth are never sent, and a conversion with no ad click can't carry `fbc`. A consistent green average is the goal.

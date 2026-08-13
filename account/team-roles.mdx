@@ -1,0 +1,105 @@
+---
+title: Team & Roles
+description: The exact difference between an owner and a member, how organization membership differs from project membership, and how invitations are sent, accepted and revoked.
+---
+
+Access is two decisions. **Are you in the organization, and as what?** — everyone is an **owner** or a **member**, and there are no other roles. **Which projects can you see?** — owners see all of them, members see only the projects they've been added to.
+
+## The two membership layers
+
+**Organization membership** carries your role and is what **Organization settings → Team** lists. **Project membership** is a separate row per project; being in the organization does not by itself get you into a project.
+
+The exception: **organization owners have implicit access to every project**, including ones created after they joined. They have no project membership rows, can't be removed from an individual project, and appear in a project's team list as **Org Owner** with no Remove button.
+
+<Callout kind="note">
+  This is why a project's team list can show more people than you added — everyone with explicit project membership, plus every organization owner.
+</Callout>
+
+## Owner versus member
+
+Both roles do the work — connecting sources, building connections, reading reports. The difference is administrative.
+
+| Action | Owner | Member |
+| --- | --- | --- |
+| See projects | Every project in the organization | Only projects they've been added to |
+| Configure sources, destinations, connections and pipelines | Yes | Yes, in their projects |
+| Edit a project's name, description and timezone | Yes | Yes, in their projects |
+| Create a new project | Yes | Yes |
+| Delete a project | Yes | No |
+| View the organization's member list | Yes | Yes |
+| Invite someone to the organization | Yes — any role, any project scope | Yes — as a member only, and only to projects they're in |
+| Invite someone to a single project | Yes | Yes, in their projects |
+| Revoke a project invitation | Yes | Yes, in their projects |
+| Revoke or regenerate an organization invitation | Yes | No |
+| Change someone's role | Yes | No |
+| Remove someone from the organization | Yes | Only themselves |
+| Add or remove a project's members | Yes | No |
+| Rename or delete the organization | Yes | No |
+| View usage | All projects | Their projects only |
+| View or change billing | Yes | No |
+
+Every rule is enforced on the server. A member who navigates straight to a billing URL gets a permission error, not a page.
+
+<Callout kind="alert">
+  Members can invite people — their one administrative power, and a fenced one. A member can only issue **member**-role invitations, and only to projects they belong to themselves. They cannot grant owner status or organization-wide access, so they cannot escalate anyone, including themselves.
+</Callout>
+
+## Inviting people
+
+| Path | Who can send | What it grants | Expires |
+| --- | --- | --- | --- |
+| **Organization settings → Team → Invite Member** | Any organization member | The role and project scope you choose | 7 days |
+| **Generate Invite Link**, in the same dialog | Any organization member | The same choices, to anyone holding the link | 30 days |
+| **Settings → Project → Team → Invite**, inside a project | Any member of that project | Fixed: **member** role, that **one project** | 7 days |
+
+The email and link forms share three fields:
+
+- **Email address** — only that address can use the invitation. One pending invitation per email per organization; a second attempt is rejected until the first is accepted or revoked.
+- **Role** — Member or Owner. Only owners see this control; members always invite as members.
+- **Project access** — *all current and future projects*, or *specific projects*. Only owners can grant the first, and it auto-adds the person to every project created later. Members must pick specific projects, and only ones they can access themselves.
+
+A link is reusable: multiple people can accept it and it stays open until it expires or you revoke it. Treat it as a credential. Owners can **Regenerate** one from the pending invitations list, which issues a new token and immediately breaks the old one.
+
+The project-scoped invite needs only an email address, which makes it the fastest way to give a client access to their own account without touching organization settings. Organization owners get a shortcut in the same dialog — *add an existing org member directly* — which skips the email for someone already in the organization.
+
+## Accepting an invitation
+
+The link lands on `/invite/<token>` and shows the inviter, organization, project and role.
+
+<Steps>
+  <Step title="Sign in or create an account">
+    If they're not signed in, the page offers **Sign In** and **Create Account**, then returns them to the invitation.
+  </Step>
+  <Step title="Accept">
+    This creates their organization membership at the invited role and adds their project memberships in one go.
+  </Step>
+  <Step title="Land in the right place">
+    Single-project invitations open that project. Broader ones open the organization's projects list.
+  </Step>
+</Steps>
+
+An invitation is **pending**, **accepted** or **expired**. Expiry is evaluated when the link is opened or accepted — a past-date invitation shows "Invitation Expired" and can't be revived, so send a fresh one.
+
+Someone already in the organization can still accept a project-scoped invitation: they keep their role and gain the named project.
+
+Pending invitations are listed under the member list on both team pages, each with **Revoke**, which kills the link immediately.
+
+## Removing people
+
+**From a project** — **Settings → Project → Team**, Remove. Organization owners only. They lose that project and keep everything else.
+
+**From the organization** — **Organization settings → Team**, Remove. Organization owners only, except that anyone can remove themselves. This also removes every project membership they held in that organization, so off-boarding someone who worked across ten client projects is one action, not ten.
+
+Two guardrails:
+
+- **The last owner can't be removed or demoted.** Promote someone else first — this is what stops an organization ending up with nobody who can reach billing.
+- **Organization owners can't be removed from individual projects.** Change their role to member first, then manage project membership.
+
+<Columns cols={2}>
+  <Card title="Organizations and projects" icon="layers" href="/account/organizations-projects" horizontal>
+    What's scoped to the organization versus the project.
+  </Card>
+  <Card title="Project settings" icon="settings" href="/account/project-settings" horizontal>
+    The per-project settings your team will be changing.
+  </Card>
+</Columns>

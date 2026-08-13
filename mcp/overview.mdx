@@ -1,0 +1,43 @@
+---
+title: MCP Overview
+description: What the Hello Conversions MCP server is — a way to let Claude and other AI clients query one project's marketing data and manage some of its configuration, using a project-scoped API key.
+---
+
+MCP — the Model Context Protocol — is a standard way for an AI client to call tools on a server. Hello Conversions runs one, so a client like Claude can read a project's marketing data and act on some of its settings without you clicking through the app. You ask "what did we spend on Meta last week and what came back?", and the client answers by calling tools against the project its key belongs to.
+
+## What it can do
+
+| | Tools |
+| --- | --- |
+| **Read data** — same per-project warehouse the dashboards use | Contacts, transactions, events, activity stream, daily KPIs, form and product stats, customer LTV, ad spend and campaigns, plus a `query` tool for read-only SQL |
+| **Manage configuration** — inspect with any key, change with a read-write key | Sources, destinations, workflow connections, pipeline configuration |
+
+Full list: the [tool reference](/mcp/tools), or **Settings → Developer → MCP Tools** in the app.
+
+Clients that support them also get **resources** — live table schemas (`hc://schema/<table>`) and querying guides, so the client looks up real column names instead of guessing — and two **prompts**, *Diagnose a stalled pipeline* and *Reconcile ad spend vs revenue*, which walk it through the right sequence of calls.
+
+## What it is not
+
+<Callout kind="info">
+  **There is no public REST API.** MCP is the programmatic surface for Hello Conversions — there is no separate set of REST endpoints, and no API key that unlocks one.
+</Callout>
+
+- **One key, one project.** A key can only ever see the project it was minted in, so an agency with twenty client projects needs twenty keys. See [Authentication](/mcp/authentication).
+- **Not a bulk export.** Queries cap at 10,000 rows per call and calls are rate limited — it is built for questions, not for mirroring your warehouse.
+- **Not a delivery path.** Conversions still reach Meta and Google through [connections and destinations](/conversion-tracking/connections); MCP edits that configuration but sends nothing itself.
+
+## Getting started
+
+<Steps>
+  <Step title="Generate a key" icon="key-round">
+    On **Settings → Developer → MCP API Keys**. New keys are read-only by default.
+  </Step>
+  <Step title="Point a client at the server" icon="plug">
+    Paste the connection snippet from that screen into Claude Code, Cursor, Claude Desktop, or any MCP-capable client — [Connect a client](/mcp/connect).
+  </Step>
+  <Step title="Ask it something" icon="message-square">
+    Start with a question you already know the answer to, so you can tell whether the client is reading the right project.
+  </Step>
+</Steps>
+
+Every call is recorded on **Settings → Developer → MCP Usage** — see [Usage and limits](/mcp/usage-limits).

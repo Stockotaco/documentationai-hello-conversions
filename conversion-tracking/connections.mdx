@@ -3,13 +3,9 @@ title: Connections
 description: Create, configure, pause, and delete the connections that route GoHighLevel events to Meta, Google Ads, and other destinations.
 ---
 
-A **connection** is one rule: *when this event happens in GoHighLevel, send it to this destination.* Everything you send to an ad platform goes through one.
+A **connection** is one rule: *when this event happens in GoHighLevel, send it to this destination.* Everything you send to an ad platform goes through one. They live under **Settings → Workflows → Connections** inside a project.
 
-You'll find them under **Settings → Workflows → Connections** inside a project — one client account, or just your business if you're not an agency.
-
-## Before you start
-
-A connection needs a destination to point at. If the project has none, the Connections page tells you so and there's nothing to configure yet — add one first under **Settings → Integrations → Destinations**:
+A connection needs a destination to point at. If the project has none, the page says so — add one first under **Settings → Integrations → Destinations**:
 
 <Columns cols={2}>
   <Card title="Meta Conversions API" icon="facebook" href="/connect/destinations/meta-capi">
@@ -22,12 +18,9 @@ A connection needs a destination to point at. If the project has none, the Conne
 
 ## What the page shows
 
-Across the top are four counters for the project: how many connections are **active** out of the total, **events** in the last 24 hours, **failures** in the last 24 hours, and the resulting **failure rate**. A failure rate above 5% is highlighted in red — that's your cue to open the [Activity Log](/conversion-tracking/activity-history).
+Four counters across the top: **active** connections out of the total, **events** in the last 24 hours, **failures** in the last 24 hours, and the **failure rate**. Above 5% the rate turns red — your cue to open the [Activity Log](/conversion-tracking/activity-history).
 
-Below that, the same connections are shown two ways at once:
-
-- A **canvas** on the left, with source events on one side and destinations on the other, joined by a line per connection. Drag from a source event to a destination to start a new connection, or click a line to edit the one it represents.
-- A **table** on the right listing every connection with its event, filters, and destination. Hovering a row lights up the matching line on the canvas, and clicking a row opens the same editor.
+Below, the same connections appear two ways: a **canvas** on the left with source events on one side and destinations on the other, joined by a line per connection; and a **table** on the right listing every connection with its event, filters and destination. Hovering a row lights up its line; clicking either opens the editor.
 
 <Callout kind="note">
   Connections created from the Pipelines screen don't appear here. They're managed by their pipeline stage instead, so the list stays readable when a client has hundreds of stages. See [Pipelines & Filters](/conversion-tracking/pipelines-filters).
@@ -37,34 +30,32 @@ Below that, the same connections are shown two ways at once:
 
 <Steps>
   <Step title="Open the editor">
-    Click **New Connection**, or drag from a source event to a destination on the canvas — dragging pre-fills both ends for you.
+    Click **New Connection**, or drag from a source event to a destination on the canvas — dragging pre-fills both ends.
   </Step>
   <Step title="Pick the source event">
-    Choose the GoHighLevel event that triggers this connection. Events are grouped by category — commerce, contacts, pipeline. **One connection listens for one event**; selecting a different event replaces your choice. To send two different events to the same destination, create two connections. The full list is in [Event Types](/conversion-tracking/event-types).
+    Events are grouped by category — commerce, contacts, pipeline. **One connection listens for one event**; selecting a different event replaces your choice, so sending two events to one destination takes two connections. The full list is in [Event Types](/conversion-tracking/event-types).
   </Step>
   <Step title="Add filters (optional)">
-    Narrow which events actually get sent — only a certain pipeline stage, only orders over a threshold, only a specific tag. With no filters, every event of that type is sent. Filter rules are covered in [Pipelines & Filters](/conversion-tracking/pipelines-filters).
+    Narrow which events get sent — one pipeline stage, orders over a threshold, a specific tag. With no filters, every event of that type is sent. See [Pipelines & Filters](/conversion-tracking/pipelines-filters).
   </Step>
   <Step title="Set the event name, or the conversion action">
-    What you see here depends on the destination:
-
-    - **Meta and other destinations** get an **Event Name** field. This is the name the destination sees. For Meta, one-click chips are offered for the standard events — Purchase, Lead, CompleteRegistration, Subscribe, AddToCart, InitiateCheckout, ViewContent, Search, Contact — or you can type a custom name. Left blank, the source event type is used as the name.
-    - **Google Ads** keys off a conversion action instead of a name, so you pick one from the account's existing actions. You can also create a new conversion action here without leaving the page — see below.
+    - **Meta and other destinations** get an **Event Name** field — the name the destination sees. Meta offers one-click chips for the standard events (Purchase, Lead, CompleteRegistration, Subscribe, AddToCart, InitiateCheckout, ViewContent, Search, Contact), or type a custom name. Left blank, the source event type is used.
+    - **Google Ads** keys off a conversion action instead, so you pick one from the account's existing actions, or create one here without leaving the page.
   </Step>
   <Step title="Name the connection and confirm the destination">
-    A name is filled in for you as `Event → Destination` (for example `Made Any Purchase → Client Meta Pixel`). Change it to whatever your team will recognise in the Activity Log. Confirm the destination, then click **Create Connection**.
+    A name is filled in as `Event → Destination` (for example `Made Any Purchase → Client Meta Pixel`). Change it to whatever your team will recognise in the Activity Log, confirm the destination, then click **Create Connection**.
   </Step>
 </Steps>
 
 The **Enabled / Disabled** toggle sits in the editor's header and defaults to enabled, so a new connection starts sending immediately.
 
 <Callout kind="tip">
-  Give connections names a client-facing teammate would understand. The name is what shows up when you filter the Activity Log by connection, and "Booked Call → Meta" beats "Connection 4" at 9pm on a Friday.
+  Name connections so a client-facing teammate would understand them. The name is what shows up when you filter the Activity Log by connection, and "Booked Call → Meta" beats "Connection 4" at 9pm on a Friday.
 </Callout>
 
 ### Creating a Google Ads conversion action inline
 
-If the action you need doesn't exist yet, click **Create New Action** in the Conversion Action step. You set:
+Click **Create New Action** in the Conversion Action step. The action is created in the Google Ads account straight away and selected for the connection.
 
 | Field | What it controls |
 | --- | --- |
@@ -72,28 +63,20 @@ If the action you need doesn't exist yet, click **Create New Action** in the Con
 | **Category** | Google's conversion category — Purchase, Lead, Sign-up, Book Appointment, Submit Lead Form, and so on. |
 | **Counting** | One per click, or many per click. |
 | **Primary / Secondary** | Whether the action counts toward the campaign's goal or is reported only. |
-| **Conversion value** | **Dynamic** takes the value from each event (purchase amount, opportunity value), **Static** applies the same value to every conversion, and **No value** assigns none. |
+| **Conversion value** | **Dynamic** takes the value from each event (purchase amount, opportunity value), **Static** applies the same value every time, **No value** assigns none. |
 
-The action is created in the Google Ads account straight away and selected for the connection.
+## Editing, pausing and deleting
 
-## Editing a connection
+Click a row in the table or a line on the canvas. Every step is editable except the destination, which is fixed once the connection exists — to point the same event at a different destination, create a second connection and delete the first. **Save Changes** applies to events arriving after the save; it doesn't change runs that already happened.
 
-Click a row in the table or a line on the canvas. Every step is editable except the destination — that's fixed once the connection exists. To point the same event at a different destination, create a second connection and delete the first.
-
-Changes are saved with **Save Changes** and apply to events arriving after the save. They do not change runs that already happened.
-
-## Pausing a connection
-
-Two ways: the toggle in the editor header, or by opening the connection and switching it to Disabled.
-
-**A paused connection sends nothing, and nothing is queued.** Events that fire while it's off are not held and not delivered later — they're simply not sent to that destination. There is no backfill or replay, so anything that happened during a pause stays missing from the ad platform.
+The toggle in the editor header pauses a connection.
 
 <Callout kind="warning">
-  Pausing is not a way to hold events back temporarily. If you pause a connection while you fix a destination's credentials, every event that fires in the meantime is lost to that platform — there is nothing to resend once you switch it back on.
+  **A paused connection sends nothing, and nothing is queued.** Events that fire while it's off are not held and not delivered later. There is no backfill or replay, so if you pause a connection while fixing a destination's credentials, every event in the meantime is lost to that platform.
 </Callout>
 
-Deleting a connection has the same effect on future events, and additionally removes it from the list. Deletion asks for confirmation and can't be undone — you'd have to rebuild the connection from scratch. The runs it already produced stay in the Activity Log.
+Deleting has the same effect on future events and removes the connection from the list. It asks for confirmation and can't be undone, but the runs it already produced stay in the Activity Log.
 
 ## Checking that it works
 
-After creating a connection, trigger the event in GoHighLevel — move a test opportunity, apply the tag, place a test order — then open **Reporting → Workflows → Activity Log**. A new run should appear for the contact within seconds. If it doesn't, or it shows as failed, [Activity & Run History](/conversion-tracking/activity-history) walks through reading the run and the common failure states.
+Trigger the event in GoHighLevel — move a test opportunity, apply the tag, place a test order — then open **Reporting → Workflows → Activity Log**. A new run should appear for the contact within seconds. If it doesn't, or shows as failed, [Activity & Run History](/conversion-tracking/activity-history) walks through reading the run and the common failure states.

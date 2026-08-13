@@ -3,13 +3,11 @@ title: Revenue Overview
 description: The RevOps report — revenue, customers, transactions and forms for a project — what each tile actually counts, which source each number comes from, and the derivations that surprise people.
 ---
 
-**Reporting → Revenue → Overview** is the project's revenue summary. The page is headed *Revenue Operations* in the app; the nav calls it Overview because it's the first thing you look at.
-
-It answers one question in several ways: **how much money came in over this window, from whom, and how did people reach us?** It has no attribution model, no channel split and no ad spend — that's [Marketing Efficiency](/reporting/marketing-efficiency). This report is the ledger view.
+**Reporting → Revenue → Overview** (headed *Revenue Operations* in the app) is the project's ledger view: how much money came in over this window, from whom, and how people reached us. No attribution model, no channel split, no ad spend — that's [Marketing Efficiency](/reporting/marketing-efficiency).
 
 ## Where the numbers come from
 
-Every figure is derived from a daily roll-up of whatever revenue source the project has:
+Every figure is derived from a daily roll-up of the project's revenue source:
 
 | Project has | Revenue is built from |
 | --- | --- |
@@ -17,9 +15,7 @@ Every figure is derived from a daily roll-up of whatever revenue source the proj
 | **Stripe only** | Stripe charges, net of refunds, deduplicated |
 | **Both** | Stripe for the charges Stripe processed, matched to the GoHighLevel transaction that shares its payment intent; GoHighLevel for everything Stripe never saw — cash, other processors |
 
-Only live, settled money counts. GoHighLevel transactions are included at status `succeeded` or `refunded`; Stripe charges at `succeeded` and `livemode`. Test-mode transactions never appear.
-
-The remaining panels come from elsewhere:
+Only live, settled money counts: GoHighLevel transactions at status `succeeded` or `refunded`, Stripe charges at `succeeded` and `livemode`. Test-mode transactions never appear.
 
 | Panel | Source |
 | --- | --- |
@@ -34,19 +30,10 @@ The remaining panels come from elsewhere:
   Every tile compares against a window of the same length ending the day before your start date, and shows the percentage change. Twelve days selected means twelve days compared.
 </Callout>
 
-**The two hero tiles:**
-
 | Tile | What it counts |
 | --- | --- |
-| **New Customers** | People whose first-ever purchase fell inside this window. |
-| **Total Revenue Collected** | All settled revenue in the window, net of refunds. |
-
-**New vs. existing** is decided against a customer's **first purchase ever**, not their first purchase in your window. Someone who bought in 2023 and bought again today is an existing customer, and today's sale is existing revenue — no matter what date range you pick. That's what makes New Customers a genuine acquisition number rather than a restatement of activity.
-
-**The rest of the tiles:**
-
-| Tile | What it counts |
-| --- | --- |
+| **New Customers** (hero) | People whose first-ever purchase fell inside this window. |
+| **Total Revenue Collected** (hero) | All settled revenue in the window, net of refunds. |
 | **Form Contacts** | Distinct contacts who submitted a form in the window. |
 | **New Customers — Single** | Same figure as the hero tile. |
 | **New Customer Rev — Single** | Revenue from transactions that landed on the buyer's first-ever purchase day. |
@@ -57,48 +44,40 @@ The remaining panels come from elsewhere:
 | **Form Submissions** | Count of form submissions — one contact submitting three forms is three. |
 | **Conversion Rate** | Transactions against unique visitors, from the tracking script. |
 
-<Callout kind="warning">
-  **Avg Order Value and Conversion Rate are averages of daily figures, not the ratio of the totals.** Each day gets its own AOV, and the tile shows the mean of those daily values, so every day counts equally regardless of how many orders it had. A quiet Sunday with one $20 order pulls the number as hard as a Monday with two hundred orders.
+**New vs. existing** is decided against a customer's **first purchase ever**, not their first purchase in your window. Someone who bought in 2023 and bought again today is an existing customer, whatever date range you pick.
 
-  If a client computes AOV by hand from Total Revenue ÷ Total Transactions and gets a different figure, this is why, and their arithmetic is the one that matches the definition they have in their head. The same applies to Conversion Rate. When a number has to survive a client conversation, take the ratio from the two totals yourself.
+<Callout kind="warning">
+  **Avg Order Value and Conversion Rate are averages of daily figures, not the ratio of the totals.** Each day gets its own AOV and the tile shows the mean, so a quiet Sunday with one $20 order pulls as hard as a Monday with two hundred orders. A client computing AOV by hand from Total Revenue ÷ Total Transactions gets a different figure, and their arithmetic matches the definition in their head. When a number has to survive a client conversation, take the ratio from the two totals yourself.
 </Callout>
 
 ## The panels
 
-**Revenue chart.** New and existing revenue as stacked bars, with form submissions as a line over the top. Follows the day / week / month toggle.
-
-**Top Products.** GoHighLevel transactions grouped by product name, with distinct customers and net revenue. This is GoHighLevel-only: a project whose revenue comes from Stripe alone won't populate it, because Stripe charges don't carry a product name in a form we can group on.
-
-**Top Forms.** Each form and the number of distinct contacts it captured in the window, as a ranked bar. Contacts, not submissions — one person filling the same form twice is one contact.
-
-**Form Submission Pages.** The same form data regrouped by the page the submission came from, with Submissions, Contacts, Customers and Revenue per page. This is the panel for finding the landing page that actually produces buyers, rather than the one everybody assumes does. Read its Revenue column with the caveat at the bottom of this page.
-
-**Customer List.** One row per customer — Lead Date, First Purchase, # Purchases and LTV — with a click-through to that person's journey: when they were captured, which forms they submitted, and every purchase since.
+| Panel | What it shows |
+| --- | --- |
+| **Revenue chart** | New and existing revenue as stacked bars, form submissions as a line over the top. Follows the day / week / month toggle. |
+| **Top Products** | GoHighLevel transactions by product name, with distinct customers and net revenue. GoHighLevel-only — Stripe charges don't carry a groupable product name. |
+| **Top Forms** | Each form and the distinct contacts it captured, as a ranked bar. Contacts, not submissions — one person filling the same form twice is one contact. |
+| **Form Submission Pages** | The same form data regrouped by originating page, with Submissions, Contacts, Customers and Revenue per page. Finds the landing page that actually produces buyers. Read its Revenue column with the caveat at the bottom of this page. |
+| **Customer List** | One row per customer — Lead Date, First Purchase, # Purchases and LTV — with a click-through to that person's journey: when they were captured, which forms they submitted, and every purchase since. |
 
 <Callout kind="warning">
-  The Customer List uses your date range to decide **which customers are listed**, not what their figures say. A customer appears if they bought at least once in the window; their **# Purchases and LTV are lifetime totals**. So a client who narrows to last week and sees a customer with 14 purchases and $9,000 of LTV is not looking at a bug — that's the customer's whole history, filtered to people who were active last week. It's a customer-quality signal, deliberately independent of the window.
+  The Customer List uses your date range to decide **which customers are listed**, not what their figures say. A customer appears if they bought at least once in the window; their **# Purchases and LTV are lifetime totals**. A client narrowing to last week and seeing a customer with 14 purchases and $9,000 of LTV isn't looking at a bug — that's the customer's whole history, filtered to people active last week.
 </Callout>
 
 ## Drilling into a number
 
-Most tiles and table cells are clickable. Clicking one opens the rows behind it — the actual contacts or the actual transactions that make up the figure — which is usually faster than arguing about a total. If a client disputes New Customers, open the drill and read them the list.
+Most tiles and table cells are clickable, opening the actual contacts or transactions behind the figure. If a client disputes New Customers, open the drill and read them the list.
 
 ## When a number looks wrong
 
-**Everything is zero.** No revenue source is connected, or the first sync hasn't landed. Check **Settings → Integrations → Sources**.
-
-**Revenue is there but forms and products are empty.** The project is on Stripe alone. Those panels are built from GoHighLevel data.
-
-**Page views, unique visitors and conversion rate are zero.** The tracking script isn't installed, or isn't on the pages people actually land on. See [Install the Tracking Script](/help-center/guides/install-tracking-script).
-
-**Page views look right for recent dates and vanish for older ones.** Pixel data behind this report only reaches back **90 days**. Revenue goes back as far as your source synced; page views do not. A 6-month range will show revenue throughout and page views only in the recent portion — which also drags the conversion rate.
-
-**A past day's revenue changed since last time.** Refunds are netted against the day of the original transaction, not the day the refund was issued. A refund processed today lowers the day the sale happened. This is intentional — it keeps a day's revenue meaning "what we actually kept from that day's sales" — but it does mean historical days can move, and a screenshot taken last month can legitimately disagree with the live report.
-
-**A sale is on the wrong day.** Days are cut in the **project's timezone**, set under **Settings → Project → General**. A late-evening sale can land on the next day if the timezone is wrong for the client.
-
-**Revenue here doesn't match Marketing Efficiency.** They count different things and neither is wrong. This report includes every settled transaction in any currency and, when both sources are connected, prefers Stripe's figure for Stripe-processed charges. Marketing Efficiency counts **USD transactions from GoHighLevel with a contact attached** and nothing else. On a project with non-USD sales, or sales that never got linked to a contact, Marketing Efficiency will report less. [Marketing Efficiency](/reporting/marketing-efficiency) covers its own definitions.
-
-**Revenue in Form Submission Pages doesn't add up to total revenue.** It isn't meant to. The revenue credited to a page counts every purchase those contacts have ever made — including purchases from before your window and after it — and a contact who submitted forms on three different pages is credited on all three. Repeat submissions compound it further. Use the column to rank pages against each other, not to total revenue. The Customers column has the same lifetime framing: it answers "did this page ever produce buyers?", not "did it produce buyers this week?"
-
-**The same form name appears twice in Top Forms.** Rows are per form *and* per page. A form embedded on more than one page produces one row per page, under the same name — the figures are split between them, not duplicated.
+| Symptom | Cause |
+| --- | --- |
+| Everything is zero | No revenue source connected, or the first sync hasn't landed. Check **Settings → Integrations → Sources** |
+| Revenue is there but forms and products are empty | The project is on Stripe alone; those panels are built from GoHighLevel data |
+| Page views, unique visitors and conversion rate are zero | The [tracking script](/help-center/guides/install-tracking-script) isn't installed, or isn't on the pages people land on |
+| Page views right for recent dates, gone for older ones | Pixel data only reaches back **90 days**; revenue goes back as far as your source synced. A 6-month range shows revenue throughout and page views only recently, which also drags conversion rate |
+| A past day's revenue changed since last time | Refunds are netted against the day of the original transaction, not the day the refund was issued, so historical days move and an old screenshot can legitimately disagree |
+| A sale is on the wrong day | Days are cut in the **project's timezone**, set under **Settings → Project → General** |
+| Revenue doesn't match [Marketing Efficiency](/reporting/marketing-efficiency) | Neither is wrong. This report counts every settled transaction in any currency and prefers Stripe's figure for Stripe-processed charges; Marketing Efficiency counts **USD GoHighLevel transactions with a contact attached** and nothing else |
+| Form Submission Pages revenue doesn't add up to total revenue | It isn't meant to. A page is credited with every purchase its contacts have ever made, before and after your window, and a contact who submitted forms on three pages is credited on all three. Rank pages against each other, don't total them. The Customers column has the same lifetime framing |
+| The same form name appears twice in Top Forms | Rows are per form *and* per page. A form embedded on two pages produces one row each, figures split between them, not duplicated |

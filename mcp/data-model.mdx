@@ -1,0 +1,194 @@
+---
+title: MCP Data Model
+description: The per-project BigQuery dataset behind the analytics tools — every table and view, what a row represents, the important columns, and the gotchas that make a query silently wrong.
+---
+
+Every project has its own BigQuery dataset, and the analytics tools read only that dataset. Write `FROM contacts` — the server scopes it, and any other dataset is rejected. What exists varies by project: tables appear only once the matching source has synced, so call `list_tables` before assuming.
+
+| Want | Use |
+| --- | --- |
+| The tables and views in this project | `list_tables`, or the resource `hc://docs/schema-index` |
+| Exact columns, types and descriptions for one table | `hc://schema/<table>`, e.g. `hc://schema/transactions` |
+| SQL rules, timezone handling and BigQuery gotchas for this project | `hc://docs/querying-guide` |
+
+<Callout kind="tip">
+  Read `hc://schema/<table>` before writing SQL against a table for the first time. Column naming is not uniform across projects — the contacts ID column may be `contact_id`, `id` or `contactId` depending on when the project was set up. Guessed column names are the most common cause of a wrong answer.
+</Callout>
+
+## Source tables
+
+Raw records from the connected sources: one row per real-world thing.
+
+### From Lead Connector (GoHighLevel)
+
+| Table | One row is | Key columns |
+| --- | --- | --- |
+| `contacts` | A contact/lead | ID column (see above), `first_name`, `last_name`, `email`, `source`, `date_added`, `first_utm_source` / `first_utm_medium` / `first_utm_campaign` and the matching `last_utm_*` set, `first_campaign` / `last_campaign`, `first_session_source`, `first_medium`, `tags`, `custom_fields` |
+| `transactions` | A charge | `contact_id`, `transaction_id`, `amount`, `amount_refunded`, `currency`, `status`, `live_mode`, `entity_source_name` (product or funnel name), `entity_source_id`, `charge_id`, `payment_provider_type`, `contact_name`, `contact_email`, `created_at` |
+| `form_submissions` | One form submission | `contact_id`, `form_id`, `form_name`, `page_url`, `submitted_at` |
+| `funnels` | A sales funnel | `funnel_id`, `name` |
+
+`tags` is `ARRAY<STRING>` and `custom_fields` is `ARRAY<STRUCT<…>>` — both need `UNNEST` before filtering. Other tables (`opportunities`, `products`, `transaction_items`) exist in some projects; `list_tables` is the authority for yours.
+
+<Callout kind="warning">
+  **Always filter transactions.** The table holds test-mode rows and non-final statuses. Every tool and view applies `live_mode = true` and `status IN ('succeeded', 'refunded')`, and reports `amount - amount_refunded`. Skip any of that and your revenue matches nothing else in the product.
+</Callout>
+
+### From the tracking pixel
+
+`events` is a **view**: the shared Mythic events table filtered to this project's location, plus `event_timestamp_local` (wall-clock in the project timezone). One row is one tracked event.
+
+Columns: `event_name` (page views are `$pageview`), `event_timestamp`, `event_timestamp_local`, `user_id`, `location_id`, `properties_json`.
+
+<Callout kind="warning">
+  **Not partition-pruned.** Even a tight `WHERE event_timestamp >= …` scans the full underlying table — roughly 75 MB per day of range. Keep exploratory queries narrow and always add a `LIMIT`; aggregations across 30+ days can blow the query's byte budget.
+
+  **`properties_json` is a STRING, and pixel property names start with `$`.** Dot notation does not work for `$`-prefixed keys:
+
+  ```sql
+  SELECT JSON_EXTRACT_SCALAR(properties_json, "$['$utm_source']") AS utm_source
+  FROM events
+  WHERE event_timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
+  ```
+
+  Plain, non-`$` keys work with ordinary `'$.key'` notation.
+</Callout>
+
+### From the CRM activity stream
+
+`ghl_activity` is a view over the shared activity stream, filtered to this project's location, plus `occurredAtLocal`. One row is one CRM event — a tag applied, an opportunity moving stage, a form submitted.
+
+Columns: `eventType` (raw GoHighLevel event name, e.g. `tag_added`, `opportunity_stage_changed`), `activityName`, `activityValue`, `contactId`, `email`, `occurredAt`, `occurredAtLocal`, `metadata`.
+
+`metadata` is JSON holding the full enriched payload — pipeline and stage names and IDs, contact source, session source, click IDs, order amounts. Several of those fields exist nowhere else, and the column is very large, which is why `get_activity_stream` omits it. Pull keys with `JSON_VALUE(metadata, '$.pipelineName')` rather than selecting the column.
+
+### From Airbyte (ad platforms and Stripe)
+
+| Table | One row is |
+| --- | --- |
+| `meta_ads_ads_insights_action_type` | Meta delivery and spend for an ad on a day, broken out by action type |
+| `meta_ads_campaigns` | A Meta campaign — `id`, `name`, `status`, `effective_status` |
+| `google_ads_account_performance_report` | Google Ads account performance for a day — `segments_date`, `metrics_cost_micros`, `metrics_impressions`, `metrics_clicks` |
+| `google_ads_campaign` | Google Ads campaign performance for a day — `campaign_id`, `campaign_name`, `campaign_status`, `campaign_advertising_channel_type`, `segments_date`, `metrics_*` |
+| `stripe_charges` | A Stripe charge — `id`, `amount`, `amount_refunded`, `currency`, `status`, `livemode`, `customer`, `payment_intent`, `invoice`, `description`, `receipt_email`, `created` |
+| `stripe_customers` | A Stripe customer — `id`, `name`, `email` |
+
+<Callout kind="alert">
+  **Airbyte tables are not deduplicated.** Every row carries `_airbyte_extracted_at` and `_airbyte_raw_id`, and the same record appears once per extract. Aggregating without deduplicating overstates every total:
+
+  ```sql
+  SELECT * FROM (
+    SELECT *, ROW_NUMBER() OVER (
+      PARTITION BY <logical_key> ORDER BY _airbyte_extracted_at DESC
+    ) AS _rn
+    FROM <airbyte_table>
+  ) WHERE _rn = 1
+  ```
+
+  The keys Hello Conversions uses: `id` for `stripe_charges` and `stripe_customers`, `(ad_id, date_start)` for the Meta insights table, `(campaign_id, segments_date)` for `google_ads_campaign`.
+</Callout>
+
+- **Stripe amounts are in cents** — net revenue is `(amount - amount_refunded) / 100.0`.
+- **`stripe_charges.created` is an epoch integer** — wrap it in `TIMESTAMP_SECONDS(CAST(created AS INT64))`.
+- **Stripe's live flag is `livemode`**, one word, unlike GHL's `live_mode`.
+- **Google Ads costs are in micros** — divide `metrics_cost_micros` by 1,000,000.
+- **The Meta insights table repeats an ad's spend across its action-type rows**, which is why the dedup key is `(ad_id, date_start)`. A naive `SUM(spend)` over the raw table counts the same money more than once.
+
+## Summary tables and views
+
+Built by Hello Conversions on top of the source tables. Which variant you get depends on the project's revenue source: GoHighLevel transactions, Stripe charges, or both.
+
+| Object | Type | One row is | Built when |
+| --- | --- | --- | --- |
+| `summary_daily` | View | One calendar day, project timezone | Revenue, forms or events exist |
+| `summary_form_stats` | View | One form on one page URL, all time | `form_submissions` exists |
+| `summary_product_stats` | View | One product, all time | A revenue source exists |
+| `summary_customer_ltv` | View | One customer, all time | A revenue source exists |
+| `revenue_attribution` | View | One charge, classified by source and category | Stripe is a revenue source |
+| `summary_lead_ltv_leads` | Table | One lead, revenue accumulated over fixed windows | `contacts` exists |
+| `summary_lead_ltv_spend` | Table | Ad spend for one provider on one day | Always, possibly empty |
+| `summary_marketing_efficiency_campaign_spend` | Table | One campaign on one day | Always, possibly empty |
+
+<Callout kind="note">
+  Views compute live. The `summary_lead_ltv_*` and `summary_marketing_efficiency_*` objects are **materialized tables** rebuilt on a nightly refresh — up to a day stale, and absent entirely on a project that has never run the refresh.
+</Callout>
+
+### `summary_daily`
+
+Columns: `day`, `total_revenue`, `new_revenue`, `existing_revenue`, `total_transactions`, `new_customers`, `returning_customers`, `avg_order_value`, `form_submissions`, `form_leads`, `page_views`, `unique_visitors`, `conversion_rate`, `cost_per_lead`, `ad_spend`. This is the view `get_daily_kpis` reads.
+
+- **`ad_spend` and `cost_per_lead` are hardcoded to `0` in the view.** Real spend is joined in by `get_daily_kpis` at query time. Query the view directly and you get zeros.
+- **`page_views` and `unique_visitors` only cover the last 90 days.** Older days show `0` visitors alongside real revenue.
+- **`conversion_rate` is transactions ÷ unique visitors**, not leads ÷ visitors — null or zero outside the 90-day window.
+- **"New" vs "returning" is by first purchase ever**, not first purchase in the range.
+- Days come from a full outer join across revenue, forms and page CTEs, so a day with forms but no revenue still appears.
+
+### `summary_form_stats`
+
+Columns: `form_name`, `page_url`, `submissions`, `leads`, `customers`, `revenue_attributed`.
+
+Groups on the **raw** `page_url`, so one form appears once per UTM variant, `_gl` parameter or session ID — `get_form_stats` strips the query string first and therefore reports fewer, larger rows. When Stripe is the only revenue source, forms cannot be attributed (no shared contact ID) and `customers` and `revenue_attributed` are hardcoded to `0`.
+
+### `summary_product_stats`
+
+Columns: `product_name`, `total_revenue`, `total_orders`, `avg_order_value`, `unique_customers`.
+
+Product name comes from `transactions.entity_source_name`, falling back to the Stripe charge description, then the literal `'Unknown'`. Revenue is net of refunds. All-time with no date column, so it cannot be windowed — `get_product_stats` runs its own date-filtered equivalent.
+
+### `summary_customer_ltv`
+
+Columns: `contact_id`, `contact_name`, `contact_email`, `lifetime_value`, `total_orders`, `avg_order_value`, `first_purchase_date`, `last_purchase_date`, `lead_date`, `first_source`.
+
+In Stripe-only projects `contact_id` is the Stripe customer ID, and `lead_date` and `first_source` are null. In mixed projects the sides join on `transactions.charge_id = stripe_charges.payment_intent`, with Stripe as financial truth and GoHighLevel supplying contact identity.
+
+<Callout kind="info">
+  `get_customer_ltv` does **not** read this view — it computes from `transactions`, `contacts` and `funnels` so it can apply product, funnel and cohort filters. Expect small differences where Stripe and GoHighLevel disagree.
+</Callout>
+
+### `revenue_attribution`
+
+A diagnostic view for reconciling money between Stripe and GoHighLevel — one row per charge:
+
+- `source` — `matched_ghl_stripe`, `stripe_only`, or `ghl_non_stripe`
+- `category` — `ghl_order`, `subscription_recurring`, `manual_invoice`, `platform_internal`, or `one_time_or_unknown`
+- amounts, currency, `created_at`, and both sides' identifiers: `stripe_charge_id`, `stripe_payment_intent`, `stripe_invoice_id`, `stripe_customer_id`, `ghl_transaction_id`, `ghl_contact_id`, `contact_email`, `description`
+
+Start here when a client's Stripe dashboard and their Hello Conversions revenue disagree — it shows which charges exist on only one side.
+
+### `summary_lead_ltv_leads`
+
+One row per lead, partitioned by `date_added`. Columns: `contact_id`, `date_added`, `email`, the `first_utm_*` / `last_utm_*` sets, `first_campaign`, `last_campaign`, `resolved_first_source`, `resolved_first_medium`, `resolved_last_source`, `resolved_last_medium`, `first_form_id`, `first_form_name`, `day_0_value` through `day_90_value`, `days_to_first_revenue`, `is_customer`.
+
+<Callout kind="alert">
+  **Only contacts with a non-empty email address are in this table.** Null or blank emails are filtered out of the lead set entirely, so any lead count taken from here is lower than `contacts`, and a project capturing phone-only leads looks dramatically under-counted. Count leads from `contacts` unless you specifically want the emailable, revenue-attributable subset.
+</Callout>
+
+- **`day_N` columns are cumulative windows, not daily buckets.** `day_7_value` is days 0–7 inclusive, and `day_30_value` already contains it. Subtract for increments.
+- **Only positive net amounts count.** A transaction netting zero or less after refunds is excluded rather than reducing the lead's total.
+- **Currency uses a static rate table.** A currency not on the list is **dropped**, not converted at 1.0 — it surfaces as a lead with no revenue, not a wrong number.
+- **Revenue counts only from `date_added` forward.** A purchase timestamped before the contact record existed is not attributed.
+- `resolved_first_source` / `resolved_first_medium` are lowercased, truncated at the first comma, and default to `(direct)` and `(none)`. The raw `first_utm_*` columns are untouched.
+- **`first_campaign` is not a UTM campaign.** Lead Connector parses `utm_id` into it, which for Meta traffic is usually the numeric campaign ID rather than the name — attribution joins must match on **both** campaign ID and campaign name.
+- In Stripe-only projects the table is built with **no revenue at all**: there is no Stripe-customer-to-contact mapping, so every lead has `is_customer = false`.
+
+### `summary_lead_ltv_spend` and `summary_marketing_efficiency_campaign_spend`
+
+Pre-deduplicated daily ad spend, so reporting pages don't repeat the `ROW_NUMBER` dance per load.
+
+| Table | Grain | Columns |
+| --- | --- | --- |
+| `summary_lead_ltv_spend` | Provider × day | `provider` (`meta` / `google`), `date_start`, `channel_type` (Google's advertising channel type; always null for Meta), `spend` |
+| `summary_marketing_efficiency_campaign_spend` | Campaign × day | `provider`, `date_start`, `campaign_id`, `campaign_name`, `spend`, `clicks`, `impressions` |
+
+Both are always created; a disconnected platform contributes zero rows rather than a missing column. Google campaign IDs are cast to strings so both platforms share one column type. Rows with a null `campaign_id` are excluded from the campaign table.
+
+## Query rules
+
+<Callout kind="warning">
+  **Anchor every date filter to the project timezone.** BigQuery defaults to UTC, so `DATE(created_at)` puts a late-evening order on the wrong day for any project west of Greenwich, and "yesterday" quietly means something different from what the customer sees in the app. Filter as `DATE(<ts_column>, '<project timezone>')`, and report times from the `*_local` columns the tools return. The querying-guide resource renders these examples with your project's timezone filled in.
+</Callout>
+
+- **Prefer the dedicated tool over `query`** — the tools already apply the live-mode, status, refund and timezone rules.
+- **Filter the partition column.** `contacts.date_added`, `transactions.created_at`, `form_submissions.submitted_at` and `summary_lead_ltv_leads.date_added` are partitioned; filtering them cuts cost and latency sharply.
+- **`SUM` of nothing is null.** Wrap with `COALESCE(SUM(x), 0)`, and use `SAFE_DIVIDE(a, b)` so a zero denominator returns null instead of erroring.
+- **Results cap at 1,000 rows by default, 10,000 maximum.** Aggregate in SQL rather than pulling rows out and summing them yourself.

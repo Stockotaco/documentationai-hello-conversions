@@ -3,21 +3,9 @@ title: Email Stats
 description: Deliverability and engagement for a project's GoHighLevel email — what each rate is divided by, how the List Health score is built, and what to check when a client disputes a number.
 ---
 
-**Reporting → Email → Email Stats** covers the email sent from a project's GoHighLevel location: what was accepted, what was delivered, what bounced, who opened and clicked, and what revenue followed.
+**Reporting → Email → Email Stats** covers **all** email sent from a project's GoHighLevel location — workflow emails, campaign blasts and one-off sends alike. It needs the [GoHighLevel source](/connect/sources/gohighlevel) connected.
 
-It needs the [GoHighLevel source](/connect/sources/gohighlevel) connected on the project. Without it the page loads with an amber banner and no data — email events are keyed to the GHL location, so there is nothing to look up.
-
-<Callout kind="note">
-  This report covers **all** email sent from that GoHighLevel location, not just email connected to anything in Hello Conversions. Workflow emails, campaign blasts and one-off sends are all in scope. If a client sends from another platform as well, that platform's email is not here.
-</Callout>
-
-## Live, not synced
-
-Unlike the Meta Ads reports, Email Stats is not fed by a nightly sync. Events stream in and the page reads them live — the **Live data** chip in the header is saying exactly that. Responses are cached for five minutes; the refresh button next to the date picker bypasses the cache and refetches.
-
-The date range covers **through today**, and the presets are Last 7 / 30 / 90 / 180 Days, defaulting to 30. The range is written into the page URL, and **Copy link** puts that URL on your clipboard — the way to send a colleague or a client the exact view you are looking at.
-
-Every KPI card also carries a trend badge against the **previous period**: the same number of days, ending the day before your range starts.
+Events stream in live rather than through a nightly sync, cached for five minutes. The range covers **through today**, with presets of Last 7 / 30 / 90 / 180 Days, defaulting to 30, written into the page URL for **Copy link**. Every KPI card carries a trend badge against the **previous period**: the same number of days, ending the day before your range starts.
 
 ## The eight KPIs
 
@@ -32,18 +20,13 @@ Every KPI card also carries a trend badge against the **previous period**: the s
 | **Complained** | Recipients who marked it as spam | Delivered |
 | **Unsubscribed** | Recipients who unsubscribed | Delivered |
 
-Two derivations are worth committing to memory, because they are what a dispute usually turns on:
+Two derivations decide most disputes. **Opens and clicks count unique recipients, not events** — Apple Mail Privacy Protection fires repeated opens, and raw events would push open rates past 100%. **Open rate and CTR are both divided by delivered, not by opens**; the clicks ÷ opens figure some ESPs call click-to-open rate is much higher.
 
-- **Opens and clicks count unique recipients, not events.** Apple Mail Privacy Protection fires an open the moment the message reaches the device, and can fire it repeatedly. Counting raw open events would push open rates past 100%. Every open and click figure on this page — cards, charts, tables, top movers — is unique recipients.
-- **Open rate and CTR are both divided by delivered, not by opens.** The CTR here is clicks ÷ delivered, not clicks ÷ opens. Some ESPs report the second one and call it click-to-open rate; that number will be much higher. If a client's other dashboard shows a bigger CTR, this is nearly always why.
-
-Trend badges follow the metric type: rate cards show a point difference (`+3.2pp`), count cards show a relative change (`+18%`), and a metric that had no volume in the previous period shows `new` rather than an infinite percentage.
-
-Colouring uses common ESP guidance: open rate above 25% and CTR above 3% read as good; hard bounce turns amber above 1% and red above 2%; soft bounce amber above 2%, red above 5%; complaints amber above 0.05% and red above 0.1%.
+Trend badges show a point difference on rate cards (`+3.2pp`), a relative change on count cards (`+18%`), and `new` where the previous period had no volume. Colouring follows common ESP guidance: open rate above 25% and CTR above 3% read as good; hard bounce amber above 1%, red above 2%; soft bounce amber above 2%, red above 5%; complaints amber above 0.05%, red above 0.1%.
 
 ## List Health
 
-The gauge at the top of the page is a 0–100 composite of four deliverability signals, weighted:
+A 0–100 composite of four deliverability signals:
 
 | Component | Weight | Full credit at | No credit at |
 | --- | :---: | --- | --- |
@@ -58,19 +41,11 @@ The gauge at the top of the page is a 0–100 composite of four deliverability s
 | 60–84 | **Watch** |
 | Below 60 | **At Risk** |
 
-Any component past its safe threshold — delivery below 90%, hard bounce above 2%, complaints above 0.1%, unsubscribes above 0.5% — is listed underneath the bar as a tripping threshold, with its actual rate.
-
-<Callout kind="warning">
-  A component with no data scores as full credit, not zero. A project with almost no send volume in the range will show a high List Health score that means "nothing has gone wrong yet", not "this list is in good shape". Check the Accepted count before you quote the score to anyone.
-</Callout>
-
-The anchors are deliberately tighter than the point at which mailbox providers actually retaliate. The gauge is meant to move to Watch while there is still time to fix something.
+Any component past its safe threshold — delivery below 90%, hard bounce above 2%, complaints above 0.1%, unsubscribes above 0.5% — is listed under the bar with its actual rate. The anchors are tighter than the point at which mailbox providers retaliate, so the gauge moves to Watch while there's still time to fix something.
 
 ## Top Movers
 
-The biggest changes in **open rate** and **CTR** versus the previous period, expressed in percentage points, split into risers and droppers.
-
-Only emails with **at least 100 delivered in both periods** are eligible. Without that floor, an automation that sent to four people last week and six this week would dominate the list with a 40-point swing. If Top Movers looks emptier than you expect, low volume is the reason.
+The biggest open rate and CTR changes versus the previous period, in percentage points, split into risers and droppers. Only emails with **at least 100 delivered in both periods** are eligible.
 
 ## Revenue Attribution
 
@@ -84,18 +59,12 @@ Four cards on a **7-day lookback**:
 | **Clicked → Revenue** | Revenue from those purchases |
 
 <Callout kind="alert">
-  These are **overlapping**, not additive. Anyone who clicked also received the email, so a purchase can be counted in both the delivered and the clicked figures. Never add the two together and present the total as email revenue — it double-counts every clicker.
+  These are **overlapping**, not additive. Anyone who clicked also received the email, so a purchase can be counted in both figures. Never add the two together and present the total as email revenue.
 </Callout>
-
-Delivered attribution is the loose end of the scale: it credits an email for any purchase in the window by someone who received it, whether or not the email had anything to do with it. Clicked attribution is the tighter, more defensible number. Use delivered to size the ceiling of email's contribution and clicked to make a claim.
 
 ## The breakdown tables
 
-Three tables, split by where the email came from: **Workflows**, **Campaigns**, and **Other** — anything GoHighLevel doesn't classify as either.
-
-Each row is one email, with its latest event date, delivered count, failed / hard bounce / soft bounce / complained / unsubscribed counts each shown with their rate, and open rate and CTR. Workflows and Campaigns also get **Delivered $** and **Clicked $** columns from the attribution data. Every table has a search box, sortable columns, paging, and a CSV export of the current sort. Clicking a row opens that email's detail.
-
-The **Other** table has no attribution columns — attribution is only produced for workflow and campaign email.
+Three tables by origin: **Workflows**, **Campaigns**, and **Other**. Each row is one email, with its latest event date, delivered count, failed / hard bounce / soft bounce / complained / unsubscribed counts each with their rate, and open rate and CTR. Workflows and Campaigns also get **Delivered $** and **Clicked $** columns; **Other** has no attribution columns, because attribution is only produced for workflow and campaign email. Every table has search, sortable columns, paging and CSV export.
 
 ## When a number is disputed
 
@@ -104,7 +73,7 @@ The **Other** table has no attribution columns — attribution is only produced 
 | Whole page empty, amber banner | No GoHighLevel integration connected on this project |
 | CTR much lower than the client's other dashboard | Theirs is probably click-to-open (clicks ÷ opens); this is clicks ÷ delivered |
 | Open rate looks implausibly high | Apple MPP inflation is already excluded here, but not everywhere — compare like for like |
-| List Health is high but something feels wrong | Very low volume in the range gives components full credit by default |
+| List Health is high but something feels wrong | A component with no data scores as full credit, so very low volume inflates the score. Check the Accepted count |
 | Top Movers is empty | No email cleared 100 delivered in both the current and previous periods |
 | Attributed revenue doesn't match the Revenue reports | Different question — this is a 7-day post-email window, not the CRM's own attribution |
 | Delivered plus clicked revenue exceeds total revenue | They overlap by design; don't sum them |

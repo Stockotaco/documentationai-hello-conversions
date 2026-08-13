@@ -3,11 +3,7 @@ title: Sources vs Destinations
 description: A source is a system Hello Conversions reads data from; a destination is where it sends conversions to — and Meta Ads and Google Ads are both.
 ---
 
-Under **Settings → Integrations** you'll find two lists: **Sources** and **Destinations**. They look similar and they share provider logos, which is why people connect one and expect the other to work. They don't. They are separate setups with separate credentials.
-
-Both lists are scoped to a **project** — one client account, or just your business if you're not an agency. Connecting Meta Ads for one client does nothing for the next one.
-
-## The difference
+Under **Settings → Integrations** there are two lists, **Sources** and **Destinations**. They share provider logos, which is why people connect one and expect the other to work. They are separate setups with separate credentials, and both are scoped to a **project** — connecting Meta Ads for one client does nothing for the next.
 
 | | Sources | Destinations |
 | --- | --- | --- |
@@ -16,30 +12,24 @@ Both lists are scoped to a **project** — one client account, or just your busi
 | Where | Settings → Integrations → Sources | Settings → Integrations → Destinations |
 | Examples | Lead Connector, Meta Ads, Google Ads, Stripe | Meta Conversions API, Google Ads |
 
-A **source** is a system Hello Conversions reads data *from*. Reports are built on top of it — you connect Meta Ads as a source so ad spend shows up next to revenue, and you connect Stripe as a source so charges show up in the revenue reports.
-
-A **destination** is where Hello Conversions *sends* conversions. When a lead comes in or a purchase lands in your CRM, the destination is what carries that event back to Meta or Google so their bidding algorithms can use it.
-
 ## Meta Ads and Google Ads are both
 
 <Callout kind="warning">
   Meta Ads and Google Ads appear in **both** lists, and connecting one does not connect the other. If ad spend shows in your reports but your Meta pixel isn't receiving conversions, you connected the source and skipped the destination — or the other way around.
 </Callout>
 
-The two setups don't even use the same credentials:
+They don't even use the same credentials:
 
-- **Meta Ads as a source** — you enter your ad account ID and authorize Meta. This pulls campaigns, ads, creatives, and spend.
-- **Meta as a destination** — you enter a Pixel ID and a Conversions API access token. This pushes conversion events.
-- **Google Ads as a source** — you enter your customer ID and authorize Google. This pulls campaigns and cost data.
-- **Google Ads as a destination** — this delivers offline conversions against a conversion action in your account.
+- **Meta Ads as a source** — ad account ID plus Meta authorization. Pulls campaigns, ads, creatives, and spend.
+- **Meta as a destination** — Pixel ID and a Conversions API access token. Pushes conversion events.
+- **Google Ads as a source** — customer ID plus Google authorization. Pulls campaigns and cost data.
+- **Google Ads as a destination** — delivers offline conversions against a conversion action in your account.
 
-If you want the full picture for a client — spend on one side, conversions on the other — you need both.
+For the full picture on a client — spend on one side, conversions on the other — you need both.
 
 ## Sources that are only sources
 
-**Lead Connector** (GoHighLevel) and **Stripe** are read-only sources. Lead Connector is where contacts, opportunities, and purchases come from; Stripe is where charges come from. Nothing is sent back to either one.
-
-## Where to go next
+**Lead Connector** (GoHighLevel) and **Stripe** are read-only. Lead Connector is where contacts, opportunities and purchases come from; Stripe is where charges come from. Nothing is sent back to either.
 
 <Columns cols={2}>
   <Card title="Lead Connector" icon="contact" href="/connect/sources/gohighlevel">

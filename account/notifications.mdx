@@ -1,0 +1,72 @@
+---
+title: Notifications & Inbox
+description: The Inbox, your account-wide notification preferences, and the per-project notification settings — which is which, and how they interact.
+---
+
+Notifications come from two screens, and mixing them up is the usual reason someone still gets an email they thought they turned off.
+
+| Screen | Scope | What it controls |
+| --- | --- | --- |
+| **Inbox → Preferences** | Your account, everywhere | Whether you get in-app and email notifications at all, and which categories you mute |
+| **Settings → Project → Notifications** | You, in one project | The weekly recap email for that project, plus that project's Slack channel |
+
+Account-wide preferences are a master switch; per-project settings are a per-account opt-out. Turning off email at the account level silences the project-level toggles too.
+
+## The Inbox
+
+The bell in the icon rail holds platform notifications sent to you — announcements, product updates, security and billing notices. You open it from inside a project, but it's **yours, not the project's**: the same messages appear whichever project you're in.
+
+Each entry shows its title, category, and an **urgent** tag when it carries one. Clicking expands the full message and marks it read; **Mark all as read** clears the lot. The list pages in twenty at a time behind a **Load more** button.
+
+## Account-wide preferences
+
+**Inbox → Preferences** controls what reaches you at all:
+
+- **In-App Notifications** — show notifications in your inbox
+- **Email Notifications** — send them to your email as well
+- **Muted categories** — General, Product Updates, Marketing, Security, Billing and System, each muted individually
+
+If you've never touched this page you're subscribed to everything; the preferences only subtract.
+
+<Callout kind="alert">
+  **Urgent notifications ignore all of it.** A message sent at urgent priority reaches you whether or not you've muted its category or switched delivery off — reserved for a security issue or a billing failure about to cut off access.
+</Callout>
+
+## Per-project notifications
+
+**Settings → Project → Notifications** is scoped to one project, and its email setting is scoped to *you* — teammates each have their own.
+
+### Weekly recap email
+
+A Friday-morning summary of channel accuracy, events sent, and new pipelines from the past week. Sent at **9am in the project's timezone**, covering the previous Monday–Sunday. If the project's timezone is wrong, this arrives at the wrong time — see [Project settings](/account/project-settings).
+
+It goes to the project's members plus the organization's owners, each controlling their own copy with this toggle. New members are subscribed by default. It only sends for projects whose organization has a live subscription — trialing, active, or canceling before the period ends.
+
+<Callout kind="note">
+  Both switches have to be on. Your account-wide **Email Notifications** setting is checked first: if it's off, you get no weekly recap for any project regardless of the per-project toggle. Turn email back on under Inbox → Preferences, then opt out of specific projects there.
+</Callout>
+
+### Slack
+
+The same page connects the project to Slack. Unlike the recap toggle, **Slack settings are project-level, not per-person** — everyone in the channel sees the same posts.
+
+<Steps>
+  <Step title="Connect">
+    Approve the Slack consent screen. You're returned to this page with the workspace shown as connected.
+  </Step>
+  <Step title="Pick a channel">
+    Public and private channels both appear. For a private channel, invite the Hello Conversions bot to it first or it can't post there.
+  </Step>
+  <Step title="Choose what posts there">
+    Toggle the weekly recap and the daily digest independently, then send the test message to confirm the channel is wired up.
+  </Step>
+</Steps>
+
+<Columns cols={2}>
+  <Card title="Project settings" icon="settings" href="/account/project-settings" horizontal>
+    The project timezone, which sets when the recap is sent.
+  </Card>
+  <Card title="Team and roles" icon="users" href="/account/team-roles" horizontal>
+    Who's on a project, and therefore who gets its recap.
+  </Card>
+</Columns>

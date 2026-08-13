@@ -3,15 +3,13 @@ title: Frameworks
 description: The Decision Frameworks page — five analytical views over the same Meta creative data, plus a ranked action list, and what each chart's axes and quadrants actually mean.
 ---
 
-**Reporting → Meta Ads → Frameworks** is titled **Decision Frameworks** in the app. It is not a way of grouping or naming creatives — it is a set of five charts that each apply a different decision framework to the same creative data behind the [Creatives](/reporting/creatives) report, plus a ranked list of actions at the top.
+**Reporting → Meta Ads → Frameworks** (titled **Decision Frameworks** in the app) applies five decision frameworks to the creative data behind the [Creatives](/reporting/creatives) report, plus a ranked list of actions. Creatives answers "which ads are working?"; Frameworks answers "so what should I change?"
 
-It reads two things: the verdict and score for every creative in the current filters, and daily per-creative metrics for the top ten creatives by spend. Same [Meta Ads source](/connect/sources/meta-ads) requirement, same date presets, same objective and format filters, same "today is never included" clamp.
-
-Use Creatives to answer "which ads are working?" Use Frameworks to answer "so what should I change?"
+It reads the verdict and score for every creative in the current filters, and daily per-creative metrics for the top ten creatives by spend. Same [Meta Ads source](/connect/sources/meta-ads) requirement, date presets, objective and format filters, and "today is never included" clamp.
 
 ## Action Items
 
-The block at the top of the page is generated, not written. It scans the creative set and emits up to five cards, in this priority order.
+Generated, not written: up to five cards, in this priority order.
 
 | Card | Triggered by | What it tells you to do |
 | --- | --- | --- |
@@ -21,35 +19,26 @@ The block at the top of the page is generated, not written. It scans the creativ
 | **Format gap** | A campaign that beats the average ROAS but is missing a format used elsewhere in the account | Repurpose the winning concept into the missing format |
 | **Budget drain** | Above-average spend with ROAS below 70% of average (or cost-per above 130% of average), and not a Scale | Cap the daily budget or move the money |
 
-Fatigue detection needs at least five days of data for a creative; anything newer is skipped rather than guessed at. The Pause card deliberately ignores low-spend Kills — a creative that spent $12 and got nothing is not evidence of anything.
-
-If nothing qualifies, the block doesn't render at all. An empty Action Items section means no creative crossed a threshold, not that the page failed to load.
+Fatigue detection needs at least five days of data for a creative; anything newer is skipped. The Pause card ignores low-spend Kills — a creative that spent $12 and got nothing is not evidence. If nothing qualifies the block doesn't render, meaning no creative crossed a threshold, not that the page failed.
 
 ## Performance Quadrant
 
-A scatter of every creative: **spend on the X axis**, and a metric you choose on the Y axis — cost-per, ROAS, or CTR. The crosshairs are the averages of the current set: average spend vertically, average of the chosen metric horizontally. Dots are coloured by verdict.
-
-The quadrant names flip depending on whether high is good or low is good on the Y axis, which is the part people misread:
+A scatter of every creative: **spend on the X axis**, cost-per, ROAS or CTR on the Y. The crosshairs are the averages of the current set; dots are coloured by verdict. The quadrant names flip depending on whether high or low is good on the Y axis, which is the part people misread:
 
 | Y axis | Top left | Top right | Bottom left | Bottom right |
 | --- | --- | --- | --- | --- |
 | ROAS or CTR (higher is better) | Hidden Gems | Winners | Cut | Budget Drains |
 | Cost-per (lower is better) | Cut | Budget Drains | Hidden Gems | Winners |
 
-"Hidden Gems" is always the low-spend, good-performance corner — the creatives worth more money. "Budget Drains" is always high-spend, bad-performance.
+"Hidden Gems" is always the low-spend, good-performance corner. "Budget Drains" is always high-spend, bad-performance.
 
 <Callout kind="note">
-  In cost-per mode, creatives with zero conversions are dropped from the chart entirely. They have no meaningful cost-per, so plotting them at zero would put your worst performers in the Winners corner. Switch the Y axis to CTR if you want to see everything.
+  In cost-per mode, creatives with zero conversions are dropped from the chart entirely — plotting them at zero would put your worst performers in the Winners corner. Switch the Y axis to CTR to see everything.
 </Callout>
 
 ## Hook Rate vs Hold Rate
 
-**Video creatives only.** X axis is hook rate — 3-second views ÷ impressions, how well the first moment stops the scroll. Y axis toggles between:
-
-- **Hold rate** — views that reached 50% of the video ÷ 3-second views. Whether the ones you stopped stayed.
-- **CTR** — whether the ones you stopped clicked.
-
-If no hold-rate data has arrived, the chart falls back to CTR on its own. Reference lines sit at the set's average hook rate and average Y value, splitting it into a diagnosis:
+**Video creatives only.** X axis is hook rate — 3-second views ÷ impressions. Y toggles between **hold rate** (views reaching 50% of the video ÷ 3-second views) and **CTR**, falling back to CTR alone if no hold-rate data has arrived. Reference lines sit at the set's average hook rate and average Y value:
 
 | Position | Hold rate mode | CTR mode | Reading |
 | --- | --- | --- | --- |
@@ -58,31 +47,29 @@ If no hold-rate data has arrived, the chart falls back to CTR on its own. Refere
 | Bottom right | Grabs, Loses Interest | Grabs, Doesn't Convert | Strong hook, weak payoff — the body or offer is the problem |
 | Bottom left | — | — | Neither end works |
 
-This chart is empty for accounts running no video. That is expected, not a fault.
+Empty for accounts running no video, which is expected.
 
 ## Winners Matrix
 
-A heatmap: **campaigns down the side, ad formats across the top**. Each cell is the average ROAS (or average cost-per, toggleable) of the creatives in that campaign-and-format combination, colour-graded so the strong cells stand out. It defaults to ROAS for the Purchases objective and to cost-per for every other objective.
+A heatmap of **campaigns down the side, ad formats across the top**. Each cell is the average ROAS (or cost-per, toggleable) of the creatives in that campaign-and-format combination, colour-graded, defaulting to ROAS for the Purchases objective and cost-per for every other.
 
-The blank cells are the point of the chart. An empty cell is a format that campaign has never run — and the whole reason the Action Items block flags format gaps.
-
-In cost-per mode, creatives with zero conversions are left out of the average, the same way they are in the quadrant chart.
+The blank cells are the point: an empty cell is a format that campaign has never run — the reason Action Items flags format gaps. In cost-per mode, zero-conversion creatives are left out of the average, as in the quadrant chart.
 
 ## Creative Fatigue
 
-A multi-line chart of the **top ten creatives by spend**, with **days since launch** on the X axis rather than calendar dates, so creatives that started weeks apart can be compared on the same curve. The Y axis toggles between CTR, cost-per and frequency. Every line is a 3-day rolling average, which is why individual days won't match the Creatives report exactly — the smoothing is intentional, to keep one quiet weekend from reading as decay.
+A multi-line chart of the **top ten creatives by spend**, with **days since launch** on the X axis rather than calendar dates, so creatives that started weeks apart compare on the same curve. Y toggles between CTR, cost-per and frequency. Every line is a 3-day rolling average — which is why individual days won't match the Creatives report, and why one quiet weekend doesn't read as decay.
 
 <Callout kind="warning">
-  "Launch" means the first day the creative spent money **inside the selected date range** — not the day it was created in Meta. A creative that has been running for three months shows day 0 at the start of your 30-day window, and its early-life curve is invisible. If you're investigating whether a specific creative is fatiguing, widen the range to cover its actual start before reading the slope.
+  "Launch" means the first day the creative spent money **inside the selected date range**, not the day it was created in Meta. A creative running for three months shows day 0 at the start of your 30-day window, hiding its early-life curve. Widen the range to cover its actual start before reading the slope.
 </Callout>
 
-The fatigue chart also ignores the format filter. Filtering the page to Video changes the quadrant, matrix and BCG charts but leaves the fatigue lines as the top ten by spend across all formats.
+The fatigue chart also ignores the format filter: filtering to Video changes the quadrant, matrix and BCG charts but leaves the fatigue lines as the top ten by spend across all formats.
 
 ## BCG Matrix
 
-Portfolio view. **X axis is spend share** — what percentage of the account's total spend in the range went to that creative. **Y axis is ROAS** for the Purchases objective, or raw conversion count for every other objective. Bubble size scales with total spend, and colour is the verdict.
+Portfolio view. **X axis is spend share** — the percentage of the account's total spend in the range that went to that creative. **Y axis is ROAS** for the Purchases objective, or raw conversion count for every other. Bubble size scales with total spend, colour is the verdict.
 
-The dividing lines here are **medians, not averages** — unlike the Performance Quadrant, which uses averages. Medians resist a single enormous spender dragging the split line across the chart.
+The dividing lines are **medians, not averages** — unlike the Performance Quadrant. Medians resist a single enormous spender dragging the split line across the chart.
 
 | Quadrant | Position | Meaning |
 | --- | --- | --- |
@@ -93,10 +80,10 @@ The dividing lines here are **medians, not averages** — unlike the Performance
 
 ## What makes this page misleading
 
-Everything here inherits the relative scoring described in [Creatives](/reporting/creatives). Two things follow from that, and both cause arguments:
+Everything inherits the relative scoring described in [Creatives](/reporting/creatives), and both consequences cause arguments:
 
-- **Every threshold is relative to the current view.** Average spend, average ROAS, the median lines, the verdict colours — all computed from the creatives on screen. An account where everything is mediocre still produces Winners and Stars, because something has to be above average. These charts tell you which of your creatives is best; they do not tell you whether it is good.
-- **Changing the date range or the format filter re-draws every line.** Nothing is anchored to a fixed benchmark, so a screenshot is only meaningful alongside the range it came from.
+- **Every threshold is relative to the current view** — average spend, average ROAS, the median lines, the verdict colours. An account where everything is mediocre still produces Winners and Stars. These charts tell you which of your creatives is best, not whether it is good.
+- **Changing the date range or the format filter re-draws every line.** Nothing is anchored to a fixed benchmark, so a screenshot is only meaningful alongside its range.
 
 | Symptom | Cause |
 | --- | --- |

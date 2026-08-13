@@ -3,30 +3,26 @@ title: Activity & Run History
 description: Trace a single conversion end to end in the Activity Log — find the run, read its status, and work out what to do about a failure.
 ---
 
-A client emails: *"Sarah booked yesterday — did that reach Meta?"* The Activity Log answers that question in about thirty seconds.
-
-Open **Reporting → Workflows → Activity Log** in the project. Every delivery attempt Hello Conversions makes is recorded there as a **run**: one row per event, per connection.
+Every delivery attempt Hello Conversions makes is recorded at **Reporting → Workflows → Activity Log** as a **run**: one row per event, per connection. It answers *"Sarah booked yesterday — did that reach Meta?"* in about thirty seconds.
 
 ## Finding the run
 
 <Steps>
   <Step title="Narrow by event type or status">
-    The chips across the top filter to **Purchase**, **Tag Added**, or **Contact Created**. The status dropdown filters to **Delivered** or **Failed** — and shows the failure count next to it, so you can see at a glance whether there's anything to worry about.
+    The chips across the top filter to **Purchase**, **Tag Added**, or **Contact Created**. The status dropdown filters to **Delivered** or **Failed**, and shows the failure count next to it.
   </Step>
   <Step title="Search for the person">
-    The search box matches on contact name or email. It narrows the rows currently loaded rather than searching all of history, so for an older event, filter first and page back to roughly the right time, then search.
+    The search box matches on contact name or email, across the rows currently loaded rather than all of history — so for an older event, filter first and page back to roughly the right time, then search.
   </Step>
   <Step title="Read the row">
     Each row shows the contact, the event, the amount, the destination, and how long ago it was processed. Hover the timestamp for the exact time in the project's timezone.
   </Step>
   <Step title="Open it">
-    Click the row to expand it in place, or open the full detail view for a side-by-side layout with more room.
+    Click the row to expand it in place, or open the full detail view for a side-by-side layout.
   </Step>
 </Steps>
 
-The log auto-refreshes every 30 seconds while you're watching it — useful when you're firing a test event and waiting for it to appear. There's a manual **Refresh** too, and you can switch the auto-refresh off.
-
-If you arrive from a connection, a green **Connection:** chip appears at the top showing you're only looking at that connection's runs. Click the × on it to see everything again.
+The log auto-refreshes every 30 seconds, which is useful while waiting on a test event. There's a manual **Refresh** too, and you can switch auto-refresh off. Arriving from a connection adds a green **Connection:** chip scoping the view to that connection's runs; click its × to see everything again.
 
 ### Reading a row at a glance
 
@@ -39,7 +35,7 @@ If you arrive from a connection, a green **Connection:** chip appears at the top
 | Meta and Google icons on the right | Lit when that click ID was present on the event (`fbc`/`fbp` for Meta, `gclid` for Google), dimmed when it wasn't. |
 | The @ and screen icons | Lit when an email, and UTM data, were available. The UTM source and medium are printed next to them. |
 
-The counters above the rows summarize the same window: total events, success rate, the failure count (click it to filter to failures), and the average Meta match quality across the last 7 days of scored events.
+The counters above the rows summarize the same window: total events, success rate, the failure count (click it to filter to failures), and average Meta match quality across the last 7 days of scored events.
 
 <Callout kind="note">
   Success rate counts **delivered plus filtered**. A filtered event isn't a failure — it's a rule you wrote doing its job — so a project with aggressive filters can sit at 100% success while sending far fewer events than it receives.
@@ -47,60 +43,38 @@ The counters above the rows summarize the same window: total events, success rat
 
 ## Reading a run
 
-Expanding a run gives you three panels that follow the event through the system:
+Expanding a run gives three panels that follow the event through the system:
 
 | Panel | What it holds |
 | --- | --- |
 | **Incoming** | The raw event exactly as GoHighLevel sent it. |
-| **Transformed** | The payload Hello Conversions actually sent, after enrichment and formatting for that destination. Identity fields like the hashed email and hashed phone are highlighted — this is where you confirm a person was properly identified. |
+| **Transformed** | The payload Hello Conversions actually sent, after enrichment and formatting for that destination. Identity fields like the hashed email and phone are highlighted — this is where you confirm a person was properly identified. |
 | **Responses** | What the destination said back: the HTTP status, the response body, and the round-trip time. |
 
-Each panel has a `{ }` toggle that swaps the readable key/value view for the raw JSON, which is what you want when you're comparing against a platform's API docs or pasting into a support ticket.
-
-A **filtered** run shows only two panels instead — the incoming event, and an explanation that it didn't pass the connection's filter rules, with a link straight to that connection's filters.
+Each panel's `{ }` toggle swaps the readable key/value view for raw JSON. A **filtered** run shows two panels instead: the incoming event, and an explanation that it didn't pass the connection's filter rules, with a link straight to those filters.
 
 ## Common failure states
 
-### The destination rejected the payload
-
-The Responses panel shows a red error block. For Meta, that includes the platform's own error title, message, type, code, subcode, and trace ID.
-
-**What to do:** read the message before changing anything — Meta and Google are usually explicit about the problem. Most rejections fall into two buckets:
-
-- **Credentials.** An expired or revoked access token fails every event to that destination, not just one. Reconnect the destination under **Settings → Integrations → Destinations**. See [Meta Conversions API](/connect/destinations/meta-capi) and [Google Ads Conversions](/connect/destinations/google-ads).
-- **Configuration.** A wrong pixel ID, a conversion action that no longer exists, or an event name the platform won't accept. Fix it on the connection or the destination, then fire a test event.
-
-### "Circuit breaker open — destination is temporarily disabled"
-
-After five consecutive failures to the same destination, Hello Conversions stops sending to it for five minutes, then lets one request through to test whether it recovered. Runs during that pause are recorded as failed with this message.
-
-**What to do:** this is a symptom, not the cause. Scroll back to the first failures before the circuit opened and fix what they say — usually credentials. Once the destination accepts a request again, normal delivery resumes on its own. There's nothing to reset by hand.
-
-### "No usable identifier for ingestion" (filtered)
-
-There was nothing on the event the destination could match a person with — no click ID, no email, no phone — so Hello Conversions skipped the call rather than sending a request that would be rejected.
-
-**What to do:** this is a data-capture problem upstream, not a delivery problem. Check that the funnel is collecting email or phone, that the tracking script is installed on the pages that lead to the conversion, and that click IDs are surviving the journey. [Match Quality](/conversion-tracking/match-quality) covers what to improve.
-
-### Filtered when you expected delivered
-
-The event reached the connection but a filter rule rejected it. The expanded run names the two usual causes: the opportunity is in a different pipeline or stage than the filter expects, or a required field on the incoming payload doesn't match or is missing.
-
-**What to do:** open the connection from the link in the panel and compare the rule against the Incoming panel's actual values. A renamed pipeline stage is the most common culprit — see [Pipelines & Filters](/conversion-tracking/pipelines-filters).
+| What you see | What it means | What to do |
+| --- | --- | --- |
+| **A red error block in Responses** | The destination rejected the payload. For Meta this includes the platform's own error title, message, type, code, subcode, and trace ID. | Read the message first. Credentials — an expired or revoked token fails every event to that destination — mean reconnecting it under **Settings → Integrations → Destinations** ([Meta](/connect/destinations/meta-capi), [Google Ads](/connect/destinations/google-ads)). Configuration — a wrong pixel ID, a deleted conversion action, an event name the platform won't accept — means fixing the connection or destination, then firing a test event. |
+| **"Circuit breaker open — destination is temporarily disabled"** | After five consecutive failures to one destination, sending pauses for five minutes, then one request is let through to test recovery. Runs during the pause are recorded as failed. | A symptom, not the cause. Scroll back to the first failures before the circuit opened and fix what they say — usually credentials. Delivery resumes on its own; nothing to reset by hand. |
+| **"No usable identifier for ingestion" (filtered)** | Nothing on the event the destination could match a person with — no click ID, no email, no phone — so the call was skipped rather than sent and rejected. | A data-capture problem upstream. Check the funnel collects email or phone, the tracking script is on the pages leading to the conversion, and click IDs survive the journey. See [Match Quality](/conversion-tracking/match-quality). |
+| **Filtered when you expected delivered** | A filter rule rejected it. The expanded run names the two usual causes: the opportunity is in a different pipeline or stage than the filter expects, or a required field on the incoming payload doesn't match or is missing. | Open the connection from the link in the panel and compare the rule against the Incoming panel's actual values. A renamed pipeline stage is the most common culprit — see [Pipelines & Filters](/conversion-tracking/pipelines-filters). |
 
 ### Nothing in the log at all
 
-If there's no run for the event, it never reached a connection. Work backwards:
+No run means the event never reached a connection. Work backwards:
 
 1. Is there an enabled connection listening for that event type? Check **Settings → Workflows → Connections**, and **Settings → Workflows → Pipelines** if the conversion is a pipeline stage.
 2. Was the connection paused at the time? Events that fire while a connection is off are not sent and not retained.
-3. Did the event actually qualify? An order that isn't in a completed state never becomes a purchase event — see [Event Types](/conversion-tracking/event-types).
-4. Is Lead Connector still connected for the project, under **Settings → Integrations → Sources**?
+3. Did the event qualify? An order that isn't in a completed state never becomes a purchase event — see [Event Types](/conversion-tracking/event-types).
+4. Is Lead Connector still connected, under **Settings → Integrations → Sources**?
 
 ## The bigger picture
 
-For patterns rather than individual events, use **Reporting → Workflows → Overview**. It shows delivered, failed, and filtered volume over 24 hours, 7 days, or 30 days, broken down by destination and by event type, plus the most frequent errors with how often each occurred and when it was last seen. Clicking the failed count there drops you into the Activity Log already filtered to failures.
+For patterns rather than individual events, use **Reporting → Workflows → Overview**: delivered, failed and filtered volume over 24 hours, 7 days or 30 days, broken down by destination and event type, plus the most frequent errors with counts and when each was last seen. Clicking the failed count drops you into the Activity Log already filtered to failures.
 
 <Callout kind="tip">
-  When a client disputes numbers, screenshot the run's Transformed panel alongside the Responses panel. It shows exactly what was sent and exactly what the platform said back — which settles most "your tracking is broken" conversations quickly.
+  When a client disputes numbers, screenshot the run's Transformed panel alongside the Responses panel. It shows exactly what was sent and exactly what the platform said back, which settles most "your tracking is broken" conversations quickly.
 </Callout>

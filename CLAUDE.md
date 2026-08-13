@@ -16,6 +16,16 @@ Individually: `node scripts/check-components.mjs [file...]` (defaults to every `
 
 `api-reference/openapi.yaml` is currently **unreferenced by the nav on purpose** — there is no public REST API yet, only the MCP server. The file and its checker stay for when there is one.
 
+## House style
+
+**Short.** The recurring failure here is pages at twice the length they need. Open on the first useful sentence — no paragraph restating the title, no "in this guide we'll". State why something matters once, in a clause. One example, not three. No recap section at the end. Cut "simply", "just", "powerful", "seamlessly", "it's worth noting that".
+
+Anything parallel — fields, options, statuses, comparisons — goes in a **table**, not sentences.
+
+Written for **agency operators** running client accounts, and it has to read fine for someone with a single project ("one client account — or just your business if you're not an agency"). Second person, present tense.
+
+Brevity is about wording, never substance. Verified facts, exact values, thresholds, tool names, nav paths, and troubleshooting cases all stay — cut the words around them. Never publish a placeholder or a TODO; this site is live. If the source doesn't confirm it, leave it out.
+
 ## Components
 
 Only the Documentation.AI set is supported: `Callout`, `Card`, `CodeGroup`, `Columns`, `Expandable`, `ExpandableGroup`, `Iframe`, `Image`, `ParamField`, `Request`, `Response`, `ResponseField`, `Step`, `Steps`, `Tab`, `Tabs`, `Update`, `Video`.

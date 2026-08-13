@@ -1,0 +1,62 @@
+---
+title: Usage and Limits
+description: What the MCP Usage screen records and shows, and the limits that actually apply — a per-key rate limit, a row cap and a timeout on queries, and no monthly quota.
+---
+
+Every MCP tool call is recorded, successful or not. **Settings → Developer → MCP Usage** shows them. Anyone with access to the project can view it.
+
+## What gets recorded
+
+| Recorded | What it is |
+| --- | --- |
+| Tool name | Which tool was called, e.g. `get_daily_kpis` or `query` |
+| API key | Which key made the call — by name and prefix |
+| Rows returned | How many rows came back |
+| Data processed | Data scanned in the warehouse. Zero for tools that read configuration rather than analytics |
+| Duration | Milliseconds |
+| Error | The failure reason, or blank |
+| Time | When it happened |
+
+Refusals count as errors too: a call blocked for being read-only records `read_only_denied`, one blocked by the rate limit records `rate_limited`.
+
+<Callout kind="note">
+  Calls are written in batches about once a minute, and the key list's "last used" date moves on the same schedule. Wait a minute before concluding a client never reached the server.
+</Callout>
+
+## What the screen shows
+
+A **7 / 30 / 90 day** selector at the top right drives the summary cards and both charts.
+
+| Panel | Shows |
+| --- | --- |
+| Summary cards | Total calls, data processed, rows served, average latency with the 95th percentile, error rate with the error count, distinct tools used, active keys |
+| Daily Calls | One bar per day, failed calls stacked in red. Hover for exact counts |
+| Data Processed | The same days by bytes scanned — catches one expensive query pattern hiding behind few calls |
+| Tool Breakdown | Every tool used, ranked by calls, with average duration and data scanned |
+| Recent Calls | Individual calls, newest first, 25 per page: tool, key, rows, data, duration, time, and the error inline. An **Errors only** filter narrows it to failures |
+
+<Callout kind="tip">
+  Start debugging at **Errors only**. Because refusals are recorded as errors, it answers all three questions at once: is the client reaching us, is it being turned away for being read-only, is it hitting the rate limit.
+</Callout>
+
+<Callout kind="info">
+  The day selector does not apply to everything. **Tool Breakdown**, the **Active Keys** count and **Recent Calls** are not restricted to the selected range, so Tool Breakdown totals can exceed the Total Calls card. That is expected, not a discrepancy.
+</Callout>
+
+## The limits that exist
+
+These three are the only ones.
+
+**100 tool calls per minute, per key.** Past that, calls return an error saying the limit was exceeded and how many seconds to wait; the connection stays up and the client can retry. The count is per key — two keys on one project each get 100 — and resets every window rather than being a quota you use up. Conversational use never reaches it; looping clients (a call per campaign, per day, per contact) do, which is worth noticing since a smarter query usually gets the same answer in one call.
+
+**10,000 rows per query, 1,000 by default**, with a `LIMIT` added if the SQL has none, and a **30-second timeout**. If you are hitting the row cap, aggregate in SQL rather than pulling raw rows.
+
+**1 MB per request.** Real MCP messages are far below this.
+
+## What is not limited
+
+<Callout kind="warning">
+  Usage is recorded and visible but **not capped**. There is no monthly allowance of calls, no ceiling on data scanned, and nothing switches off when the numbers get large — nobody will stop a client querying the same expensive thing a thousand times a day.
+</Callout>
+
+So: give each client or teammate their own key, so Tool Breakdown tells you who is doing what; check **Data Processed** after a new connection has run a week; and revoke keys showing use you can't account for ([Authentication](/mcp/authentication)).

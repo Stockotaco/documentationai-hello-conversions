@@ -1,0 +1,81 @@
+---
+title: Organizations & Projects
+description: How to create an organization, add and switch between projects, and which settings live at the organization level versus the project level.
+---
+
+Every setting in the app belongs to one of two containers: an **organization**, which holds your projects, teammates and subscription, or a **project**, which is one client account. [Core concepts](/getting-started/core-concepts) covers the model; this is how to work it.
+
+## Creating an organization
+
+From **/org/new**, reachable from the organization list at **/org**:
+
+<Steps>
+  <Step title="Name the organization">
+    Up to 100 characters. You become its **owner** — the first and, until you promote someone, the only one.
+  </Step>
+  <Step title="Choose a plan">
+    Conversions Plus+ or Reporting Suite, through checkout. Both start with a free trial. See [Plans and billing](/account/plans-billing).
+  </Step>
+  <Step title="Create your first project">
+    You land in that project's onboarding. Later projects are created from the projects page instead.
+  </Step>
+</Steps>
+
+You can belong to several organizations. The list at **/org** shows each with your role and how many projects you can see.
+
+<Callout kind="info">
+  A second organization is a second subscription. Separate client accounts are what projects are for, and keeping them in one organization keeps you on one bill. Create a second organization only when the billing relationship genuinely differs — a client who pays for their own account directly.
+</Callout>
+
+## Creating a project
+
+From **Projects → New Project**. Two fields: **Website URL** — the domain to track, which becomes the project's name — and an optional **Description**.
+
+The project appears immediately and drops you into onboarding. Its tracking client, BigQuery dataset and reporting views provision in the background, so a new project can show empty reports for a minute or two.
+
+Any organization member can create a project. The creator is added to it automatically, along with any member whose access was set to "all current and future projects" — see [Team and roles](/account/team-roles).
+
+<Callout kind="tip">
+  Name the project after the domain. The projects page pulls a favicon for names that look like domains and falls back to a letter tile for names that don't — across twenty client cards, that's the difference between scanning and reading.
+</Callout>
+
+## Finding and switching between projects
+
+Each project card shows a 30-day event sparkline, contact count and 30-day revenue. You can search by name, sort by name, events, contacts or revenue, and switch between grid and list view — the list is the denser read across many accounts.
+
+Clicking a project opens its Revenue Overview. Inside a project, the icon rail switches between **Reporting**, **Inbox** and **Settings**.
+
+Organization owners see every project. Members see only the projects they've been added to, which is what makes client-by-client separation work.
+
+## What lives at which level
+
+| Level | What it holds |
+| --- | --- |
+| **Organization** | The plan, subscription and invoices; usage and the contact total that sets your price; the member list, roles and invitations; the organization name; the bug-report webhook |
+| **Project** | Sources and destinations; connections and pipeline configuration; the tracking script and link domains; the timezone; project team access; notification settings; MCP API keys; all reporting data |
+
+Two consequences: data never crosses projects, so two clients on the same Meta account never see each other's numbers. And one subscription covers every project — adding a client project adds contacts, not a bill.
+
+Organization settings are reachable from the header on the projects page. Project settings live under **Settings** inside a project; see [Project settings](/account/project-settings).
+
+## Renaming and deleting
+
+| Action | Who | Notes |
+| --- | --- | --- |
+| Rename a project | Any project member | **Settings → Project → General**. The connected ad-platform and Stripe syncs are renamed to match. |
+| Delete a project | Organization owner | Danger Zone on the same page; type the project name to confirm. Takes the tracking client offline and tears down the syncs, integrations and connections. |
+| Rename an organization | Owner | **Organization settings → General**. The same page holds an optional bug-report webhook — a Slack incoming webhook that receives a message when an agent files a bug through the MCP server. |
+| Delete an organization | Owner | Only once it has **zero projects**. Also cancels the subscription. |
+
+<Callout kind="warning">
+  Deleting a project is irreversible. A lapsed subscription deletes nothing — resubscribing restores everything, so don't reach for delete to solve a billing problem.
+</Callout>
+
+<Columns cols={2}>
+  <Card title="Team and roles" icon="users" href="/account/team-roles" horizontal>
+    Who can do what, and how invitations work.
+  </Card>
+  <Card title="Project settings" icon="settings" href="/account/project-settings" horizontal>
+    Name, timezone, and what the timezone changes.
+  </Card>
+</Columns>

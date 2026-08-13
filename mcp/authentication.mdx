@@ -1,0 +1,73 @@
+---
+title: Authentication
+description: How Hello Conversions API keys work — project scoping, the read-only option and exactly what it blocks, optional expiry, revocation, and how to rotate a key safely.
+---
+
+Every MCP call is authenticated with an API key, created on **Settings → Developer → MCP API Keys** inside the project it belongs to.
+
+## A key belongs to one project
+
+There is no account-wide key. The project is baked into the key — the server looks it up on every call, and no parameter a client sends can point a tool somewhere else. A key you hand to a client or a contractor cannot read another account's data. Raw SQL is scoped the same way: `query` rewrites unqualified table names into the project's own dataset, and a query naming a different dataset is refused rather than run.
+
+## What a key looks like
+
+Keys start with `hc_` followed by a long random string. Hello Conversions stores the **first eight characters**, so the app can show which key is which, and a **one-way hash** of the whole key, which can confirm a key you present but cannot be turned back into it.
+
+<Callout kind="alert">
+  **The full key is shown once**, in the banner right after you generate it. Nobody can retrieve it afterwards — not another owner, not support. If you lose it, generate a new key and revoke the old one.
+</Callout>
+
+The key list then shows the prefix, name, created and last-used dates, call count, and expiry if set.
+
+## Who can create and revoke keys
+
+**Generate Key** and **Revoke** appear only for the project's owner. Others with project access see the key list — names, prefixes, status, usage — but cannot mint or revoke.
+
+## Read-only keys
+
+Every key is read-only or read-write, fixed at creation: to change one, generate a new key. **New keys are read-only unless you uncheck the box.**
+
+| A read-only key can | A read-only key cannot |
+| --- | --- |
+| Run analytics and SQL queries — KPIs, contacts, transactions, events, activity, form and product stats, customer LTV, ad spend and campaigns | Create, update or delete a destination |
+| List and inspect sources, destinations, connections and pipeline configuration | Create, update, toggle or delete a workflow connection |
+| Read connection statistics | Change pipeline configuration |
+| Report a bug to Hello Conversions | Disconnect an integration, or run a destination connectivity test |
+
+A blocked call changes nothing. The server refuses it and returns a message the client can explain to you — the tool modifies data and this key is read-only — recorded on the [Usage](/mcp/usage-limits) screen as a `read_only_denied` error.
+
+Two details: **connectivity tests are blocked** even though they change nothing in your account, because the test reaches out to Meta or Google on your behalf. **Bug reporting is deliberately allowed**, so the keys most likely to hit a broken tool aren't the ones unable to report it.
+
+<Callout kind="tip">
+  Leave keys read-only — a read-write key can delete a destination or connection, which quietly stops conversions reaching an ad platform. Mint a read-write key for the specific job that needs it, and revoke it afterwards.
+</Callout>
+
+## Expiry
+
+Tick **Set expiration date** at creation and pick a day. After it, calls come back unauthorized and the key's status changes from active to expired. Expiry is optional with no default — set one when the key has a natural end, like a contractor's engagement.
+
+## Revoking
+
+**Revoke** kills a key immediately. No confirmation, no undo — it stays in the list marked revoked and can never be reactivated. The server caches validated keys briefly to stay fast, and revoking clears that cache entry in the same action, so there is no window where a revoked key still works.
+
+## Rotating a key
+
+There is no rotate button. Order matters — doing it this way leaves no gap where the client is disconnected.
+
+<Steps>
+  <Step title="Generate a replacement" icon="plus">
+    Mint a new key with the same read-only setting and update the client — snippets in [Connect a client](/mcp/connect).
+  </Step>
+  <Step title="Revoke the old one" icon="trash-2">
+    Once the client works on the new key.
+  </Step>
+</Steps>
+
+Rotate when someone holding a key leaves, when a machine is lost or decommissioned, or whenever you are unsure where a key has been.
+
+## Treat a key like a password
+
+- **One key per person and per machine** — a shared key cannot be revoked for one holder without cutting off everyone.
+- **Never paste a key into a ticket, shared doc or chat channel**, including the connection URL that contains it.
+- **If a key may have leaked, revoke first.** A replacement takes seconds.
+- **Check "last used" occasionally** and revoke keys nobody is using.

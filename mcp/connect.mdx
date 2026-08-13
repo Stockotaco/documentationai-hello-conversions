@@ -1,0 +1,112 @@
+---
+title: Connect a Client
+description: Point Claude Code, Cursor, Claude Desktop or any MCP-capable client at the Hello Conversions MCP server, using a project-scoped API key.
+---
+
+The MCP server is hosted by Hello Conversions — nothing to install, nothing to run locally. The address is the same for everyone; the API key you send with it is what makes it your project.
+
+```
+https://mcp.helloconversions.com/mcp
+```
+
+<Steps>
+  <Step title="Open the MCP API Keys screen" icon="key-round">
+
+    In the project you want the client to read, go to **Settings → Developer → MCP API Keys**. It lists existing keys and, below them, a **Connect via MCP** panel with ready-made snippets.
+
+    <Callout kind="note">
+      **Generate Key** and **Revoke** appear only for the project's owner. If you can see the key list but not those buttons, ask the owner to mint the key.
+    </Callout>
+
+  </Step>
+
+  <Step title="Generate a key" icon="plus">
+
+    Click **Generate Key**, name it after the client that will hold it, and choose whether it is read-only — the default, and the right choice for anything that only asks questions.
+
+    Copy the key from the banner before you navigate away: only its first eight characters are stored, so it is never shown again. Scoping, expiry and revocation are covered in [Authentication](/mcp/authentication).
+
+    <Callout kind="tip">
+      While the new key is still on screen, the snippets below it are filled in with the real key. Once you dismiss the banner they fall back to a `YOUR_API_KEY` placeholder you substitute yourself.
+    </Callout>
+
+  </Step>
+
+  <Step title="Paste the configuration into your client" icon="plug">
+
+    Replace `YOUR_API_KEY` with the key you copied.
+
+    <Tabs>
+      <Tab title="Claude Code">
+
+        ```bash
+        claude mcp add --transport http hello-conversions "https://mcp.helloconversions.com/mcp?token=YOUR_API_KEY"
+        ```
+
+      </Tab>
+
+      <Tab title="Cursor">
+
+        The **Cursor** tab of the **Connect via MCP** panel has an **Add to Cursor** button — it opens Cursor and installs the server with your key in place. If nothing opens, use the **Config (JSON)** tab.
+
+      </Tab>
+
+      <Tab title="Claude Desktop / Web">
+
+        **Settings → Connectors → Add custom connector**, and paste this as the URL:
+
+        ```
+        https://mcp.helloconversions.com/mcp?token=YOUR_API_KEY
+        ```
+
+      </Tab>
+
+      <Tab title="Config (JSON)">
+
+        For Windsurf and other clients that read a config file, add this to your `.mcp.json`:
+
+        ```json
+        {
+          "mcpServers": {
+            "hello-conversions": {
+              "url": "https://mcp.helloconversions.com/mcp?token=YOUR_API_KEY"
+            }
+          }
+        }
+        ```
+
+      </Tab>
+    </Tabs>
+
+  </Step>
+
+  <Step title="Check it works" icon="circle-check">
+
+    Ask the client something verifiable — "list the tables you can see". Then open **Settings → Developer → MCP Usage**: the call appears in **Recent Calls** tagged with the key that made it, which confirms the client reached the project you meant. Allow up to a minute — see [Usage and limits](/mcp/usage-limits).
+
+  </Step>
+</Steps>
+
+## Sending the key as a header
+
+The snippets put the key in the URL because most clients only let you configure a URL. If yours can set headers, drop the `?token=` and send:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+The server reads the `Authorization` header first and falls back to the `token` query parameter.
+
+<Callout kind="warning">
+  A key in a URL is still a password — it lands in the client's config file, and anything that logs URLs logs it. Never paste a connection URL into a shared doc, ticket or chat channel. Mint one key per person and machine so a leak can be revoked on its own.
+</Callout>
+
+## If the connection fails
+
+| What you see | What it means |
+| --- | --- |
+| "Invalid or missing API key" (HTTP 401) | The key is wrong, expired or revoked. Check the status badge on **MCP API Keys**. |
+| Connects, but every tool that changes something is refused | The key is read-only — the default. See [Authentication](/mcp/authentication). |
+| Retries forever, or complains about SSE | The client is trying the retired HTTP+SSE transport. This server speaks Streamable HTTP only. |
+| "Rate limit exceeded" | Past 100 tool calls in a minute on that key — see [Usage and limits](/mcp/usage-limits). |
+| Connects, but returns the wrong project's numbers | Not possible: a key is bound to one project. The key belongs to a different project than you assumed — check its prefix against the key list. |
