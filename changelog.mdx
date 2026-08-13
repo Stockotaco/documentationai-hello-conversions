@@ -1,0 +1,149 @@
+---
+title: Changelog
+description: Version history, recent updates, new features, and changes for Hello Conversions.
+---
+
+## Recent Updates
+
+<Update label="2024-12-05" description="v2.1.0" tags={["feature", "improvement"]}>
+
+## New Features
+
+- Added TikTok Ads integration for server-side conversion tracking.
+- Introduced custom dashboard widgets for revenue attribution breakdowns.
+
+## Improvements
+
+- Enhanced GHL pipeline syncing with real-time form submission tracking.
+- Optimized Meta Ads data passback for faster event reporting.
+
+## Bug Fixes
+
+- Fixed intermittent iOS conversion loss due to privacy settings.
+- Resolved dashboard refresh delays during high-traffic periods.
+
+</Update>
+
+<Update label="2024-11-20" description="v2.0.0" tags={["feature", "breaking"]}>
+
+## New Features
+
+- Launched revenue analytics dashboard with daily ops metrics.
+- Added Google Ads offline conversion import support.
+
+## Breaking Changes
+
+- Updated API endpoints from `/v1/track` to `/v2/events` for better performance. Migrate your webhooks accordingly.
+
+## Improvements
+
+- Improved ad blocker bypass accuracy to capture `>95%` of conversions.
+
+</Update>
+
+<Update label="2024-10-15" description="v1.9.0" tags={["bugfix", "improvement"]}>
+
+## Bug Fixes
+
+- Corrected GHL calendar event attribution mismatches.
+- Fixed email open tracking discrepancies in analytics.
+
+## Improvements
+
+- Reduced setup time to under 60 seconds with one-click GHL connector.
+- Added export to CSV for all dashboard reports.
+
+</Update>
+
+## Upgrade Instructions
+
+Follow these steps to update Hello Conversions and apply the latest changes.
+
+<Steps>
+  <Step title="Backup Your Config" icon="database">
+
+    Export your current settings from the dashboard.
+
+````bash
+# From CLI, if using our SDK
+helloconversions config export --file backup.json
+````
+
+  </Step>
+  <Step title="Update Client" icon="download">
+
+    Install the latest version via your package manager.
+
+````javascript
+// npm
+npm install helloconversions@latest
+
+// Or yarn
+yarn add helloconversions@latest
+````
+
+  </Step>
+  <Step title="Migrate Endpoints" icon="settings">
+
+    Update any custom scripts to use new v2 endpoints.
+
+    <Callout kind="alert">
+      Test in staging before production deployment.
+    </Callout>
+
+  </Step>
+  <Step title="Verify Tracking" icon="check-circle">
+
+    Monitor the dashboard for `>99%` conversion capture rate.
+
+  </Step>
+</Steps>
+
+## Upcoming Roadmap
+
+Track our planned features and improvements.
+
+<Board title="Hello Conversions Roadmap">
+  <BoardColumn title="Planned" color="0" icon="calendar">
+    <BoardCard
+      title="Server-side GTM Integration"
+      description="Full Google Tag Manager support for advanced tracking"
+      icon="zap"
+      dueDate="2025-01-15"
+    />
+    <BoardCard
+      title="AI Attribution Insights"
+      description="Automated ad performance recommendations"
+      icon="brain"
+    />
+  </BoardColumn>
+  <BoardColumn title="In Progress" color="1" icon="loader-2">
+    <BoardCard
+      title="Klavyio Email Sync"
+      description="Deeper email campaign attribution"
+      author="Engineering Team"
+    />
+  </BoardColumn>
+  <BoardColumn title="Completed" color="2" icon="check-circle">
+    <BoardCard
+      title="Custom Dashboards"
+      description="Fully released in v2.1.0"
+      createdAt="2024-12-05"
+    />
+  </BoardColumn>
+</Board>
+
+## Additional Resources
+
+<Columns cols={2}>
+  <Card title="Quickstart Guide" icon="book-open" href="/quickstart">
+    Set up tracking in 90 seconds.
+  </Card>
+  <Card title="Integrations" icon="plug" href="/introduction">
+    Connect Meta, Google, and GHL.
+  </Card>
+</Columns>
+
+<Callout kind="tip">
+  Check your version in the dashboard settings. Report issues via support@helloconversions.com.
+</Callout>

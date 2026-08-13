@@ -1,0 +1,174 @@
+---
+title: Quickstart
+description: Get started with Hello Conversions in under 90 seconds: sign up, connect GHL, and view your first live conversion data.
+---
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+<Callout kind="info">
+
+- An active GoHighLevel (`GHL`) account with admin access
+- Connected ad accounts on Meta, Google Ads, or TikTok
+- A web browser (Chrome recommended for best experience)
+
+</Callout>
+
+## Complete Setup in 90 Seconds
+
+Follow these steps to connect your `GHL` account and see live conversion data.
+
+<Steps>
+  <Step title="Start Your Free Trial" icon="user-plus">
+
+    Visit the [pricing page](https://helloconversions.com/pricing) and click **Start 7-Day Free Trial**.
+
+    Fill out the form with your email and create a password. No credit card required.
+
+    After signup, you'll land on the [dashboard](https://cloud.helloconversions.com).
+
+  </Step>
+
+  <Step title="Connect GoHighLevel" icon="link">
+
+    In the dashboard, navigate to **Integrations > GoHighLevel**.
+
+    Copy your `GHL` API key from your `GHL` account settings (under **Settings > API Keys**).
+
+    Paste the key into Hello Conversions and click **Connect**.
+
+    <CodeGroup tabs="GHL API Key">
+
+    ````bash
+    # Example GHL API key format (yours will be longer)
+    YOUR_GHL_API_KEY_HERE
+    ````
+
+    ````json
+    {
+      "api_key": "YOUR_GHL_API_KEY_HERE"
+    }
+    ````
+
+    </CodeGroup>
+
+  </Step>
+
+  <Step title="Add Tracking Script" icon="code">
+
+    Hello Conversions generates a tracking script. Copy it from **Setup > Tracking Code**.
+
+    Paste the script into your `GHL` site's `<head>` section (via Custom Code or site builder).
+
+    <CodeGroup tabs="JavaScript,jQuery">
+
+    ````javascript
+    <!-- Hello Conversions Tracking Script -->
+    <script>
+      (function(h,e,l,l,o,c,o,n,s) {
+        h[o] = h[o] || {q:[],c:function(){this.q.push(arguments)}};
+        s = document.createElement('script');
+        s.src = 'https://cloud.helloconversions.com/tracker.js';
+        s.async = true;
+        document.head.appendChild(s);
+      })(
+        window, document, 'HelloConversions', 'tracker', 'hcq'
+      );
+      hcq('init', 'YOUR_ACCOUNT_ID');
+    </script>
+    ````
+
+    ````javascript
+    // jQuery version (if preferred)
+    $.getScript('https://cloud.helloconversions.com/tracker.js', function() {
+      window.hcq('init', 'YOUR_ACCOUNT_ID');
+    });
+    ````
+
+    </CodeGroup>
+
+    Replace `YOUR_ACCOUNT_ID` with your dashboard account ID.
+
+  </Step>
+
+  <Step title="Verify First Conversions" icon="check-circle">
+
+    Trigger a test form submission or purchase in your `GHL` funnel.
+
+    Refresh the Hello Conversions dashboard. Events appear in **Real-Time Events** within seconds.
+
+    Check **Daily Rev Ops** for revenue and conversion metrics.
+
+    <Callout kind="success">
+
+      Success! You now track every conversion, bypassing ad blockers and iOS limits.
+
+    </Callout>
+
+  </Step>
+</Steps>
+
+## Connect Ad Platforms
+
+Link your ad accounts for full attribution.
+
+<Tabs>
+  <Tab title="Meta Ads" icon="facebook">
+
+    Go to **Integrations > Meta**.
+
+    Authorize with your Meta Business Manager.
+
+    Select campaigns to track conversions back to `GHL`.
+
+  </Tab>
+
+  <Tab title="Google Ads" icon="search">
+
+    Navigate to **Integrations > Google**.
+
+    Grant access via Google Ads account.
+
+    Map conversions to `GHL` events.
+
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<Columns cols={2}>
+  <Card title="Explore Dashboard" icon="bar-chart-3" href="/dashboard">
+    Dive into revenue analytics and pipeline insights.
+  </Card>
+
+  <Card title="Custom Dashboards" icon="layout-dashboard" href="/custom-dashboards">
+    Build personalized views for your team.
+  </Card>
+
+  <Card title="Integrations" icon="plug" href="/integrations">
+    Connect TikTok, email, and more platforms.
+  </Card>
+
+  <Card title="Troubleshooting" icon="help-circle" href="/troubleshooting">
+    Common setup issues and fixes.
+  </Card>
+</Columns>
+
+<Expandable title="Advanced: Test Webhook (Optional)" default-open="false">
+
+  For custom events, set up a webhook in `GHL`:
+
+  ```
+  https://api.helloconversions.com/webhooks/ghl
+  ```
+
+  Use header: `Authorization: Bearer YOUR_API_KEY`.
+
+</Expandable>
+
+<Callout kind="tip">
+
+  Setup takes `<90 seconds`. If data doesn't appear, check script placement and `GHL` permissions.
+
+</Callout>

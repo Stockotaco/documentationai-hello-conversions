@@ -1,0 +1,27 @@
+---
+title: No Conversions Showing
+description: Fix when conversions aren’t tracked.
+---
+
+## Symptoms
+- Conversion events are missing in dashboard
+- No data on ad platforms
+
+## Causes
+- Script not installed
+- Pixel blocked by browser
+
+## Quick Fix
+<Steps>
+  <Step title="Check script installation">
+    ````html
+    Ensure the Hello Conversions script is added before </head> in every funnel page.
+    ````
+  </Step>
+  <Step title="Clear cache or use incognito">
+    Cached pages may run old scripts; try incognito mode.
+  </Step>
+  <Step title="Re-test conversion">
+    Fill out your funnel form again to verify tracking.
+  </Step>
+</Steps>
