@@ -1,0 +1,11 @@
+{
+  "name": "documentationai-hello-conversions",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-components.mjs && node scripts/check-openapi.mjs api-reference"
+  },
+  "devDependencies": {
+    "yaml": "^2.7.0"
+  }
+}

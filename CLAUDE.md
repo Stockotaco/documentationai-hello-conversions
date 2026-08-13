@@ -7,11 +7,12 @@ The public docs site for **Hello Conversions**, published at documentation.ai. M
 ## Before committing
 
 ```bash
-git config core.hooksPath .githooks     # once per clone — wires the check below
-node scripts/check-components.mjs       # every .mdx, or pass specific files
+git config core.hooksPath .githooks     # once per clone — wires the checks below
+npm install                             # once per clone — the openapi check needs `yaml`
+npm run check                           # both checks over the whole repo
 ```
 
-The pre-commit hook runs it against staged files.
+Individually: `node scripts/check-components.mjs [file...]` (defaults to every `.mdx`) and `node scripts/check-openapi.mjs api-reference` (accepts files or dirs). The pre-commit hook runs each against the staged files of its kind.
 
 ## Components
 
@@ -23,7 +24,7 @@ Full component reference: the `documentation-ai` skill.
 
 ## OpenAPI
 
-An unquoted comma or colon inside a YAML flow mapping — `description: Raw upstream detail, when there is one.` — parses locally into a junk key and gets the whole spec rejected by the site. Quote any flow-mapping string containing `,` or `:`.
+An unquoted comma or colon inside a YAML flow mapping — `{ name: id, in: query, description: Raw upstream detail, when there is one. }` — is *valid YAML*. It parses into `description: "Raw upstream detail"` plus a junk key `when there is one.` with a null value, so a parse check passes and the site then rejects the whole spec with "must NOT have additional properties". Quote any flow-mapping string containing `,` or `:`. `scripts/check-openapi.mjs` catches exactly this — it flags null-valued keys and unknown keys on parameter objects.
 
 ## Navigation
 
