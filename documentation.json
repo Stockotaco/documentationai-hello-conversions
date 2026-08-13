@@ -316,5 +316,18 @@
   "template": "atlas",
   "logo-dark": "https://blob-cdn.documentation.ai/org-fc95cd15-c077-4392-93a6-0386943df3a9/doc-3bcc8076-79cb-46b0-ae94-3b4ce3e0efaa/1786595560886-ee72m4ptda-Logo.Logo?fm=auto&auto=compress%2Cformat",
   "logo-light": "https://blob-cdn.documentation.ai/org-fc95cd15-c077-4392-93a6-0386943df3a9/doc-3bcc8076-79cb-46b0-ae94-3b4ce3e0efaa/1786595560886-ee72m4ptda-Logo.Logo?fm=auto&auto=compress%2Cformat",
-  "favicon": "https://blob-cdn.documentation.ai/org-fc95cd15-c077-4392-93a6-0386943df3a9/doc-3bcc8076-79cb-46b0-ae94-3b4ce3e0efaa/1786595589881-i23zvgms628-favicon.favicon?fm=auto&auto=compress%2Cformat"
+  "favicon": "https://blob-cdn.documentation.ai/org-fc95cd15-c077-4392-93a6-0386943df3a9/doc-3bcc8076-79cb-46b0-ae94-3b4ce3e0efaa/1786595589881-i23zvgms628-favicon.favicon?fm=auto&auto=compress%2Cformat",
+  "navbar": {
+    "actions": {
+      "primary": {
+        "title": "Login",
+        "link": "https://cloud.helloconversions.com/login"
+      }
+    }
+  },
+  "scripts": [
+    {
+      "src": "scripts/iris.js"
+    }
+  ]
 }
