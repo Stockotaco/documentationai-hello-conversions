@@ -3,38 +3,36 @@ title: Marketing Efficiency
 description: Spend against revenue for a project — how ad spend is joined to sales, what MER, CAC and attributed sales actually measure, and why this report moves with Lead LTV.
 ---
 
-**Reporting → Revenue → Marketing Efficiency** puts ad spend and revenue on the same page: what did we spend, what came back, and through which channel and campaign? Where [Revenue Overview](/reporting/revenue-overview) is the ledger and [Lead LTV](/reporting/lead-ltv) follows leads forward in time, this is the in-period view — everything is measured inside the window you selected.
-
-## What it needs connected
+**Reporting → Revenue → Marketing Efficiency** puts ad spend and revenue on one page. Where [Revenue Overview](/reporting/revenue-overview) is the ledger and [Lead LTV](/reporting/lead-ltv) follows leads forward in time, this is the in-period view.
 
 | Requirement | What it powers |
 | --- | --- |
-| **[GoHighLevel](/connect/sources/gohighlevel) contacts** | New Leads, all attribution, the customer classification |
+| **[GoHighLevel](/connect/sources/gohighlevel) contacts** | New Leads, all attribution, customer classification |
 | **GoHighLevel transactions** | Sales, AOV, first-time vs existing revenue, Products |
-| **[Meta Ads](/connect/sources/meta-ads) / [Google Ads](/connect/sources/google-ads)** | Ad Spend, MER, CAC, Channel Performance, the campaign table |
+| **[Meta Ads](/connect/sources/meta-ads) / [Google Ads](/connect/sources/google-ads)** | Ad Spend, MER, CAC, Channel Performance, campaigns |
 
 Without ad sources the revenue half still works and spend-derived figures are empty. Without GoHighLevel there is no report.
 
 <Callout kind="alert">
-  This report shares its lead data with [Lead LTV](/reporting/lead-ltv) — both are built on the same table of leads and their attribution, rebuilt once a day — so **a gap in one shows up in the other**. Most commonly: a lead is a contact **with an email address**, so contacts captured without one are counted by neither report. If New Leads here looks low, Lead LTV will be low in exactly the same way, and the fix is upstream in the CRM.
+  This report shares its lead data with [Lead LTV](/reporting/lead-ltv) — same table, rebuilt once a day — so **a gap in one shows up in the other**. Most commonly: a lead is a contact **with an email address**, so contacts captured without one are counted by neither. If New Leads looks low, Lead LTV is low identically, and the fix is upstream in the CRM.
 </Callout>
 
-## The headline KPIs
+## Headline KPIs
 
 | Tile | What it measures |
 | --- | --- |
-| **Sales** | Settled revenue in the window, net of refunds. |
-| **Ad Spend** | Meta plus Google spend in the window. |
-| **MER** | Sales ÷ Ad Spend. Marketing efficiency ratio, across everything. |
-| **AOV** | Sales ÷ transactions. |
-| **New Leads** | Contacts captured in the window. |
-| **New Customers** | People whose first-ever purchase fell in the window. |
+| **Sales** | Settled revenue in the window, net of refunds |
+| **Ad Spend** | Meta plus Google spend in the window |
+| **MER** | Sales ÷ Ad Spend |
+| **AOV** | Sales ÷ transactions |
+| **New Leads** | Contacts captured in the window |
+| **New Customers** | People whose first-ever purchase fell in the window |
 
-**Sales is narrower here than on Revenue Overview.** It counts GoHighLevel transactions that are settled, live, **denominated in USD** and **attached to a contact**. Non-USD sales are excluded outright — not converted, excluded — as is any transaction with no contact. A multi-currency account reads lower here by design: a sale it can't attribute to a person is a sale it can't attribute to a channel.
+**Sales is narrower here than on Revenue Overview.** It counts GoHighLevel transactions that are settled, live, **denominated in USD** and **attached to a contact**. Non-USD sales are excluded, not converted. A multi-currency account reads lower by design: a sale it can't attribute to a person is one it can't attribute to a channel.
 
-MER is blended — *all* revenue over *all* spend, including revenue that had nothing to do with advertising. Right for "is the business efficient", wrong for "is Meta working".
+MER is blended — all revenue over all spend, including revenue advertising had nothing to do with. Right for "is the business efficient", wrong for "is Meta working".
 
-## The efficiency tiles
+## Efficiency tiles
 
 | Tile | How it's derived |
 | --- | --- |
@@ -45,64 +43,62 @@ MER is blended — *all* revenue over *all* spend, including revenue that had no
 | **Existing Customers** | Buyers in the window who had bought before it |
 | **Existing Customer Revenue** | Their revenue |
 
-<Callout kind="warning">
-  Both cost tiles are **blended**: total ad spend over total leads or customers, whether or not those people came from ads. On an account with meaningful organic or referral flow they read better than true paid CAC. Read them as a trend on one account rather than a benchmark between accounts, and use Channel Performance for per-channel cost.
-</Callout>
-
 First-time versus existing is decided by a contact's **first-ever** purchase date, not their first in your window.
+
+<Callout kind="warning">
+  Both cost tiles are **blended**: total spend over total leads or customers, whether or not those people came from ads. With meaningful organic or referral flow they read better than true paid CAC. Treat them as a trend on one account, not a benchmark between accounts, and use Channel Performance for per-channel cost.
+</Callout>
 
 ## Channel Performance
 
-Where spend gets joined to revenue per channel. The join is the part clients query:
-
 | Column | How it's derived |
 | --- | --- |
-| **Channel** | Every lead's resolved source bucketed as **Meta**, **Google** or other. The match is deliberately tolerant — `meta-ads`, `fb_lead`, `ig-30dl` and `social-media` all land where you'd expect. |
-| **Spend** | From the ad platforms, per provider, for your window. |
-| **Attributed sales** | Transactions in your window from contacts whose source maps to that channel, using their attribution **whenever they became a lead** — so a contact who came from Meta a year ago and buys today counts as Meta revenue today. That's the honest treatment of a long sales cycle, and why attributed sales can exceed what the ad platform reports. |
-| **Leads / Customers** | Counted from leads captured **in the window**. Customers means "leads from this window who have ever converted". |
-| **CAC** | That channel's spend ÷ that customer count. |
+| **Channel** | Every lead's resolved source bucketed as **Meta**, **Google** or other. Deliberately tolerant — `meta-ads`, `fb_lead`, `ig-30dl` and `social-media` all land where you'd expect |
+| **Spend** | From the ad platforms, per provider, for your window |
+| **Attributed sales** | Transactions in your window from contacts whose source maps to that channel, using their attribution **whenever they became a lead** — so a contact from Meta a year ago who buys today counts as Meta revenue today. The honest treatment of a long sales cycle, and why this can exceed what the ad platform reports |
+| **Leads / Customers** | Counted from leads captured **in the window**; Customers means "leads from this window who have ever converted" |
+| **CAC** | That channel's spend ÷ that customer count |
 
 <Callout kind="warning">
-  Attributed sales and Leads/Customers use different populations on purpose, so the row is internally inconsistent read as arithmetic: attributed sales look at all-time leads buying now, Leads and Customers at this window's leads. A channel can show high attributed sales and few customers, or the reverse, without either being wrong. Compare each column against its own history rather than dividing one by another.
+  Attributed sales and Leads/Customers use different populations on purpose, so the row is inconsistent read as arithmetic — attributed sales look at all-time leads buying now, Leads and Customers at this window's leads. A channel can show high attributed sales and few customers without either being wrong. Compare each column against its own history rather than dividing one by another.
 </Callout>
 
-A **Low source attribution coverage** warning appears above the table when fewer than 5% of the window's leads resolve to a paid source at all — every channel figure below it is then built on a sliver of your traffic. It's a tracking alarm, not a display quirk, and usually means UTMs are missing from the ads. [Meta Ads](/connect/sources/meta-ads) and [Google Ads](/connect/sources/google-ads) cover the tagging each platform needs.
+A **Low source attribution coverage** warning appears when fewer than 5% of the window's leads resolve to a paid source, meaning every channel figure below is built on a sliver of your traffic. It's a tracking alarm, usually missing UTMs on the ads.
 
 ## The campaign table
 
-Spend, clicks, impressions, CPM and CPC come straight from the ad platform per campaign. Sales attribution is harder, because clients tag campaigns inconsistently — some put the campaign name in `utm_campaign`, some the platform's numeric ID, and GoHighLevel separately parses `utm_id` into its own field.
+Spend, clicks, impressions, CPM and CPC come straight from the ad platform. Sales attribution is harder: clients tag campaigns inconsistently, some using the campaign name in `utm_campaign`, some the numeric ID, and GoHighLevel separately parses `utm_id` into its own field.
 
-Rather than pick one convention, the report tries four in order and takes the first that lands: the lead's UTM campaign matched as an **ID**, then as a **name**, then GoHighLevel's parsed campaign as an **ID**, then as a **name**. Each row shows which route matched.
+The report tries four routes in order and takes the first that lands — UTM campaign as **ID**, UTM campaign as **name**, GoHighLevel's parsed campaign as **ID**, then as **name**. Each row shows which matched.
 
-- **When nothing matches**, attributed sales and MER are **blank** rather than zero — an empty cell means "couldn't attribute", not "made no money".
-- **Campaigns with no spend in the window are not listed**, and the table shows the top 100 by spend. A paused campaign still producing sales won't appear.
+- **When nothing matches**, attributed sales and MER are **blank** rather than zero. An empty cell means "couldn't attribute", not "made no money".
+- **Campaigns with no spend in the window are not listed**, and the table caps at the top 100 by spend. A paused campaign still producing sales won't appear.
 
-The **Products** table below groups the window's transactions by product name from GoHighLevel. Stripe-sourced revenue carries no groupable product name, so this is GoHighLevel-only.
+**Products** below groups the window's transactions by GoHighLevel product name. Stripe-sourced revenue carries no groupable product name, so this is GoHighLevel-only.
 
-## Filters, and what they do to the numbers
+## Filters
 
-Source, medium, form and campaign filters all take **several values at once**. Attribution switches every lead between first-touch and last-touch source; last touch is the default.
+Source, medium, form and campaign filters each take **several values at once**. Attribution switches every lead between first-touch and last-touch; last touch is the default.
 
 | State | Which transactions count |
 | --- | --- |
-| **No filter active** | Every settled USD transaction in the window, whoever made it. |
-| **Any filter active** | Only transactions from contacts matching the filter — matched across their whole history, not just leads captured in this window. |
+| **No filter** | Every settled USD transaction in the window, whoever made it |
+| **Any filter** | Only transactions from contacts matching the filter — matched across their whole history, not just leads captured in this window |
 
-With no filter, a sale today from someone who became a lead 18 months ago is real revenue. Ask "what did Meta produce" and the question becomes one about a population. Expect Sales to drop when you apply your first filter — the denominator changed, the data didn't disappear.
+Expect Sales to drop when you apply your first filter. The denominator changed; the data didn't disappear.
 
 ## Freshness
 
-Spend and lead data come from a snapshot rebuilt **once a day in the project's timezone**; the sales side is queried live on each page load. The header chip shows the last successful rebuild, and a **Refresh failed** chip if the most recent attempt errored — in which case spend and lead figures are the last good build. The refresh button re-runs the queries; it doesn't rebuild the snapshot.
+Spend and lead data come from a snapshot rebuilt **once a day in the project's timezone**; the sales side is queried live per page load. The header chip shows the last successful rebuild, or **Refresh failed** if the latest attempt errored — in which case spend and lead figures are the last good build. The refresh button re-runs queries; it does not rebuild the snapshot.
 
 ## When a number looks wrong
 
 | Symptom | Cause |
 | --- | --- |
-| Sales is lower than [Revenue Overview](/reporting/revenue-overview) | Expected on some accounts. This report counts USD-only, contact-attached GoHighLevel transactions; Revenue Overview counts everything settled and prefers Stripe's own figure for charges Stripe processed. Non-USD and unattached sales are the gap |
-| New Leads is lower than the CRM's contact count | Contacts without an email address aren't leads. [Lead LTV](/reporting/lead-ltv) shows the same shortfall — same underlying data |
-| Ad spend is zero but the platform shows spend | The ad source isn't connected, or its sync hasn't landed. Check **Settings → Integrations → Sources** |
-| Attributed sales far below the ad platform's reported conversions | The platform credits a click; this report credits a lead record that carries a source, so leads arriving without UTMs are invisible to the join. The Low source attribution coverage warning tells you when that's dominant |
-| A campaign shows spend and a blank attributed sales cell | Nothing in the window matched through any of the four routes. Check the ads carry UTMs and that the campaign name or ID in the UTM matches what the platform reports |
-| The numbers moved and no one changed anything | The daily rebuild landed, or a source finished a sync. The header chip gives the exact time |
-| Marketing Efficiency and Lead LTV disagree about revenue | Different measures on the same leads: this report counts transactions inside your window, Lead LTV counts revenue produced by leads captured in your window whenever it arrived. A long sales cycle makes them diverge sharply, and that divergence is usually the most interesting thing on either page |
+| Sales lower than [Revenue Overview](/reporting/revenue-overview) | Expected on some accounts. This report counts USD-only, contact-attached GoHighLevel transactions; Revenue Overview counts everything settled and prefers Stripe's figure for charges Stripe processed |
+| New Leads lower than the CRM's contact count | Contacts without an email address aren't leads. [Lead LTV](/reporting/lead-ltv) shows the same shortfall |
+| Ad spend zero but the platform shows spend | The ad source isn't connected, or its sync hasn't landed. Check **Settings → Integrations → Sources** |
+| Attributed sales far below the platform's reported conversions | The platform credits a click; this credits a lead record carrying a source, so leads arriving without UTMs are invisible to the join |
+| A campaign shows spend and a blank attributed sales cell | Nothing matched through any of the four routes. Check the ads carry UTMs and that the name or ID matches what the platform reports |
+| The numbers moved and nobody changed anything | The daily rebuild landed, or a source finished a sync. The header chip gives the time |
+| Marketing Efficiency and Lead LTV disagree about revenue | Different measures on the same leads: this counts transactions inside your window, Lead LTV counts revenue from leads captured in your window whenever it arrived. A long sales cycle makes them diverge sharply |

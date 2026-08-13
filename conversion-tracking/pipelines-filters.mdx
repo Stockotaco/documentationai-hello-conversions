@@ -3,64 +3,54 @@ title: Pipelines & Filters
 description: Decide which GoHighLevel activity counts as a lead, a booking, or a purchase — using pipeline stages and per-connection filter rules.
 ---
 
-"How many leads did we get?" only has an answer once you've decided what a lead *is*. In GoHighLevel that's usually a pipeline stage. Purchases are different — they come from order and transaction events rather than the pipeline.
+"How many leads did we get?" only has an answer once you've decided what a lead *is*. In GoHighLevel that's usually a pipeline stage. Purchases are different — they come from order and transaction events.
 
 ## Leads and bookings: pipeline stages
 
-**Settings → Workflows → Pipelines** pulls the pipelines and stages live from the connected Lead Connector (GoHighLevel) account. The header tells you how many stages are active out of the total, and each stage is a row you can switch on.
+**Settings → Workflows → Pipelines** pulls pipelines and stages live from the connected Lead Connector account. Each stage is a row you can switch on.
 
 <Steps>
   <Step title="Find the stage">
-    Search matches on pipeline name, stage name, or event name. The pipeline dropdown narrows to specific pipelines, **Active Only** hides everything switched off, and the sort control orders stages by pipeline order, alphabetically, or active-first. **Collapse all** makes the page usable on a client with a lot of pipelines.
+    Search matches pipeline name, stage name, or event name. **Active Only** hides everything switched off; sort orders by pipeline order, alphabetically, or active-first.
   </Step>
   <Step title="Name the event">
-    Each stage gets an event name, pre-filled from the stage name in lowercase with underscores — `Call Booked` becomes `call_booked`. This is what the destination receives, so change it to whatever the ad platform should see (`Lead`, `Schedule`, `Purchase`). A pencil icon marks a customized name.
+    Pre-filled from the stage name in lowercase with underscores — `Call Booked` becomes `call_booked`. This is what the destination receives, so change it to whatever the ad platform should see (`Lead`, `Schedule`, `Purchase`). A pencil icon marks a customized name.
   </Step>
   <Step title="Choose the value">
-    **Opp. Value** sends the opportunity's own monetary value from GoHighLevel — right when opportunities carry realistic amounts. **Custom** applies one fixed value to every conversion at this stage — right when the pipeline value is empty or aspirational.
+    **Opp. Value** sends the opportunity's own amount from GoHighLevel — right when opportunities carry realistic values. **Custom** applies one fixed value to every conversion at this stage — right when the pipeline value is empty or aspirational.
   </Step>
-  <Step title="Switch the stage on and pick destinations">
-    Flip the toggle and a **Send events to** row appears listing the project's connected destinations. Select every one that should receive this stage; with none selected the page warns you, and the stage does nothing.
+  <Step title="Switch it on and pick destinations">
+    A **Send events to** row appears listing connected destinations. With none selected the stage does nothing and the page warns you.
   </Step>
   <Step title="Set the Google Ads conversion action">
-    Google Ads destinations get a gear icon on their card. Google keys on a conversion action rather than an event name, so open it and pick which action this stage maps to. An amber dot means none is selected yet.
+    Google keys on a conversion action rather than an event name, so open the gear icon on a Google Ads card and pick one. An amber dot means none is selected yet.
   </Step>
   <Step title="Save">
-    **Save Changes** in the unsaved-changes bar applies everything at once; **Discard** reverts to the last saved state.
+    **Save Changes** applies everything at once; **Discard** reverts to the last saved state.
   </Step>
 </Steps>
 
-**Enable All** in a pipeline's header switches every stage in it on or off at once.
+**Enable All** in a pipeline header toggles every stage in it.
 
 <Callout kind="warning">
-  Switching on every stage sends a conversion at each step of the journey — one contact moving through five active stages produces five conversions. If you're feeding an ad platform's optimization, pick the one or two stages that represent the outcome you're buying.
+  Switching on every stage sends a conversion at each step — one contact moving through five active stages produces five conversions. If you're feeding an ad platform's optimization, pick the one or two stages representing the outcome you're buying.
 </Callout>
 
-### What a stage fires on
+A stage fires when an opportunity **arrives** at it — both created directly in it and moved into it. Behind the scenes that's a connection listening for Opportunity Changed, filtered to that pipeline and stage. Stage-managed connections deliberately don't appear on the [Connections](/conversion-tracking/connections) screen, since hundreds of stages would bury the ones you built by hand; what they deliver still shows in the [Activity Log](/conversion-tracking/activity-history).
 
-An active stage sends its event when an opportunity **arrives at that stage** — both when one is created directly in it and when an existing one is moved into it.
-
-Behind the scenes this builds a connection listening for Opportunity Changed, filtered to that one pipeline and stage. Stage-managed connections deliberately don't appear on the [Connections](/conversion-tracking/connections) screen, because hundreds of stages would bury the connections you built by hand. What they deliver still shows up in the [Activity Log](/conversion-tracking/activity-history).
-
-<Callout kind="note">
-  If a project's pipelines don't load, Lead Connector isn't connected for that project — fix that under **Settings → Integrations → Sources**. Likewise, if no destinations appear under a stage, none are connected yet.
-</Callout>
+If pipelines don't load, Lead Connector isn't connected — fix it under **Settings → Integrations → Sources**. If no destinations appear under a stage, none are connected yet.
 
 ## Purchases
 
-Purchases come from GoHighLevel's order and transaction events, wired up as ordinary connections: pick **Made Any Purchase**, **Product Purchased**, **Subscription Started**, or **Subscription Rebilled** as the source event and point it at a destination. Which to use, and how the three differ in timing and coverage, is in [Event Types](/conversion-tracking/event-types).
+Wired as ordinary connections: pick **Made Any Purchase**, **Product Purchased**, **Subscription Started**, or **Subscription Rebilled** as the source event and point it at a destination. Which to use, and how they differ in timing and coverage, is in [Event Types](/conversion-tracking/event-types).
 
 ## Filters
 
-Every connection can carry filter rules. A rule is a **field**, an **operator**, and a **value**; an event that fails is recorded as **filtered** and nothing is sent. With two or more rules you get a logic toggle: **AND** (the default) requires every rule to pass, **OR** requires any one.
+A rule is a **field**, an **operator**, and a **value**. An event that fails is recorded as **filtered** and nothing is sent. With two or more rules, **AND** (default) requires every rule to pass, **OR** any one.
 
-<Callout kind="tip">
-  Filters are also a diagnostic. Filtered runs appear in the Activity Log with the reason attached, so if a client insists a conversion should have fired, you can show them which rule stopped it.
-</Callout>
+Filtered runs appear in the Activity Log with the reason attached, so when a client insists a conversion should have fired you can show them which rule stopped it.
 
-### Which fields you can filter on
-
-The available fields depend on the source event, because the fields only exist on those events.
+### Fields, by source event
 
 | Source event | Fields you can filter on |
 | --- | --- |
@@ -72,38 +62,38 @@ The available fields depend on the source event, because the fields only exist o
 | Contact Created | Contact Source, Session Source |
 
 <Callout kind="note">
-  Subscription Started and Subscription Rebilled have no filter fields — the list will be empty. They're already narrowed by their own definition (a charge with a subscription attached, split by whether it's the first charge or a rebill), so filter them by choosing the right one of the two.
+  Subscription Started and Subscription Rebilled have no filter fields — the list is empty. They're already narrowed by definition (a charge with a subscription attached, split by first charge vs rebill), so filter them by choosing the right one of the two.
 </Callout>
 
 ### Operators
 
 | Operator | Works on | Notes |
 | --- | --- | --- |
-| equals / not equals | text, numbers | Exact match. |
+| equals / not equals | text, numbers | Exact match |
 | greater than / greater than or equal | numbers | |
 | less than / less than or equal | numbers | |
-| contains / does not contain | text | Case-insensitive. |
-| exists / does not exist | text, numbers | No value needed — checks the field is present and not empty. |
-| is one of / is not one of | text | Takes a comma-separated list. |
+| contains / does not contain | text | Case-insensitive |
+| exists / does not exist | text, numbers | No value needed — checks the field is present and not empty |
+| is one of / is not one of | text | Comma-separated list |
 
-As you type a value, Hello Conversions suggests real values it has seen on that field in this project's recent events. You can always type one that isn't listed.
+As you type a value, Hello Conversions suggests real values seen on that field in recent events. You can always type one that isn't listed.
 
 ### Examples
 
-**Only count opportunities that reach one stage**, on a connection with the source event **Opportunity Changed**. Add a second rule with AND logic if two pipelines share the stage name:
+Only count opportunities reaching one stage (source event **Opportunity Changed**):
 
 ```
 Pipeline Name  equals  Aesthetics – New Patients
 Stage Name     equals  Call Booked
 ```
 
-**Ignore small orders**, on a connection with the source event **Made Any Purchase** — useful when a client sells both a cheap tripwire and a high-ticket offer through one funnel:
+Ignore small orders, on **Made Any Purchase** — useful when a client sells a cheap tripwire and a high-ticket offer through one funnel:
 
 ```
 Monetary Value  greater than or equal  500
 ```
 
-**Only send purchases that came from ads**, or **group several funnels onto one connection** with *is one of*:
+Only send purchases that came from ads, or group several funnels onto one connection:
 
 ```
 Facebook Click ID  exists
@@ -111,5 +101,5 @@ Funnel Name  is one of  Free Guide, Webinar Reg, Quiz Funnel
 ```
 
 <Callout kind="warning">
-  Filters match the event's fields exactly as GoHighLevel sends them, so a renamed pipeline stage silently stops matching a rule that names it. Filtering on **Stage ID** or **Pipeline ID** survives renames — less readable, but it doesn't break when a client tidies up their pipeline.
+  Filters match fields exactly as GoHighLevel sends them, so a renamed pipeline stage silently stops matching a rule that names it. Filtering on **Stage ID** or **Pipeline ID** survives renames — less readable, but it doesn't break when a client tidies up their pipelines.
 </Callout>
