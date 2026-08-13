@@ -94,6 +94,57 @@
             ]
           },
           {
+            "group": "Reporting",
+            "icon": "bar-chart-3",
+            "pages": [
+              {
+                "title": "Reporting Overview",
+                "path": "reporting/overview",
+                "icon": "layout-dashboard"
+              },
+              {
+                "title": "Revenue Overview",
+                "path": "reporting/revenue-overview",
+                "icon": "dollar-sign"
+              },
+              {
+                "title": "Lead LTV",
+                "path": "reporting/lead-ltv",
+                "icon": "heart-pulse"
+              },
+              {
+                "title": "Marketing Efficiency",
+                "path": "reporting/marketing-efficiency",
+                "icon": "gauge"
+              },
+              {
+                "title": "Creatives",
+                "path": "reporting/creatives",
+                "icon": "image"
+              },
+              {
+                "title": "Frameworks",
+                "path": "reporting/frameworks",
+                "icon": "grid-2x2"
+              },
+              {
+                "title": "Creative Tracking",
+                "path": "reporting/creative-tracking",
+                "icon": "search-check"
+              },
+              {
+                "title": "Email Stats",
+                "path": "reporting/email-stats",
+                "icon": "mail"
+              },
+              {
+                "title": "Workflow Performance",
+                "path": "reporting/workflow-performance",
+                "icon": "bar-chart-3"
+              }
+            ]
+          },
+          {
             "group": "Conversion Tracking",
             "icon": "activity",
             "pages": [

@@ -1,0 +1,136 @@
+---
+title: Workflow Performance
+description: Read the Workflows Overview — what each counter and breakdown measures, how to spot a destination that has started failing or gone quiet, and what to check when the numbers look wrong.
+---
+
+The [Activity Log](/conversion-tracking/activity-history) answers "did *this* conversion reach Meta?". The **Overview** answers the question you actually start your morning with: is this client's conversion delivery healthy at all?
+
+Open **Reporting → Workflows → Overview** in the project. Everything on the screen is scoped to that one project — one client account, one set of destinations.
+
+## The window
+
+Three ranges across the top: **24h**, **7d** (the default), and **30d**. Each one is a rolling window counting back from right now, not a calendar period — "7d" at 2pm Thursday means since 2pm the previous Thursday. There's no custom date range and no comparison to a previous period.
+
+The screen refreshes itself every 60 seconds while the **Auto** button is lit. Turn it off to freeze the numbers while you're screenshotting, or hit **Refresh** for an immediate reload. Deliveries land in the numbers within seconds of happening, so a test event fired now shows up on the next refresh.
+
+## The four counters
+
+Everything on this screen counts **runs**, not events. A run is one event delivered to one connection, so an event wired to three connections contributes three runs. That's the same unit the Activity Log shows one row per.
+
+| Counter | What it counts |
+| --- | --- |
+| **Total Events** | Every run in the window, whatever the outcome. Delivered + Failed + Filtered always adds up to this. |
+| **Delivered** | The destination's API accepted the payload. Not the same as the platform attributing the conversion to an ad — see [How Delivery Works](/conversion-tracking/how-delivery-works). |
+| **Failed** | A request was made and rejected, or the destination was circuit-broken at the time. Click this card to jump into the Activity Log already filtered to failures. |
+| **Filtered** | The event reached a connection but a filter rule rejected it, or there was nothing usable to send. No request was made. This is a normal outcome, not an error. |
+
+An event is only ever counted once per connection. Duplicate deliveries of the same event are dropped before anything is logged, so these are counts of events, not of attempts.
+
+## Event Volume
+
+The stacked bar chart is the same three outcomes over time — green delivered, grey filtered, red failed. On the **24h** range each bar is an hour; on **7d** and **30d** each bar is a day.
+
+Read it for shape rather than precision. What you're looking for is a bar pattern that matches the client's actual business rhythm — weekday peaks, quiet weekends — and no sudden cliff. A step change to zero mid-window is the clearest signal on the whole screen that something broke, and the bar where it happens tells you when to look in the Activity Log.
+
+## By Event Type
+
+One row per source event type, with the raw event key printed next to the friendly name so you can match it to the connection that produced it. Total, Delivered, Failed, and a **Success** percentage.
+
+Success here is **(delivered + filtered) ÷ total**. A filtered event is a rule you wrote doing its job, so it counts as success. A row sitting at 100% with a large Filtered share isn't broken — it's heavily filtered, which may or may not be what you intended.
+
+This table is also the fastest way to catch a *configuration* problem rather than a delivery one. If a client's Purchase row shows a fraction of the volume you'd expect, or an event type you configured last week isn't listed at all, the problem is upstream of delivery — see [Event Types](/conversion-tracking/event-types) and [Connections](/conversion-tracking/connections).
+
+## By Destination
+
+One card per destination platform — Meta CAPI, Google Ads, PostHog, Webhook — showing total events, average delivery time, a success percentage, and a bar. When a platform has any failures, a delivered/failed line appears underneath it.
+
+Two things to know before you read the percentage:
+
+<Callout kind="warning">
+  **By Destination and By Event Type calculate success differently.** By Destination is **delivered ÷ total**, and filtered events sit in that total without counting as successes. By Event Type counts filtered as success. So a project with aggressive filters shows a low percentage here and 100% next to the same events above — with nothing actually failing. Judge failures by the red delivered/failed line under the bar, not by the percentage alone.
+</Callout>
+
+The **ms avg** is the average round-trip of *delivered* calls to that platform. A destination whose runs all failed shows `0ms avg` — that's the absence of a successful call, not an instant one.
+
+Cards are grouped by platform, not by individual destination or connection. Two Meta pixels in one project are added together into a single Meta CAPI card, and this screen never breaks results out per connection. When you need per-connection numbers, open the connection's runs from **Settings → Workflows → Connections** — that opens the Activity Log with a green **Connection:** chip applied.
+
+## Top Errors
+
+Up to 20 distinct error messages from the window, most frequent first. Each entry shows the platform's own error title and detail, the destination, the source event type, the platform's error code where it sends one, an occurrence count, and how long ago it was last seen. **View all** drops you into the Activity Log filtered to failures.
+
+**Last seen is the field to read first.** A large count that was last seen 20 hours ago is a fire that's already out — usually a token that has since been reconnected. A smaller count last seen "just now" is the live problem.
+
+<Callout kind="note">
+  Errors are grouped by their exact message text. Meta stamps every response with a unique trace ID, so the same Meta problem often appears as several separate entries with a count of 1 each, rather than one entry with a count of 12. Identical-looking rows repeated down the list are one problem, not many.
+</Callout>
+
+The red badge next to the heading totals the occurrences of the errors *listed*. Since the list caps at 20 distinct messages, that badge can be lower than the Failed counter above it.
+
+## What healthy looks like
+
+- Volume tracks the client's business rhythm, with no cliff to zero.
+- Failed is 0, or a handful against thousands.
+- Top Errors shows the green "No errors in this period" state.
+- Every destination you've configured appears in By Destination, and its bar is full.
+- Every event type you've wired up appears in By Event Type.
+
+And what should send you looking:
+
+| Picture | Usual cause |
+| --- | --- |
+| A wall of failures on one destination, all the same error | Expired or revoked credentials. Every event to that destination fails, then the circuit breaker opens and keeps failing until it's fixed. Reconnect it under **Settings → Integrations → Destinations**. |
+| Failures across several event types but only one destination | Destination-level: credentials, or a pixel/conversion action that no longer exists. |
+| Failures on one event type across destinations | Connection-level: usually a payload or event-name problem on that specific wiring. |
+| Volume drops to zero and stays there | Nothing is arriving at all — check the source before the destinations. |
+| Filtered climbs while Delivered falls | Nothing is failing; the events stopped qualifying. A renamed pipeline stage is the usual culprit — see [Pipelines & Filters](/conversion-tracking/pipelines-filters). |
+| Everything looks fine, but the client says conversions are missing | Delivery is working and the gap is elsewhere: attribution, match quality, or an event type you never wired up. |
+
+## Spotting a destination that has gone quiet
+
+A destination that fails loudly is easy. One that simply stops is the one that costs a client money for weeks, because a screen full of green looks fine.
+
+<Steps>
+  <Step title="Compare the ranges">
+    Switch between 24h, 7d, and 30d. A destination present at 30d but missing or much smaller at 24h stopped somewhere in between — the volume chart shows you roughly when.
+  </Step>
+  <Step title="Check for a card that's disappeared">
+    By Destination only lists platforms with runs in the window. A destination you know is configured but that has no card at all sent nothing in this period.
+  </Step>
+  <Step title="Work out which end went quiet">
+    If Total Events is healthy but one destination vanished, the events are arriving and something on that connection stopped matching them — a disabled connection, or filter rules that no longer match. If Total Events fell too, the events stopped arriving; check the source under **Settings → Integrations → Sources**.
+  </Step>
+  <Step title="Confirm in the Activity Log">
+    Open the connection's runs from **Settings → Workflows → Connections** and read the most recent one. That tells you the last thing that actually happened on that wiring, and why.
+  </Step>
+</Steps>
+
+## When the numbers look wrong or empty
+
+**The whole screen is empty.** No runs exist for this project in the window. Either nothing has been wired up yet, or nothing qualified. Events are only recorded once they reach an enabled connection — an event GoHighLevel sends that no connection listens for, an order that isn't in a completed state, or an opportunity in a stage no pipeline connection targets produces no run at all and is invisible here. That's usually a configuration gap, not a delivery failure.
+
+**One panel is empty while the rest have data.** Each section is loaded by its own query, and a section whose query fails comes back empty rather than breaking the page. A blank By Destination card next to a populated volume chart means that one query failed — hit **Refresh** before concluding anything.
+
+**The counters don't match the tables.** The four counters are computed from an hourly rollup while the tables and the chart read individual runs, so at the far edge of a long window the counters can trail the tables by up to one hour's worth of events. A difference of a few events on a 30d view is this; a difference of hundreds isn't.
+
+**Filtered looks lower than expected on a pipeline-driven project.** Connections that pipelines create and manage are fanned out across stages, and the ones that don't match an event's stage are deliberately not logged — otherwise every opportunity event would write a wall of filtered rows. Filtered here reflects your own filter rules, not that internal partitioning.
+
+<Callout kind="tip">
+  This screen tells you *whether* something is wrong and *where*. It never tells you why. Once you know which destination and which error, the answer is one click away in the Activity Log — the Failed counter and **View all** both land you there pre-filtered.
+</Callout>
+
+## Next
+
+<Columns cols={2}>
+  <Card title="Activity & Run History" icon="history" href="/conversion-tracking/activity-history">
+    Trace one delivery end to end once you know where to look.
+  </Card>
+  <Card title="How Delivery Works" icon="route" href="/conversion-tracking/how-delivery-works">
+    What delivered, failed, and filtered actually mean.
+  </Card>
+  <Card title="Connections" icon="link" href="/conversion-tracking/connections">
+    The wiring behind every number on this page.
+  </Card>
+  <Card title="Match Quality" icon="target" href="/conversion-tracking/match-quality">
+    Why delivered events still may not be attributed.
+  </Card>
+</Columns>

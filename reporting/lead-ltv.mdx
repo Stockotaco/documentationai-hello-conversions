@@ -1,0 +1,131 @@
+---
+title: Lead LTV
+description: What a lead captured today is worth 1, 7, 30 and 90 days later — the cohort logic behind the report, what it needs connected, and the definitions worth knowing before you quote a number to a client.
+---
+
+**Reporting → Revenue → Lead LTV** answers a question no ad platform can: **what is a lead actually worth, and how long does it take to be worth it?**
+
+Every other revenue view in the product is organised by the day money arrived. This one is organised by the day the *lead* arrived. A lead captured on 1 March is followed forward — how much revenue had they produced after 1 day, after 7, after 30, after 90 — regardless of which month those payments landed in.
+
+That inversion is the whole point. If your sales cycle is three weeks long, a report keyed on payment date will always credit this month's revenue to this month's spend, and you will never see that January's leads were twice as valuable as March's.
+
+## What it needs connected
+
+| Requirement | Why |
+| --- | --- |
+| **[GoHighLevel](/connect/sources/gohighlevel) contacts** | Leads *are* contacts. Without them there is no report. |
+| **GoHighLevel transactions** | The revenue side. Revenue has to be tied to a contact. |
+| **[Meta Ads](/connect/sources/meta-ads) / [Google Ads](/connect/sources/google-ads)** | Optional. Adds Spend, CAC, Payback and LROAS. |
+
+<Callout kind="alert">
+  **Stripe alone will not work.** Stripe charges arrive without a link to a contact, and a lead-value report with no way to attach revenue to a lead has nothing to compute. A project in that state shows a **"Stripe-only — Lead LTV unsupported"** chip in the page header instead of a page of zeros. Connect GoHighLevel to enable the report.
+</Callout>
+
+## What counts as a lead
+
+A lead is **a contact with an email address**, dated by when the contact was created.
+
+The email requirement is not incidental — it's why the first KPI is labelled *New Leads w/Email* rather than *New Leads*. Contacts captured with only a phone number never enter this report. If a client runs a call-only funnel, or a form that doesn't require email, their lead count here will be lower than the count they see in GoHighLevel, and the gap is exactly those contacts.
+
+## What counts as revenue
+
+Revenue is GoHighLevel transactions, net of refunds, tied to the contact who produced them, and dated relative to the day that contact was captured:
+
+- Statuses `succeeded`, `refunded` and `partially_refunded` are all read, and the refunded portion subtracted. Only a **positive net amount** contributes.
+- Transactions **before** the contact's capture date are ignored. A contact re-created in the CRM after buying will look like a zero-value lead.
+- Amounts are converted to **USD at fixed rates**, not at the rate on the day of the sale. A transaction in a currency the conversion table doesn't cover is dropped entirely rather than counted at face value.
+
+<Callout kind="note">
+  Fixed conversion rates mean a multi-currency client's historic figures shift slightly against their own books, and won't track real exchange-rate movement over a long window. For a single-currency USD account — most accounts — none of this applies.
+</Callout>
+
+## The KPIs
+
+| Tile | What it measures |
+| --- | --- |
+| **New Leads w/Email** | Contacts with an email captured in the window, after filters. |
+| **Day 1 / 7 / 30 / 90 Value** | Total revenue those leads produced within that many days of capture. |
+| **Lead → Customer Rate** | Share of those leads who have **ever** produced revenue — including after your window ended. |
+| **Activation Rate** | Share who produced revenue within 30 days. The faster, comparable version of the above. |
+| **Median Time to First $** | Median days from capture to first payment. Lower is better. |
+| **CAC** | Ad spend in the window ÷ customers from it. |
+| **Payback** | The first curve point where cumulative revenue per customer covers CAC. "Not yet" means it hasn't by Day 90. |
+| **LROAS** | Day 90 Value ÷ ad spend. 1× is break-even by day 90; 3× is three dollars back per dollar in. |
+
+The Day values are **cumulative, not incremental**. Day 7 Value includes everything Day 1 Value already counted. The curve only ever goes up.
+
+<Callout kind="warning">
+  **Lead → Customer Rate looks forward past the end of your window.** It asks whether a lead in this period has ever converted, at any point, including yesterday. That makes it honest but not stable: the same March window will report a higher conversion rate in June than it did in April, because more of those leads have since bought. When comparing two periods, use **Activation Rate** — it caps every cohort at 30 days, so old and new periods are measured the same way.
+</Callout>
+
+<Callout kind="warning">
+  **CAC and LROAS divide total ad spend by all customers, not just paid ones.** Spend is every dollar of Meta and Google spend in the window; customers is every converting lead, however they arrived — organic, referral, repeat, or paid. On an account with strong organic flow this flatters CAC considerably. Use the Source / Medium table below when you need per-channel economics rather than a blended figure.
+</Callout>
+
+The **Total / Avg / Lead / % Change** toggle above the KPIs restates every value figure three ways. Avg / Lead is the one to quote when lead volume changed between the two periods — totals move with volume, averages don't.
+
+## Attribution
+
+Attribution decides which source, medium and campaign a lead is filed under.
+
+| Mode | Meaning |
+| --- | --- |
+| **Last Touch** (default) | The most recent source the contact arrived through. |
+| **First Touch** | The source they originally arrived through. |
+
+Where a lead has no UTM, Hello Conversions falls back to the session source recorded on the contact, and only then to `(direct)` / `(none)`. Values are lower-cased, and where the CRM has stored several comma-joined values in one field, only the first is used. That last detail is why you'll see `facebook` rather than `facebook, ig, direct` on the Source / Medium table.
+
+Switching between First and Last Touch redraws every breakdown in the report. It does not change lead counts or revenue totals — the same leads are being filed under different headings.
+
+## The breakdowns
+
+**Lead LTV by Cohort.** Leads bucketed by capture date at day, week or month granularity.
+
+<Callout kind="info">
+  The cohort table deliberately reaches back **further than your date range** — 30 days, 12 weeks or 6 months beyond the start, depending on granularity — so that a two-week-old cohort has mature cohorts to be compared against. Rows outside your selected range are expected here, and only here. Every other panel respects the range exactly.
+</Callout>
+
+**Lead LTV by First Form Submission.** Each lead is filed under the **first form they ever submitted**, which is generally the one that captured them. Leads that never submitted a form are grouped as *No form submission* rather than dropped.
+
+**Lead LTV by Source / Medium.** Leads by resolved source and medium, with spend attached where the report can attach it.
+
+The spend column on that last table is the one to understand before you present it:
+
+- **Google** spend is filed by campaign type — Search, Shopping and Performance Max land under `cpc`, Display under `display`, Video under `video`, Demand Gen and Discovery under `paid_social`.
+- **Meta** spend is split across your Facebook and Instagram rows in proportion to how many leads each one claimed. This only happens when Meta-attributable leads are at least **5%** of the period's leads. Below that threshold the split would be noise, so all Meta spend is shown instead as a single `(meta-paid)` row with no leads against it.
+
+<Callout kind="tip">
+  A `(meta-paid)` row with all your Meta spend and zero leads is the report telling you that Meta traffic is arriving without usable attribution — almost always missing or broken UTMs on the ads. It's a tracking problem to fix, not a reporting quirk to explain away.
+</Callout>
+
+## Reading a maturity-limited number
+
+A cohort captured eight days ago has no real Day 30 value. It has a Day 30 cell, and that cell contains revenue through day eight.
+
+The report marks these cells and tells you the cohort's age when you hover, but the trap is in the comparison rather than the cell: the newest cohort will almost always look worse than an older one on Day 30 and Day 90, purely because it hasn't had time. When you present a cohort table to a client, either compare like-aged cohorts, or read down the Day 1 and Day 7 columns where every row has had long enough.
+
+## Drilling into a number
+
+Clicking a **New Leads** figure — on a KPI, or on any breakdown row — opens the actual contacts behind it, with their source, medium, campaign, capture date, whether they converted and their lifetime value. The list carries whatever filters are active on the page, plus that row's own dimension.
+
+## Freshness
+
+Lead LTV reads a snapshot that is rebuilt **once a day, at a set hour in the project's own timezone**. The header chip shows the exact time of the last successful rebuild, so you always know what "now" means on this page.
+
+<Callout kind="note">
+  The refresh button re-runs the queries against the current snapshot. It does not rebuild the snapshot. If the header shows **Refresh failed**, you're looking at the last good build and refreshing won't advance it — the numbers will move when the next scheduled rebuild succeeds.
+</Callout>
+
+## When a number looks wrong
+
+**The report is empty and the header says Stripe-only.** GoHighLevel isn't connected. That's the whole explanation.
+
+**Lead counts are lower than the client's own CRM count.** Contacts without an email address are not leads here. Compare against a GoHighLevel view filtered to contacts with an email before concluding anything is missing.
+
+**A known customer shows as a zero-value lead.** Their payments predate their contact record. Revenue is only counted from the capture date forward, so a contact re-created after purchase has no revenue attached to it.
+
+**Ad spend is missing but leads and revenue are fine.** Meta Ads or Google Ads isn't connected as a source, or hasn't synced. Everything spend-derived — Spend, CAC, Payback, LROAS — goes blank together, which is the tell.
+
+**Everything went to zero after a client shared a link.** A shared URL carries its filters. If those filters match nothing in the current window, the page shows an amber banner naming each filter that matched no leads, with a one-click clear.
+
+**These numbers don't match Marketing Efficiency.** They're built on the same lead data — see the section on that in [Marketing Efficiency](/reporting/marketing-efficiency) — but they count revenue differently. This report follows leads forward from capture; that one counts transactions inside the window. The two agreeing would be the surprise.

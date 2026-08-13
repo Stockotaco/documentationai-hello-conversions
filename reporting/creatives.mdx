@@ -1,0 +1,128 @@
+---
+title: Creatives
+description: The per-creative performance report for Meta Ads — what each metric measures, how the Scale / Chill / Kill verdict is calculated, and what to check when a number looks wrong.
+---
+
+**Reporting → Meta Ads → Creatives** ranks every ad creative that spent money in the selected period, with a recommended action on each one. It is the report you open when a client asks "which ads are working?"
+
+It needs the [Meta Ads source](/connect/sources/meta-ads) connected on the project. Without it the page shows an empty state pointing at the Sources screen — there is no partial version of this report.
+
+## What counts as a creative
+
+A row is one **Meta ad creative**, not one ad. If five ads across three ad sets all use the same creative, that's one row, and its spend, impressions, clicks, and conversions are the sum of all five.
+
+That has two consequences worth knowing before you explain a number to a client:
+
+- **The campaign column can list several campaigns.** A creative that ran in more than one campaign shows all of them, comma-separated. There is no single campaign to attribute it to, because there isn't one.
+- **Creatives with no spend in the range never appear.** The report is built from daily ad-level spend rows. A creative that existed but spent nothing simply isn't in the list — it isn't hidden, it has no data to show.
+
+Format is inferred from the creative's own structure, in this order: carousel child attachments make it a **Carousel**, more than one image in a dynamic asset feed makes it a **DCA Carousel**, a video object or video ID makes it a **Video**, and anything else is a **Single Image**. The format filter in the header offers All, Video, Carousel and Single Image.
+
+## The objective decides what "a conversion" means
+
+Every number on this page is measured against one Meta result type — the **objective**. It is set per project on the Meta Ads row of the Sources screen, and defaults to Purchases. The Objective dropdown in the report header overrides it for the current view without changing the saved default.
+
+| Objective | Counts as a conversion | Cost-per label |
+| --- | --- | --- |
+| Purchases | `purchase` | CPA |
+| Leads | `lead` | CPL |
+| Registrations | `complete_registration` | Cost/Reg |
+| Add to Carts | `add_to_cart` | Cost/ATC |
+| Checkouts | `initiate_checkout` | Cost/Checkout |
+| Content Views | `view_content` | Cost/View |
+| Contacts | `contact` | Cost/Contact |
+| Subscriptions | `subscribe` | Cost/Sub |
+| Trial Starts | `start_trial` | Cost/Trial |
+
+<Callout kind="warning">
+  A lead-gen account left on the default Purchases objective produces a report of zeros — spend and CTR are fine, but conversions, cost-per and ROAS are all empty because the account never records `purchase` results. This is the single most common cause of "the Creatives report is broken". Check the objective first.
+</Callout>
+
+**ROAS only exists for Purchases.** Every other objective leaves the ROAS column blank and drops it from sorting, from the verdict score, and from the charts on [Frameworks](/reporting/frameworks). That is deliberate, not missing data.
+
+## What each metric measures
+
+| Metric | How it is calculated | Notes |
+| --- | --- | --- |
+| **Spend** | Meta's daily ad-level spend, summed across every ad using the creative | The one number that is unambiguously Meta's |
+| **Conversions** (Purchases, Leads, …) | Meta's reported result count for the selected objective | Meta's attribution, Meta's windows — see below |
+| **ROAS** | Meta's own purchase return on ad spend for the creative, over the range | Purchases objective only |
+| **CPA / CPL / cost-per** | Spend ÷ conversions | Shown as `--` when the creative has zero conversions, not as `$0` |
+| **CTR** | Clicks ÷ impressions × 100 | Meta's link-agnostic click count |
+| **CPC** | Spend ÷ clicks | |
+| **CPM** | Spend ÷ impressions × 1000 | In the creative detail view |
+| **Hook rate** | 3-second video views ÷ impressions × 100 | Video creatives only; replaces CTR on video cards |
+
+Conversion counts come from Meta, already attributed. Where Meta gives a plain total for a result type, that total is used; where it doesn't, the count falls back to 7-day-click plus 1-day-view. You are reading Meta's view of its own performance, which is why these numbers move after the fact and why they will not equal what your [conversion tracking](/conversion-tracking/how-delivery-works) delivered.
+
+<Callout kind="note">
+  This report and the Revenue reports are answering different questions and should not be expected to agree. Creatives shows what **Meta** thinks its ads produced, using Meta's attribution. Revenue reports show what actually landed in the CRM. When a client says the numbers don't match, that gap is usually the whole explanation.
+</Callout>
+
+## Scale, Chill and Kill
+
+Each creative gets a verdict badge. The verdict is relative — it compares a creative against the other creatives **currently in view**, not against a fixed benchmark.
+
+Here is the mechanism, because you will be asked:
+
+1. For every creative in the current date range and format filter, the report computes ROAS, cost-per, CTR and (for video) hook rate.
+2. Each of those is converted to a z-score — how many standard deviations above or below the average of that set. Cost-per is inverted, so cheaper scores higher. Scores are capped at ±3 so one outlier can't dominate.
+3. The z-scores are combined into one composite score using fixed weights.
+4. The composite is multiplied by a **spend factor** that dampens creatives with too little spend to judge.
+
+| | ROAS | Cost-per | CTR | Hook |
+| --- | :---: | :---: | :---: | :---: |
+| Purchases, video | 0.40 | 0.35 | 0.15 | 0.10 |
+| Purchases, non-video | 0.45 | 0.40 | 0.15 | — |
+| Other objectives, video | — | 0.50 | 0.35 | 0.15 |
+| Other objectives, non-video | — | 0.55 | 0.45 | — |
+
+The composite score then becomes a verdict:
+
+| Composite score | Verdict |
+| --- | --- |
+| 1.0 or higher | **Scale** |
+| −0.8 or lower | **Kill** |
+| Anything between | **Chill** |
+| *Fewer than 3 creatives in view* | **Chill** for everything |
+
+**Confidence** is derived from how far the creative sits from average and how much it spent, capped at 100. A creative also carries a data-sufficiency rating: **low** below a quarter of the average spend (floor $10), **medium** below half (floor $20), **high** above that. Low-sufficiency creatives say so in their reasons.
+
+<Callout kind="alert">
+  Because the comparison set is whatever is on screen, **changing the date range or the format filter changes the verdicts**. Filtering to Video only re-scores the videos against each other. A creative can be Scale in a 7-day view and Kill in a 90-day view without anything about the creative changing. Say which range you were looking at when you tell a client to kill an ad.
+</Callout>
+
+Clicking any creative opens a detail view with the full asset, ad copy, call to action, landing page, URL parameters, all metrics, and a bar per z-score showing exactly which metric drove the verdict.
+
+## How the data refreshes
+
+Three separate clocks sit between Meta and what you see:
+
+| Stage | Timing |
+| --- | --- |
+| Meta Ads → Hello Conversions | Airbyte sync, **daily at 02:00 UTC** (plus one immediately on connect) |
+| Creative images and thumbnails | Copied into Hello Conversions storage after each successful sync |
+| Report results | Cached for **15 minutes** per project, date range and filter combination |
+
+Thumbnails are copied rather than hot-linked because Meta's CDN URLs expire. If a creative shows a blank tile, it either arrived after the last sync or its media failed to copy — the metrics are still correct.
+
+**Today is never included.** The end of the range is always clamped to yesterday in the project's timezone, because Meta's same-day numbers are incomplete and would make every creative look broken. The 7d / 30d / 90d presets all end yesterday.
+
+Platform admins see a **Clear cache** button in the header that drops the cached results for the project and refetches. It clears the 15-minute cache — it does not pull new data from Meta.
+
+## When a number looks wrong
+
+| Symptom | Most likely cause |
+| --- | --- |
+| Every conversion, cost-per and ROAS is zero | Wrong objective for the account — check the Meta Ads source row |
+| ROAS column missing entirely | Objective is not Purchases. Expected |
+| Report is completely empty | No spend in the range, or the first Meta sync hasn't finished |
+| A creative you know is running isn't listed | It spent nothing in the range, or its spend landed after the last daily sync |
+| Yesterday's spend missing | The 02:00 UTC sync hasn't run since that spend was recorded |
+| Numbers changed since this morning | Meta revised its own attribution, or the 15-minute cache expired |
+| Verdicts flipped between two views | Different date range or format filter — the comparison set changed |
+| Cost-per shows `--` | Zero conversions. Dividing by zero would be worse |
+| One creative shows several campaign names | It genuinely ran in all of them |
+| Meta Ads Manager shows different totals | Different attribution window or date range in Ads Manager, or you're comparing an ad-level number against a creative-level total |
+
+For the analytical views built on this same data — quadrants, fatigue curves, and the campaign-by-format matrix — see [Frameworks](/reporting/frameworks). For whether your creatives are tagged well enough to attribute at all, see [Tracking](/reporting/creative-tracking).

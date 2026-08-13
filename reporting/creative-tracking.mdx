@@ -1,0 +1,95 @@
+---
+title: Tracking
+description: The Tracking Audit — which spending creatives are missing UTM parameters or a landing page, how much money is going to untagged ads, and how to fix it.
+---
+
+**Reporting → Meta Ads → Tracking** is the **Tracking Audit**. It answers one question: of the creatives that are actually spending money, which ones are tagged well enough for the click to be attributable when it lands?
+
+It is a read-only check. Nothing here changes anything in Meta — the fixes happen in Ads Manager, and this page tells you where to make them.
+
+Like the rest of the Meta reports it needs the [Meta Ads source](/connect/sources/meta-ads) connected, and it covers 7, 30 or 90 days ending yesterday.
+
+## What it checks
+
+One row per creative that spent money in the range, sorted by spend. For each one:
+
+| Column | What it means |
+| --- | --- |
+| **Creative** | Creative name, or the creative ID when it has no name |
+| **Landing Page** | The destination URL resolved from the creative — shown as its hostname, and linked. Red **Missing** when the creative carries no destination URL at all |
+| **Source** | Whether the creative's URL parameters contain `utm_source` |
+| **Medium** | Whether they contain `utm_medium` |
+| **Campaign** | Whether they contain `utm_campaign` |
+| **Content** | Whether they contain `utm_content` |
+| **Spend** | Spend on that creative in the range |
+
+The four UTM checks are simple presence tests, case-insensitive. They confirm the parameter name is there — they do **not** validate that the value is correct, non-empty, or consistent with the rest of the account. A creative tagged `utm_source=` with nothing after it shows a green tick.
+
+<Callout kind="warning">
+  The check reads the creative's **URL parameters** field in Meta, which is where tracking parameters belong. UTMs appended to the end of the website URL instead will not be seen here, and the creative will show four red crosses even though the click may still carry tags. If a creative you know is tagged shows as untagged, look at *where* in the ad the parameters were entered before assuming the report is wrong.
+</Callout>
+
+## The four summary cards
+
+| Card | What it counts |
+| --- | --- |
+| **Total Creatives** | Every creative with spend in the range |
+| **Missing UTMs** | Creatives with **none** of source, medium or campaign |
+| **Missing Landing Pages** | Creatives with no destination URL |
+| **Spend Without Tracking** | Total spend on the creatives counted in Missing UTMs |
+
+<Callout kind="alert">
+  **Missing UTMs and the Issues filter count different things.** The card counts creatives with *no* UTM at all. The **Issues** filter shows every creative missing *any* of source, medium, campaign, or a landing page. So a creative with only `utm_source` is an issue in the table but is not counted on the card. Expect the Issues list to be longer than the Missing UTMs number, and don't quote them as the same figure.
+</Callout>
+
+`utm_content` is displayed in the table but is not counted by either the card or the Issues filter. It is useful for creative-level reporting downstream, not a pass/fail condition here.
+
+## Reading the table
+
+Three view filters sit next to the date presets:
+
+- **All** — every spending creative.
+- **Issues** — missing any of source, medium, campaign, or a landing page.
+- **Valid** — has all three of those UTMs *and* a landing page.
+
+Rows with an issue **and** more than $100 of spend are tinted red and carry an amber warning triangle. That is the triage order: an untagged creative spending $4 is a housekeeping item, an untagged creative spending $4,000 is a live problem. Sort by spend and work down.
+
+## Fixing what it reports
+
+Every failure is fixed in Meta Ads Manager, not in Hello Conversions.
+
+<Steps>
+  <Step title="Find the ad in Ads Manager">
+    Search for the creative name from the audit table. The same creative may be used by several ads — every one of them needs fixing.
+  </Step>
+  <Step title="Fill in the URL parameters field">
+    At ad level, under the destination settings, put your tracking parameters in the **URL parameters** field. Set `utm_source`, `utm_medium` and `utm_campaign` at minimum. Meta's dynamic parameters — such as `{{campaign.name}}` and `{{ad.name}}` — keep the tags accurate as ads change.
+  </Step>
+  <Step title="Add a destination URL where one is missing">
+    A creative with no landing page usually means an ad type that never had one, or an incomplete ad. Confirm the ad is meant to send traffic to a site at all before treating it as broken.
+  </Step>
+  <Step title="Wait for the next sync">
+    Meta Ads syncs into Hello Conversions daily at 02:00 UTC, and this report caches its results for 30 minutes. A fix made this afternoon shows up tomorrow, not immediately.
+  </Step>
+</Steps>
+
+## Why an untagged creative matters
+
+An untagged click arrives at the landing page carrying nothing that identifies which ad sent it. The contact GoHighLevel then creates has no campaign attribution, so no report downstream can credit that ad for the lead or the sale it produced. The spend is still counted — the return isn't.
+
+That is what **Spend Without Tracking** is measuring: money you are spending whose results you will not be able to attribute to anything, no matter which report you open afterwards.
+
+<Callout kind="tip">
+  Run this audit whenever you take over an account, and again after any bulk creative launch. Both are the moments where untagged ads get shipped, and both are cheaper to fix on day one than to explain a month later when the client asks why half the ad spend has no attributed revenue.
+</Callout>
+
+## When the audit looks wrong
+
+| Symptom | Cause |
+| --- | --- |
+| Table is empty | No creative spent in the range, or the first Meta sync hasn't finished |
+| A creative you fixed still shows red | The fix hasn't synced yet — sync is daily at 02:00 UTC, plus a 30-minute result cache |
+| A tagged creative shows as untagged | The parameters were appended to the website URL rather than entered in the URL parameters field |
+| Missing UTMs card is lower than the Issues row count | Working as intended — see the note above |
+| Landing page shows only a hostname | Only the hostname is displayed; the link itself goes to the full URL |
+| A creative appears here but not in the Creatives grid | The two use the same source data, but the Creatives grid paginates and can be filtered by format or verdict |
