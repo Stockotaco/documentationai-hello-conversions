@@ -3,17 +3,13 @@ title: Creatives
 description: The per-creative performance report for Meta Ads — what each metric measures, how the Scale / Chill / Kill verdict is calculated, and what to check when a number looks wrong.
 ---
 
-**Reporting → Meta Ads → Creatives** ranks every ad creative that spent money in the selected period, with a recommended action on each. It needs the [Meta Ads source](/connect/sources/meta-ads) connected.
+**Reporting → Meta Ads → Creatives** ranks every ad creative that spent money in the period, with a recommended action on each. Needs the [Meta Ads source](/connect/sources/meta-ads) connected.
 
-## What counts as a creative
-
-A row is one **Meta ad creative**, not one ad: five ads across three ad sets using the same creative are one row, summing all five. The campaign column can therefore list several campaigns, and creatives with no spend in the range never appear.
-
-Format is inferred from the creative's structure, in order: carousel child attachments make it a **Carousel**, more than one image in a dynamic asset feed a **DCA Carousel**, a video object or video ID a **Video**, anything else a **Single Image**.
+A row is one **Meta ad creative**, not one ad: five ads across three ad sets using the same creative are one row, summing all five. Format is inferred from the creative's structure, in order: carousel child attachments make it a **Carousel**, more than one image in a dynamic asset feed a **DCA Carousel**, a video object or video ID a **Video**, anything else a **Single Image**.
 
 ## The objective decides what "a conversion" means
 
-The **objective** is set per project on the Meta Ads row of the Sources screen, defaulting to Purchases; the header dropdown overrides it for the current view without changing the saved default.
+Set per project on the Meta Ads row of the Sources screen, defaulting to Purchases; the header dropdown overrides it for the current view without changing the saved default.
 
 | Objective | Counts as a conversion | Cost-per label |
 | --- | --- | --- |
@@ -27,7 +23,7 @@ The **objective** is set per project on the Meta Ads row of the Sources screen, 
 | Subscriptions | `subscribe` | Cost/Sub |
 | Trial Starts | `start_trial` | Cost/Trial |
 
-**ROAS only exists for Purchases.** Every other objective leaves the column blank and drops it from sorting, from the verdict score, and from the charts on [Frameworks](/reporting/frameworks).
+**ROAS only exists for Purchases.** Every other objective drops it from the column, from sorting, from the verdict score and from the charts on [Frameworks](/reporting/frameworks).
 
 ## What each metric measures
 
@@ -42,11 +38,11 @@ The **objective** is set per project on the Meta Ads row of the Sources screen, 
 | **CPM** | Spend ÷ impressions × 1000 | In the creative detail view |
 | **Hook rate** | 3-second video views ÷ impressions × 100 | Video creatives only; replaces CTR on video cards |
 
-Conversion counts arrive from Meta already attributed: where Meta gives a plain total for a result type that total is used, otherwise the count falls back to 7-day-click plus 1-day-view. These are Meta's numbers, not what your [conversion tracking](/conversion-tracking/how-delivery-works) delivered or what the Revenue reports show landing in the CRM.
+Conversions use Meta's own total for the result type, falling back to 7-day-click plus 1-day-view. These are Meta's numbers, not what your [conversion tracking](/conversion-tracking/how-delivery-works) delivered or what the Revenue reports show landing in the CRM.
 
 ## Scale, Chill and Kill
 
-Each creative's verdict is relative to the creatives **currently in view**. ROAS, cost-per, CTR and (for video) hook rate each become a z-score against that set — cost-per inverted so cheaper scores higher, capped at ±3 so one outlier can't dominate — combined by fixed weights, then multiplied by a **spend factor** that dampens creatives with too little spend to judge.
+Each verdict is relative to the creatives **currently in view**. ROAS, cost-per, CTR and (for video) hook rate each become a z-score against that set — cost-per inverted so cheaper scores higher, capped at ±3 — combined by fixed weights, then multiplied by a **spend factor** that dampens creatives with too little spend to judge.
 
 | | ROAS | Cost-per | CTR | Hook |
 | --- | :---: | :---: | :---: | :---: |
@@ -62,7 +58,7 @@ Each creative's verdict is relative to the creatives **currently in view**. ROAS
 | Anything between | **Chill** |
 | *Fewer than 3 creatives in view* | **Chill** for everything |
 
-**Confidence** comes from how far the creative sits from average and how much it spent, capped at 100. Each creative also carries a data-sufficiency rating: **low** below a quarter of the average spend (floor $10), **medium** below half (floor $20), **high** above that.
+Data sufficiency is rated **low** below a quarter of the average spend (floor $10), **medium** below half (floor $20), **high** above that. Confidence is capped at 100.
 
 <Callout kind="alert">
   Because the comparison set is whatever is on screen, **changing the date range or the format filter changes the verdicts** — a creative can be Scale in a 7-day view and Kill in a 90-day view without changing at all. Say which range you were looking at when you tell a client to kill an ad.

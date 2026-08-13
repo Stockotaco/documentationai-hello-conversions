@@ -3,7 +3,7 @@ title: Tracking
 description: The Tracking Audit — which spending creatives are missing UTM parameters or a landing page, how much money is going to untagged ads, and how to fix it.
 ---
 
-**Reporting → Meta Ads → Tracking** is the **Tracking Audit**: of the creatives actually spending money, which are tagged well enough for the click to be attributable when it lands? It needs the [Meta Ads source](/connect/sources/meta-ads) connected, and covers 7, 30 or 90 days ending yesterday.
+**Reporting → Meta Ads → Tracking** is the **Tracking Audit**: of the creatives spending money, which are tagged well enough for the click to be attributable when it lands? It needs the [Meta Ads source](/connect/sources/meta-ads) connected, and covers 7, 30 or 90 days ending yesterday.
 
 ## What it checks
 
@@ -40,14 +40,7 @@ The UTM checks are case-insensitive presence tests on the creative's **URL param
 | **Issues** | Missing any of source, medium, campaign, or a landing page |
 | **Valid** | Has all three of those UTMs *and* a landing page |
 
-Rows with an issue **and** more than $100 of spend are tinted red and carry an amber warning triangle. Sort by spend and work down.
-
-## Fixing what it reports
-
-Every failure is fixed in Meta Ads Manager. The same creative may be used by several ads — every one needs fixing.
-
-- At ad level, under destination settings, set `utm_source`, `utm_medium` and `utm_campaign` at minimum in the **URL parameters** field. Meta's dynamic parameters, such as `{{campaign.name}}` and `{{ad.name}}`, keep tags accurate as ads change.
-- A creative with no landing page is usually an ad type that never had one. Confirm it is meant to send traffic to a site before treating it as broken.
+Rows with an issue **and** more than $100 of spend are tinted red and carry an amber warning triangle. Sort by spend and work down. Every failure is fixed in Meta Ads Manager, at ad level, in the **URL parameters** field — and the same creative may be used by several ads, each needing the fix.
 
 ## When the audit looks wrong
 

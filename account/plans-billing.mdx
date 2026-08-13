@@ -3,7 +3,7 @@ title: Plans & Billing
 description: How Hello Conversions plans, contact-based pricing, free trials, and usage reporting work, and where to manage them in the app.
 ---
 
-Billing sits on the **organization**, not on individual projects. One subscription covers every project in it; adding a client project doesn't add a bill, it adds contacts, which is what you're charged on. Everything here lives under **Organization settings → Billing** and **Organization settings → Usage**.
+Billing sits on the **organization**, not on individual projects. One subscription covers every project in it; adding a client project adds contacts, which is what you're charged on. Everything here lives under **Organization settings → Billing** and **Organization settings → Usage**.
 
 <Callout kind="note">
   Only the organization owner can view or change billing. For members, the billing pages aren't just hidden in the navigation — the server refuses the request.
@@ -17,7 +17,7 @@ Billing sits on the **organization**, not on individual projects. One subscripti
 | **Reporting Suite** | Everything in Conversions Plus+, plus the analytics layer on top of it. |
 | **Enterprise** | Organizations past the self-serve contact ceiling, or with custom requirements. |
 
-You can subscribe to either self-serve plan and switch between them at any time; Enterprise is arranged with us directly. An organization with no subscription sits on **Free** — the state of not having subscribed rather than a usable tier. The billing page shows each plan's current feature list side by side, with your plan marked.
+Either self-serve plan can be subscribed to and switched at any time from the billing page; Enterprise is arranged with us directly. No subscription means **Free**.
 
 ## How pricing works
 
@@ -28,15 +28,15 @@ Both self-serve plans are priced on **contact tiers**, not a flat fee.
 3. That total lands you in a contact tier, shown on the billing page as "Up to N contacts".
 4. Your monthly price is that tier's price on your plan. Reporting Suite costs more than Conversions Plus+ at every tier.
 
-The billing page shows your current tier, your contact count against it, and the monthly estimate for each plan. Check prices there — they're set centrally and can change.
+Prices are set centrally and can change, so read them off the billing page.
 
 <Callout kind="warning">
-  Contact tiers have a self-serve ceiling of 100,000 contacts across the organization. Past it, checkout is blocked and you'll need enterprise pricing. The billing page warns you at 80% of that ceiling, which is the point to get in touch rather than the point you're stopped.
+  Contact tiers have a self-serve ceiling of 100,000 contacts across the organization. Past it, checkout is blocked and you'll need enterprise pricing. The billing page warns you at 80% of that ceiling.
 </Callout>
 
 ## Free trial
 
-Your first subscription starts with a 7-day free trial, once per organization: if you've had one and later resubscribe, the new subscription bills immediately. The billing page shows a countdown with days remaining and the exact end date.
+Your first subscription starts with a 7-day free trial, once per organization: if you've had one and later resubscribe, the new subscription bills immediately.
 
 ## What an active subscription gates
 
@@ -54,14 +54,14 @@ Anything else — never subscribed, canceled past the period end, or past due on
 
 From **Organization settings → Billing** the owner can:
 
-- **Subscribe** to Conversions Plus+ or Reporting Suite through hosted checkout
-- **Switch plans** between the two, applied to the existing subscription
+- **Subscribe** to either plan through hosted checkout
+- **Switch plans**, applied to the existing subscription
 - **Open the billing portal** to update payment details and retrieve invoices
 - **Cancel**, effective at the end of the current period — the status becomes "canceling" and access continues until then
 - **Review recent billing events**, listed with the plan and outcome of each
 
 <Callout kind="info">
-  Some organizations are billed outside the app — usually a subscription that predates self-serve checkout, or one arranged directly. Those show a notice on the billing page and can't use self-serve checkout or plan switching, because it would bill you twice. Contact support to change plans instead.
+  Some organizations are billed outside the app — usually a subscription that predates self-serve checkout, or one arranged directly. Those can't use self-serve checkout or plan switching, because it would bill you twice. Contact support to change plans instead.
 </Callout>
 
 ## Where to see usage
@@ -71,8 +71,6 @@ From **Organization settings → Billing** the owner can:
 - **Contacts** per project, as a trend line plus the latest figure
 - **Events** per project — tracking pixel events, shown for visibility and not billed
 - **Previous months**, expandable to each month's totals and the per-project split
-
-Use it when the bill moves and you want to know which client account moved it. The Billing page carries the same contact total as one meter against your current tier.
 
 <Callout kind="tip">
   Contact counts come from the connected Lead Connector location. A project whose Lead Connector integration is disconnected stops reporting new counts and carries its last known figure forward, so an unnoticed disconnection quietly freezes that project's usage. Spot it on **Settings → Integrations → Sources**.
