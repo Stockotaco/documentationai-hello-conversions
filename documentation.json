@@ -324,10 +324,5 @@
         "link": "https://cloud.helloconversions.com/login"
       }
     }
-  },
-  "scripts": [
-    {
-      "src": "scripts/iris.js"
-    }
-  ]
+  }
 }
