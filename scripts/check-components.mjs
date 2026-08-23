@@ -20,7 +20,7 @@ const SUPPORTED = new Set([
   'Iframe', 'Image', 'ParamField', 'Request', 'Response', 'ResponseField',
   'Step', 'Steps', 'Tab', 'Tabs', 'Update', 'Video',
   // Not in the skill reference, but used by Documentation.AI's own generated
-  // pages here (features.mdx, changelog.mdx) — the platform supports them.
+  // pages — the platform supports them.
   'Board', 'BoardColumn', 'BoardCard',
 ]);
 
