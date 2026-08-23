@@ -40,6 +40,7 @@ Below, the same connections appear two ways: a **canvas** on the left with sourc
   </Step>
   <Step title="Set the event name, or the conversion action">
     - **Meta and other destinations** get an **Event Name** field — the name the destination sees. Meta offers one-click chips for the standard events (Purchase, Lead, CompleteRegistration, Subscribe, AddToCart, InitiateCheckout, ViewContent, Search, Contact), or type a custom name. Left blank, the source event type is used.
+    - Meta destinations also get an advanced **Event ID (Deduplication)** field — a template such as `{orderId}` or `lead_{contactId}` that overrides the generated event ID, so server events can deduplicate against matching browser-pixel events. Leave it blank unless you're matching your pixel's own IDs.
     - **Google Ads** keys off a conversion action instead, so you pick one from the account's existing actions, or create one here without leaving the page.
   </Step>
   <Step title="Name the connection and confirm the destination">

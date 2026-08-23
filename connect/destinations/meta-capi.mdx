@@ -78,8 +78,12 @@ Each delivery is one `POST` to Meta's Conversions API for the destination's pixe
 
 Every event carries an `event_id` of `hello-` plus the order ID (or the transaction ID for subscription rebills, since rebills reuse the original order's ID). Meta collapses events sharing the same `event_name` and `event_id`, so two connections firing for one sale count once.
 
+<Callout kind="tip">
+  If your funnel also fires a browser-pixel event for the same conversion, you can make the two deduplicate against each other: every connection to a Meta destination has an advanced **Event ID (Deduplication)** field that overrides the generated ID. Set it to a template using `{orderId}`, `{transactionId}` or `{contactId}` — for example `lead_{contactId}` — matching whatever `event_id` your browser pixel sends for the same event. It must contain at least one variable, so every event doesn't end up with the same ID (Meta would drop all but the first). Leave it blank and the default `hello-` ID is used.
+</Callout>
+
 <Callout kind="alert">
-  This does **not** deduplicate against your browser pixel, which doesn't send our `hello-` prefixed IDs. If your funnel already fires a browser `Purchase` on the thank-you page and you also send `Purchase` from here, expect both to be counted. Either send a different event name server-side, or stop firing the browser event for that conversion.
+  Without a matching Event ID template, server events do **not** deduplicate against your browser pixel, which doesn't send our `hello-` prefixed IDs. If your funnel already fires a browser `Purchase` on the thank-you page and you also send `Purchase` from here, expect both to be counted. Either set the Event ID template so the two share an ID, use a different event name server-side, or stop firing the browser event for that conversion.
 </Callout>
 
 ## Confirm events are arriving
