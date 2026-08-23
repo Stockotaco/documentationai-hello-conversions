@@ -290,17 +290,6 @@
                 "path": "help-center/troubleshooting/report-numbers"
               }
             ]
-          },
-          {
-            "group": "Guides",
-            "icon": "book-open",
-            "expandable": false,
-            "pages": [
-              {
-                "title": "Install Tracking Script",
-                "path": "help-center/guides/install-tracking-script"
-              }
-            ]
           }
         ]
       }

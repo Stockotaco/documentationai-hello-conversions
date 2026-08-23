@@ -34,16 +34,16 @@ Raw records from the connected sources: one row per real-world thing.
   **Always filter transactions.** The table holds test-mode rows and non-final statuses. Every tool and view applies `live_mode = true` and `status IN ('succeeded', 'refunded')`, and reports `amount - amount_refunded`. Skip any of that and your revenue matches nothing else in the product.
 </Callout>
 
-### From the tracking pixel
+### From tracked site events
 
-`events` is a **view**: the shared Mythic events table filtered to this project's location, plus `event_timestamp_local` (wall-clock in the project timezone). One row is one tracked event.
+`events` is a **view**: the shared events table filtered to this project's location, plus `event_timestamp_local` (wall-clock in the project timezone). One row is one tracked event.
 
 Columns: `event_name` (page views are `$pageview`), `event_timestamp`, `event_timestamp_local`, `user_id`, `location_id`, `properties_json`.
 
 <Callout kind="warning">
   **Not partition-pruned.** Even a tight `WHERE event_timestamp >= …` scans the full underlying table — roughly 75 MB per day of range. Keep exploratory queries narrow and always add a `LIMIT`; aggregations across 30+ days can blow the query's byte budget.
 
-  **`properties_json` is a STRING, and pixel property names start with `$`.** Dot notation does not work for `$`-prefixed keys:
+  **`properties_json` is a STRING, and event property names start with `$`.** Dot notation does not work for `$`-prefixed keys:
 
   ```sql
   SELECT JSON_EXTRACT_SCALAR(properties_json, "$['$utm_source']") AS utm_source

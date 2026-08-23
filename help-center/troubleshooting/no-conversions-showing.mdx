@@ -8,20 +8,19 @@ description: Fix when conversions aren’t tracked.
 - No data on ad platforms
 
 ## Causes
-- Script not installed
-- Pixel blocked by browser
+- A source or destination isn't connected
+- No connection is routing the event to a destination
+- The event doesn't match a connection's filters
 
 ## Quick Fix
 <Steps>
-  <Step title="Check script installation">
-    ````html
-    Ensure the Hello Conversions script is added before </head> in every funnel page.
-    ````
+  <Step title="Check your sources and destinations">
+    Under **Settings → Integrations**, confirm the project has a source (e.g. GoHighLevel) and a destination (Meta or Google Ads) connected, and that each shows a healthy status.
   </Step>
-  <Step title="Clear cache or use incognito">
-    Cached pages may run old scripts; try incognito mode.
+  <Step title="Check your connections">
+    A conversion only reaches an ad platform when a connection routes its event type to a destination. Open the connection list and confirm one covers the event you expect — and that it's enabled.
   </Step>
-  <Step title="Re-test conversion">
-    Fill out your funnel form again to verify tracking.
+  <Step title="Check the Activity Log">
+    Open the [Activity Log](/conversion-tracking/activity-history) and submit a test form. The event should appear with its delivery outcome; if it was filtered or failed, the log says why.
   </Step>
 </Steps>
