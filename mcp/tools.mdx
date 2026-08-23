@@ -3,7 +3,7 @@ title: MCP Tool Reference
 description: Every tool the Hello Conversions MCP server exposes — exact names, parameters, return shapes, and which ones a read-only key cannot call.
 ---
 
-The MCP server exposes **30 tools**: 12 analytics tools that read the project's BigQuery dataset, and 18 management tools that read and write sources, destinations, connections and pipeline config. An API key is bound to one project — no tool takes a project ID, and none can reach another project's data.
+The MCP server exposes **31 tools**: 12 analytics tools that read the project's BigQuery dataset, 18 management tools that read and write sources, destinations, connections and pipeline config, and one documentation tool that searches the official docs. An API key is bound to one project — no tool takes a project ID, and none can reach another project's data.
 
 ## Rules that apply to every tool
 
@@ -497,3 +497,17 @@ Files a bug report against the project — for a missing table, a permission err
 | `error_detail` | string | No | Raw error text or stack. |
 
 Returns `{ id, status, message }`. Writes a row but is exempt from the read-only check. If the organization has a bug-report webhook configured it also posts there; the report is stored either way.
+
+### Documentation
+
+#### `search_documentation`
+
+Searches the official Hello Conversions documentation (hybrid semantic + keyword search) and returns the matched sections with their content. Use it whenever you're unsure how a feature, report or concept works instead of guessing.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `query` | string | Yes | What to look up, e.g. `how match quality is scored`. |
+| `limit` | number | No | Max sections to return. Default 10. |
+| `semanticRatio` | number (0–1) | No | Semantic vs keyword balance — higher favours meaning, lower favours exact terms. Default 0.75. |
+
+Read-only. Returns each match with its section title, breadcrumb, content, a direct section URL and a parent page URL for full context. Available to every key, including read-only ones.
