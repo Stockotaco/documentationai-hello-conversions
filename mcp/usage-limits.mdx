@@ -5,6 +5,8 @@ description: What the MCP Usage screen records and shows, and the limits that ac
 
 Every MCP tool call is recorded, successful or not. **Settings → Developer → MCP Usage** shows them. Anyone with access to the project can view it.
 
+A call made with an [organization key](/mcp/authentication) is recorded against the project it queried, so it appears here under the org key's name even though that key isn't in the project's own key list. Calls to the organization root — `list_projects` — belong to no project and are recorded nowhere, though they still move the key's "last used" date and count toward its rate limit.
+
 ## What gets recorded
 
 | Recorded | What it is |
@@ -48,6 +50,10 @@ A **7 / 30 / 90 day** selector at the top right drives the summary cards and bot
 These three are the only ones.
 
 **100 tool calls per minute, per key.** Past that, calls return an error saying the limit was exceeded and how many seconds to wait; the connection stays up and the client can retry. The count is per key — two keys on one project each get 100 — and resets every window rather than being a quota you use up. Conversational use never reaches it; looping clients (a call per campaign, per day, per contact) do, which is worth noticing since a smarter query usually gets the same answer in one call.
+
+<Callout kind="warning">
+  An [organization key](/mcp/authentication) gets **one** 100-per-minute allowance in total, not one per project. Anything that fans out across many client accounts on a single org key shares that budget — a reason to give a busy per-project tool its own project key.
+</Callout>
 
 **10,000 rows per query, 1,000 by default**, with a `LIMIT` added if the SQL has none, and a **30-second timeout**. If you are hitting the row cap, aggregate in SQL rather than pulling raw rows.
 
