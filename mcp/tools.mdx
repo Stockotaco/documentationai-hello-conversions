@@ -3,7 +3,9 @@ title: MCP Tool Reference
 description: Every tool the Hello Conversions MCP server exposes — exact names, parameters, return shapes, and which ones a read-only key cannot call.
 ---
 
-The MCP server exposes **31 tools**: 12 analytics tools that read the project's BigQuery dataset, 18 management tools that read and write sources, destinations, connections and pipeline config, and one documentation tool that searches the official docs. An API key is bound to one project — no tool takes a project ID, and none can reach another project's data.
+The MCP server exposes **31 tools**: 12 analytics tools that read the project's BigQuery dataset, 18 management tools that read and write sources, destinations, connections and pipeline config, and one documentation tool that searches the official docs. Every one of them acts on the project the connection is scoped to — no tool takes a project ID, and none can reach another project's data.
+
+An [organization key](/mcp/authentication) connected at the bare `/mcp` is the one exception: it sees none of the tools below, only `list_projects`, until a project ID in the URL path scopes it.
 
 ## Rules that apply to every tool
 

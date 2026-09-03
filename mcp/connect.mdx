@@ -1,6 +1,6 @@
 ---
 title: Connect a Client
-description: Point Claude Code, Cursor, Claude Desktop or any MCP-capable client at the Hello Conversions MCP server, using a project-scoped API key.
+description: Point Claude Code, Cursor, Claude Desktop or any MCP-capable client at the Hello Conversions MCP server, with a project key or an organization key.
 ---
 
 The MCP server is hosted by Hello Conversions — nothing to install, nothing to run locally. The address is the same for everyone; the API key you send with it is what makes it your project.
@@ -87,6 +87,25 @@ https://mcp.helloconversions.com/mcp
   </Step>
 </Steps>
 
+## Connecting with an organization key
+
+An [organization key](/mcp/authentication) reaches every project you own, and the **URL path** is what picks one. There are two forms:
+
+| URL | What the client sees |
+| --- | --- |
+| `https://mcp.helloconversions.com/mcp` | One tool, `list_projects` — the directory of your projects and their IDs. No data. |
+| `https://mcp.helloconversions.com/mcp/<project id>` | That project's full toolset, exactly as a project key would see it. |
+
+Connect at the root when you don't know the project ID yet, read `list_projects`, then reconnect with the ID in the path:
+
+```bash
+claude mcp add --transport http hello-conversions "https://mcp.helloconversions.com/mcp/PROJECT_ID?token=YOUR_ORG_KEY"
+```
+
+<Callout kind="note">
+  There is deliberately no "switch project" tool. A client stays on the project in its URL for the whole session, so one conversation can't quietly answer a question about the wrong client account.
+</Callout>
+
 ## Sending the key as a header
 
 The snippets put the key in the URL because most clients only let you configure a URL. If yours can set headers, drop the `?token=` and send:
@@ -109,4 +128,6 @@ The server reads the `Authorization` header first and falls back to the `token` 
 | Connects, but every tool that changes something is refused | The key is read-only — the default. See [Authentication](/mcp/authentication). |
 | Retries forever, or complains about SSE | The client is trying the retired HTTP+SSE transport. This server speaks Streamable HTTP only. |
 | "Rate limit exceeded" | Past 100 tool calls in a minute on that key — see [Usage and limits](/mcp/usage-limits). |
-| Connects, but returns the wrong project's numbers | Not possible: a key is bound to one project. The key belongs to a different project than you assumed — check its prefix against the key list. |
+| Connects, but returns the wrong project's numbers | On a project key, not possible — it is bound to one project, so the key belongs to a different project than you assumed. Check its prefix against the key list. On an organization key, check the project ID in the URL path. |
+| Connects, but the only tool is `list_projects` | An organization key at the bare `/mcp`. Add the project ID to the path — see below. |
+| "This API key cannot access that project" (HTTP 403) | The project ID in the path is not in this key's organization, or you put a path on a project key. |

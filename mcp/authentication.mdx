@@ -1,13 +1,32 @@
 ---
 title: Authentication
-description: How Hello Conversions API keys work — project scoping, the read-only option and exactly what it blocks, optional expiry, revocation, and how to rotate a key safely.
+description: How Hello Conversions API keys work — project and organization scoping, the read-only option and exactly what it blocks, optional expiry, revocation, and how to rotate a key safely.
 ---
 
-Every MCP call is authenticated with an API key, created on **Settings → Developer → MCP API Keys** inside the project it belongs to.
+Every MCP call is authenticated with an API key. There are two kinds, and which one you mint decides how much a client holding it can reach.
 
-## A key belongs to one project
+## Project keys and organization keys
 
-There is no account-wide key. The project is baked into the key — the server looks it up on every call, and no parameter a client sends can point a tool somewhere else. A key you hand to a client or a contractor cannot read another account's data. Raw SQL is scoped the same way: `query` rewrites unqualified table names into the project's own dataset, and a query naming a different dataset is refused rather than run.
+| | Project key | Organization key |
+| --- | --- | --- |
+| Minted on | **Settings → Developer → MCP API Keys**, inside the project | **Organization Settings → MCP Keys** |
+| Who can mint it | The project's owner | The organization's owner only |
+| Reaches | That one project, always | Every project in the organization, present and future |
+| Connects at | `/mcp` | `/mcp` for the project list, `/mcp/<project id>` for one project's data |
+
+A project key is the default and the one to hand out. The project is baked into the key — the server looks it up on every call, and no parameter a client sends can point a tool somewhere else. A key you give a client or a contractor cannot read another account's data.
+
+An organization key exists for the case a project key can't serve: one agency-side tool that works across all your client accounts without juggling twenty keys. It is **owner-only to mint** because it ignores per-project access — an admin who can only administer two of your five projects must not be able to mint a key that reads all five.
+
+<Callout kind="alert">
+  An organization key is as sensitive as your own login. Never give one to a client, a contractor, or anything outside your team — it reads every account you run, including ones you add later. For anyone outside, mint a project key.
+</Callout>
+
+## How the scope is enforced
+
+Raw SQL is scoped the same way the tools are: `query` rewrites unqualified table names into the project's own dataset, and a query naming a different dataset is refused rather than run.
+
+An organization key is narrowed by the **URL path**, not by anything the AI client says. At the bare `/mcp` it sees a single tool, `list_projects`, and no data at all — there is no project selected, so there is nothing to query. Adding a project ID to the path (`/mcp/<project id>`) gives it that project's full toolset. A project ID the key's organization doesn't own comes back as a refusal, whether or not that project exists.
 
 ## What a key looks like
 
@@ -22,6 +41,8 @@ The key list then shows the prefix, name, created and last-used dates, call coun
 ## Who can create and revoke keys
 
 **Generate Key** and **Revoke** appear only for the project's owner. Others with project access see the key list — names, prefixes, status, usage — but cannot mint or revoke.
+
+Organization keys are stricter: the **MCP Keys** screen in organization settings is visible only to an organization owner, who is also the only person who can mint or revoke one.
 
 ## Read-only keys
 
@@ -39,7 +60,7 @@ A blocked call changes nothing. The server refuses it and returns a message the 
 Two details: **connectivity tests are blocked** even though they change nothing in your account, because the test reaches out to Meta or Google on your behalf. **Bug reporting is deliberately allowed**, so the keys most likely to hit a broken tool aren't the ones unable to report it.
 
 <Callout kind="tip">
-  Leave keys read-only — a read-write key can delete a destination or connection, which quietly stops conversions reaching an ad platform. Mint a read-write key for the specific job that needs it, and revoke it afterwards.
+  Leave keys read-only — a read-write key can delete a destination or connection, which quietly stops conversions reaching an ad platform. Mint a read-write key for the specific job that needs it, and revoke it afterwards. On an organization key this matters more: read-write there means every project.
 </Callout>
 
 ## Expiry
