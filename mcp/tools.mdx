@@ -372,6 +372,16 @@ Read-only. Returns the connection object.
 
 Returns the created connection. See [Event types](/conversion-tracking/event-types) for what each source event means and which fields are filterable.
 
+A filter rule's `field` must be the exact payload key for the selected event types — an unknown key is rejected:
+
+| Source event | Filter field keys |
+| --- | --- |
+| `made_purchase` | `monetaryValue`, `sourceName`, `sourceId`, `fbclid`, `gclid` |
+| `product_purchased` | `productName`, `sourceName`, `sourceId`, `monetaryValue`, `fbclid`, `gclid` |
+| `opportunity_changed` | `pipelineName`, `pipelineId`, `stageName`, `stageId` |
+| `tag_added`, `tag_removed` | `activityName` (the tag name) |
+| `contact_created` | `contactSource`, `sessionSource` |
+
 #### `update_connection`
 
 | Parameter | Type | Required | Meaning |
@@ -385,7 +395,7 @@ Returns the created connection. See [Event types](/conversion-tracking/event-typ
 | `custom_event_name` | string or `null` | No | `null` clears it. |
 | `enabled` | boolean | No | Enable or disable. |
 
-Returns the updated connection. Each supplied field replaces its stored value wholesale.
+Returns the updated connection. Each supplied field replaces its stored value wholesale. Filter `field` keys are validated the same way as in `create_connection`.
 
 #### `toggle_connection`
 
