@@ -90,7 +90,7 @@ Every event carries an `event_id` of `hello-` plus the order ID (or the transact
 
 <Steps>
   <Step title="Check the destination status">
-    On **Settings → Integrations → Destinations**, the destination should sit under **Active** with a green dot. **Error** puts the last failure message on the card — usually an expired or revoked token.
+    On **Settings → Integrations → Destinations**, the destination should sit under **Active** with a green dot. The card names the pixel it sends to, so you can tell two destinations apart when their names are similar. **Error** puts the last failure message on the card — usually an expired or revoked token.
   </Step>
   <Step title="Check the Activity Log">
     **Reporting → Workflows → Activity Log** lists every processed event with the delivered payload, Meta's response and the HTTP status. `delivered` means Meta accepted it. See [Activity history](/conversion-tracking/activity-history).
