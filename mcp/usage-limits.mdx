@@ -5,7 +5,7 @@ description: What the MCP Usage screen records and shows, and the limits that ac
 
 Every MCP tool call is recorded, successful or not. **Settings → Developer → MCP Usage** shows them. Anyone with access to the project can view it.
 
-A call made with an [organization key](/mcp/authentication) is recorded against the project it queried, so it appears here under the org key's name even though that key isn't in the project's own key list. Calls to the organization root — `list_projects` — belong to no project and are recorded nowhere, though they still move the key's "last used" date and count toward its rate limit.
+A call made with an [organization key](/mcp/authentication) is recorded against the project it queried, so it appears here under the org key's name even though that key isn't in the project's own key list. Calls to `list_projects` belong to no project and are recorded nowhere, though they still move the key's "last used" date and count toward its rate limit.
 
 ## What gets recorded
 

@@ -89,21 +89,27 @@ https://mcp.helloconversions.com/mcp
 
 ## Connecting with an organization key
 
-An [organization key](/mcp/authentication) reaches every project you own, and the **URL path** is what picks one. There are two forms:
+An [organization key](/mcp/authentication) reaches every project you own. There are two forms:
 
 | URL | What the client sees |
 | --- | --- |
-| `https://mcp.helloconversions.com/mcp` | One tool, `list_projects` — the directory of your projects and their IDs. No data. |
-| `https://mcp.helloconversions.com/mcp/<project id>` | That project's full toolset, exactly as a project key would see it. |
+| `https://mcp.helloconversions.com/mcp` | `list_projects` plus every project tool. Each project tool takes a required `project_id` from `list_projects`. No resources or prompts. |
+| `https://mcp.helloconversions.com/mcp/<project id>` | That project's full toolset, resources and prompts, exactly as a project key would see it. Tools take no `project_id`. |
 
-Connect at the root when you don't know the project ID yet, read `list_projects`, then reconnect with the ID in the path:
+Use the bare `/mcp` if you switch between client accounts in one AI client. The client reads `list_projects`, then names the project on every call:
+
+```bash
+claude mcp add --transport http hello-conversions "https://mcp.helloconversions.com/mcp?token=YOUR_ORG_KEY"
+```
+
+Use `/mcp/<project id>` to lock a client tool to one account:
 
 ```bash
 claude mcp add --transport http hello-conversions "https://mcp.helloconversions.com/mcp/PROJECT_ID?token=YOUR_ORG_KEY"
 ```
 
 <Callout kind="note">
-  There is deliberately no "switch project" tool. A client stays on the project in its URL for the whole session, so one conversation can't quietly answer a question about the wrong client account.
+  There is deliberately no "switch project" tool. At the bare `/mcp` every call names its project, and on `/mcp/<project id>` the client stays on that project for the whole session, so no call runs against a project it didn't name.
 </Callout>
 
 ## Sending the key as a header
@@ -128,6 +134,8 @@ The server reads the `Authorization` header first and falls back to the `token` 
 | Connects, but every tool that changes something is refused | The key is read-only — the default. See [Authentication](/mcp/authentication). |
 | Retries forever, or complains about SSE | The client is trying the retired HTTP+SSE transport. This server speaks Streamable HTTP only. |
 | "Rate limit exceeded" | Past 100 tool calls in a minute on that key — see [Usage and limits](/mcp/usage-limits). |
-| Connects, but returns the wrong project's numbers | On a project key, not possible — it is bound to one project, so the key belongs to a different project than you assumed. Check its prefix against the key list. On an organization key, check the project ID in the URL path. |
-| Connects, but the only tool is `list_projects` | An organization key at the bare `/mcp`. Add the project ID to the path — see below. |
+| Connects, but returns the wrong project's numbers | On a project key, not possible — it is bound to one project, so the key belongs to a different project than you assumed. Check its prefix against the key list. On an organization key, check the project ID in the URL path, or the `project_id` the client passed. |
+| A project tool fails asking for `project_id` | An organization key at the bare `/mcp`. The client must pass a `project_id` from `list_projects`, or connect at `/mcp/<project id>` — see above. |
+| No resources or prompts | An organization key at the bare `/mcp`. They are only served at `/mcp/<project id>`. |
 | "This API key cannot access that project" (HTTP 403) | The project ID in the path is not in this key's organization, or you put a path on a project key. |
+| "This API key cannot access project <id>" | The `project_id` the client passed is not in this key's organization. |

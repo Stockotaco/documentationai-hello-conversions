@@ -12,7 +12,7 @@ Every MCP call is authenticated with an API key. There are two kinds, and which 
 | Minted on | **Settings → Developer → MCP API Keys**, inside the project | **Organization Settings → MCP Keys** |
 | Who can mint it | The project's owner | The organization's owner only |
 | Reaches | That one project, always | Every project in the organization, present and future |
-| Connects at | `/mcp` | `/mcp` for the project list, `/mcp/<project id>` for one project's data |
+| Connects at | `/mcp` | `/mcp` for every project, picked per call by `project_id`, or `/mcp/<project id>` for one project |
 
 A project key is the default and the one to hand out. The project is baked into the key — the server looks it up on every call, and no parameter a client sends can point a tool somewhere else. A key you give a client or a contractor cannot read another account's data.
 
@@ -26,7 +26,14 @@ An organization key exists for the case a project key can't serve: one agency-si
 
 Raw SQL is scoped the same way the tools are: `query` rewrites unqualified table names into the project's own dataset, and a query naming a different dataset is refused rather than run.
 
-An organization key is narrowed by the **URL path**, not by anything the AI client says. At the bare `/mcp` it sees a single tool, `list_projects`, and no data at all — there is no project selected, so there is nothing to query. Adding a project ID to the path (`/mcp/<project id>`) gives it that project's full toolset. A project ID the key's organization doesn't own comes back as a refusal, whether or not that project exists.
+An organization key is narrowed by the **URL path** or by an explicit project ID on each call:
+
+| Connected at | Tools | How the project is chosen |
+| --- | --- | --- |
+| `/mcp` | `list_projects` plus every project tool | Each project tool takes a required `project_id` (an ID from `list_projects`). No data is reachable without one. |
+| `/mcp/<project id>` | That project's full toolset, plus its resources and prompts | Pinned by the path. Tools take no `project_id`. |
+
+The server checks on every call that the key's organization owns the project. A project ID it doesn't own is refused ("This API key cannot access project <id>"), whether or not that project exists.
 
 ## What a key looks like
 
