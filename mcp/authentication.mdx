@@ -33,7 +33,7 @@ An organization key is narrowed by the **URL path** or by an explicit project ID
 | `/mcp` | `list_projects` plus every project tool | Each project tool takes a required `project_id` (an ID from `list_projects`). No data is reachable without one. |
 | `/mcp/<project id>` | That project's full toolset, plus its resources and prompts | Pinned by the path. Tools take no `project_id`. |
 
-The server checks on every call that the key's organization owns the project. A project ID it doesn't own is refused ("This API key cannot access project <id>"), whether or not that project exists.
+The server checks on every call that the key's organization owns the project. A project ID it doesn't own is refused ("This API key cannot access project `<id>`"), whether or not that project exists.
 
 ## What a key looks like
 
