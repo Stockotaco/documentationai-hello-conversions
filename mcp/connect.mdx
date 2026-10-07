@@ -138,4 +138,4 @@ The server reads the `Authorization` header first and falls back to the `token` 
 | A project tool fails asking for `project_id` | An organization key at the bare `/mcp`. The client must pass a `project_id` from `list_projects`, or connect at `/mcp/<project id>` — see above. |
 | No resources or prompts | An organization key at the bare `/mcp`. They are only served at `/mcp/<project id>`. |
 | "This API key cannot access that project" (HTTP 403) | The project ID in the path is not in this key's organization, or you put a path on a project key. |
-| "This API key cannot access project <id>" | The `project_id` the client passed is not in this key's organization. |
+| "This API key cannot access project `<id>`" | The `project_id` the client passed is not in this key's organization. |
