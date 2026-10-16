@@ -49,6 +49,16 @@ Your API key is passed straight through to the sync service and is not stored by
 
 The initial sync pulls history back to **1 January 2023**. After that, Stripe syncs **daily at 02:00 UTC**, re-checking the last 7 days each run so refunds and status changes on recent charges are picked up.
 
+Organization owners can change how often Stripe syncs with the **Sync** dropdown on its row in **Settings → Integrations → Sources**. Other members see the current setting.
+
+| Option | Runs (UTC) |
+| --- | --- |
+| Once a day (default) | 02:00 |
+| Every 12 hours | 02:00, 14:00 |
+| Every 6 hours | 02:00, 08:00, 14:00, 20:00 |
+
+On 12 or 6 hours, the [Lead LTV](/reporting/lead-ltv) and [Marketing Efficiency](/reporting/marketing-efficiency) snapshots are also rebuilt about 10 minutes after each sync instead of once a day. A reconnect keeps the setting.
+
 ## Telling it's working
 
 | What you see | What it means |

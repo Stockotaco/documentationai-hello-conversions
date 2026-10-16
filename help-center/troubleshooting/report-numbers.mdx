@@ -58,8 +58,8 @@ The most common complaint, and usually neither report is wrong.
 | Every conversion, cost-per and ROAS is zero | Wrong objective for the account — a lead-gen account left on the default Purchases never records `purchase` results |
 | ROAS column missing entirely | Objective is not Purchases. Expected |
 | Report is completely empty | No spend in the range, or the first Meta sync hasn't finished |
-| A creative you know is running isn't listed | It spent nothing in the range, or its spend landed after the last daily sync |
-| Yesterday's spend missing | The 02:00 UTC sync hasn't run since that spend was recorded |
+| A creative you know is running isn't listed | It spent nothing in the range, or its spend landed after the last sync |
+| Yesterday's spend missing | No sync has run since that spend was recorded. On the default once-a-day sync (02:00 UTC) that can be most of a day; [every 6 hours](/connect/sources/meta-ads#how-often-it-syncs) shortens it |
 | Numbers changed since this morning | Meta revised its own attribution, or the 15-minute cache expired |
 | Verdicts flipped between two views | Different date range or format filter — the comparison set changed |
 | Cost-per shows `--` | Zero conversions |
@@ -71,7 +71,7 @@ The most common complaint, and usually neither report is wrong.
 | Symptom | Cause |
 | --- | --- |
 | Table is empty | No creative spent in the range, or the first Meta sync hasn't finished |
-| A creative you fixed still shows red | The fix hasn't synced yet — sync is daily at 02:00 UTC, plus a 30-minute result cache |
+| A creative you fixed still shows red | The fix hasn't synced yet. Meta syncs at 02:00 UTC by default (or every 12 or 6 hours if set), and the result cache clears when a sync finishes |
 | A tagged creative shows as untagged | The parameters were appended to the website URL rather than entered in the URL parameters field |
 | Missing UTMs card is lower than the Issues row count | The card counts creatives with *no* UTM at all; Issues counts any missing one, so a creative with only `utm_source` is in Issues but not on the card |
 | Landing page shows only a hostname | Only the hostname is displayed; the link goes to the full URL |
@@ -103,8 +103,8 @@ The most common complaint, and usually neither report is wrong.
 
 | Cause | Which reports |
 | --- | --- |
-| Daily snapshot rebuild, project timezone | Marketing Efficiency, Lead LTV |
-| Meta sync at 02:00 UTC | Creatives, Creative Tracking, Frameworks |
+| Daily snapshot rebuild, project timezone, plus after each sync when a source syncs every 12 or 6 hours | Marketing Efficiency, Lead LTV |
+| Meta sync at 02:00 UTC, or every 12 or 6 hours if set | Creatives, Creative Tracking, Frameworks |
 | Short result caches — 15 minutes on creatives, 30 on tracking, 5 on email | Creatives, Creative Tracking, Email Stats |
 | A range ending today keeps moving until the day closes | All of them |
 | Refunds netted against the original transaction date | Revenue Overview |

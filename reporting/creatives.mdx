@@ -68,9 +68,9 @@ Data sufficiency is rated **low** below a quarter of the average spend (floor $1
 
 | Stage | Timing |
 | --- | --- |
-| Meta Ads → Hello Conversions | Airbyte sync, **daily at 02:00 UTC** (plus one immediately on connect) |
+| Meta Ads → Hello Conversions | Airbyte sync, **daily at 02:00 UTC** by default, or every 12 or 6 hours ([sync frequency](/connect/sources/meta-ads#how-often-it-syncs)), plus one immediately on connect |
 | Creative images and thumbnails | Copied into Hello Conversions storage after each successful sync |
-| Report results | Cached for **15 minutes** per project, date range and filter combination |
+| Report results | Cached for **15 minutes** per project, date range and filter combination, and cleared when a sync finishes |
 
 **Today is never included** — the end of the range is clamped to yesterday in the project's timezone, because Meta's same-day numbers are incomplete. Platform admins get a **Clear cache** button, which drops the 15-minute cache but does not pull new data from Meta.
 

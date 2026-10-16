@@ -110,7 +110,7 @@ Built by Hello Conversions on top of the source tables. Which variant you get de
 | `summary_marketing_efficiency_campaign_spend` | Table | One campaign on one day | Always, possibly empty |
 
 <Callout kind="note">
-  Views compute live. The `summary_lead_ltv_*` and `summary_marketing_efficiency_*` objects are **materialized tables** rebuilt on a nightly refresh — up to a day stale, and absent entirely on a project that has never run the refresh.
+  Views compute live. The `summary_lead_ltv_*` and `summary_marketing_efficiency_*` objects are **materialized tables** rebuilt on a daily refresh (and after each sync for sources set to sync every 12 or 6 hours) — up to a day stale, and absent entirely on a project that has never run the refresh.
 </Callout>
 
 ### `summary_daily`

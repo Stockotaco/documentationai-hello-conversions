@@ -44,6 +44,16 @@ Without it, those reports still load — they just have no Meta spend in them.
 
 An initial sync runs on connect. After that the account syncs **daily at 02:00 UTC**.
 
+Organization owners can change how often the account syncs with the **Sync** dropdown on its row in **Settings → Integrations → Sources**. Other members see the current setting.
+
+| Option | Runs (UTC) |
+| --- | --- |
+| Once a day (default) | 02:00 |
+| Every 12 hours | 02:00, 14:00 |
+| Every 6 hours | 02:00, 08:00, 14:00, 20:00 |
+
+On 12 or 6 hours, the [Lead LTV](/reporting/lead-ltv) and [Marketing Efficiency](/reporting/marketing-efficiency) snapshots are also rebuilt about 10 minutes after each sync instead of once a day. A reconnect keeps the setting.
+
 - **Insights use a 28-day lookback.** Each run re-pulls the last 28 days of performance data, so Meta's late attribution corrections show up instead of freezing at day-one numbers.
 - **Only active, paused, and in-process campaigns sync.** Archived and deleted campaigns are not pulled, so historical spend on an archived campaign won't appear.
 

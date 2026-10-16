@@ -89,6 +89,6 @@ Expect Sales to drop when you apply your first filter. The denominator changed; 
 
 ## Freshness
 
-Spend and lead data come from a snapshot rebuilt **once a day in the project's timezone**; the sales side is queried live per page load. The header chip shows the last successful rebuild, or **Refresh failed** if the latest attempt errored — in which case spend and lead figures are the last good build. The refresh button re-runs queries; it does not rebuild the snapshot.
+Spend and lead data come from a snapshot rebuilt **once a day in the project's timezone**; the sales side is queried live per page load. When a connected ad or Stripe account [syncs every 12 or 6 hours](/connect/sources/meta-ads#how-often-it-syncs), the snapshot is also rebuilt about 10 minutes after each sync. The header chip shows the last successful rebuild, or **Refresh failed** if the latest attempt errored — in which case spend and lead figures are the last good build. The refresh button re-runs queries; it does not rebuild the snapshot.
 
 Numbers not matching? [A report number looks wrong](/help-center/troubleshooting/report-numbers) lists the causes symptom by symptom.

@@ -45,6 +45,16 @@ Connecting Google Ads pulls your campaigns and daily cost into Hello Conversions
 
 An initial sync runs on connect. After that the account syncs **daily at 02:00 UTC**, so cost data in the reports is up to a day behind — expected, not a fault.
 
+Organization owners can change how often the account syncs with the **Sync** dropdown on its row in **Settings → Integrations → Sources**. Other members see the current setting.
+
+| Option | Runs (UTC) |
+| --- | --- |
+| Once a day (default) | 02:00 |
+| Every 12 hours | 02:00, 14:00 |
+| Every 6 hours | 02:00, 08:00, 14:00, 20:00 |
+
+On 12 or 6 hours, the [Lead LTV](/reporting/lead-ltv) and [Marketing Efficiency](/reporting/marketing-efficiency) snapshots are also rebuilt about 10 minutes after each sync instead of once a day. A reconnect keeps the setting.
+
 ## Telling it's working
 
 | What you see | What it means |

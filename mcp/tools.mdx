@@ -3,7 +3,7 @@ title: MCP Tool Reference
 description: Every tool the Hello Conversions MCP server exposes — exact names, parameters, return shapes, and which ones a read-only key cannot call.
 ---
 
-The MCP server exposes **31 tools**: 12 analytics tools that read the project's BigQuery dataset, 18 management tools that read and write sources, destinations, connections and pipeline config, and one documentation tool that searches the official docs. Every one of them acts on the project the connection is scoped to, and none can reach another project's data.
+The MCP server exposes **45 tools**: 11 analytics tools that read the project's BigQuery dataset, 31 management tools that read and change sources, destinations, connections, the Activity Log, pipelines, the business profile, brand kit, Creative Brief and Slack notifications, two bug-report tools, and one documentation tool that searches the official docs. Every one of them acts on the project the connection is scoped to, and none can reach another project's data.
 
 An [organization key](/mcp/authentication) connected at the bare `/mcp` also gets `list_projects`, and every tool below takes an extra required `project_id` from it. The server refuses a project the key's organization doesn't own. On a project key or at `/mcp/<project id>`, no tool takes a project ID.
 
@@ -19,7 +19,7 @@ An [organization key](/mcp/authentication) connected at the bare `/mcp` also get
 
 ## Analytics tools
 
-All 12 are read-only. They query the project's BigQuery dataset — see [Data model](/mcp/data-model). Every one returns `{ rows, total_rows }` except `list_tables`. Row columns are listed per tool.
+All 11 are read-only. They query the project's BigQuery dataset — see [Data model](/mcp/data-model). Every one returns `{ rows, total_rows }` except `list_tables`. Row columns are listed per tool.
 
 ### `list_tables`
 
@@ -79,23 +79,9 @@ Searches transactions/charges. Reads GHL `transactions`; falls back to `stripe_c
 | GHL `transactions` | `contact_id`, `amount`, `currency`, `status`, `product_name`, `created_at`, `created_at_local` | Filtered to `live_mode = true`. `product_name` is `entity_source_name`. |
 | `stripe_charges` | `id`, `amount`, `currency`, `status`, `product_name`, `created_at`, `created_at_local`, `customer` | `amount` is net of refunds, converted from cents. `product_name` is the charge description. Deduplicated to the latest extract per charge. |
 
-### `search_events`
-
-Searches tracked website events.
-
-| Parameter | Type | Required | Meaning |
-| --- | --- | --- | --- |
-| `eventName` | string | No | Exact event name, e.g. `$pageview`. |
-| `dateFrom` | string | No | Start date. **Defaults to 7 days ago.** |
-| `dateTo` | string | No | End date. Defaults to today. |
-| `userId` | string | No | Visitor/user ID. |
-| `limit` | number | No | Max rows. Default 100. |
-
-Returns `event_name`, `event_timestamp`, `event_timestamp_local`, `user_id`, `location_id`. A date range is always applied — omitting both dates gives the last 7 days, not all time.
-
 ### `get_activity_stream`
 
-Queries the GoHighLevel activity stream: tag changes, stage moves, form submissions.
+Queries the CRM activity history from Lead Connector: tag changes, stage moves, form submissions. It is not the Activity Log of events sent to Meta, Google Ads or webhooks; for those use [`list_activity_log`](#activity-log).
 
 | Parameter | Type | Required | Meaning |
 | --- | --- | --- | --- |
@@ -216,6 +202,8 @@ Sorted by spend descending. Dates match the ad platform's own reporting date, no
 | --- | --- | --- |
 | `list_integrations` | List data source integrations | Yes |
 | `disconnect_integration` | Disconnect a source — **destructive** | No |
+| `sync_integration` | Start a Meta Ads, Google Ads or Stripe sync now | No |
+| `set_meta_objective` | Set the Meta Ads objective the Creatives reports count | No |
 | `list_destinations` | List delivery destinations | Yes |
 | `get_destination` | Full detail for one destination | Yes |
 | `create_destination` | Create a destination | No |
@@ -229,9 +217,22 @@ Sorted by spend descending. Dates match the ad platform's own reporting date, no
 | `toggle_connection` | Flip a connection on/off | No |
 | `delete_connection` | Delete a connection — **destructive** | No |
 | `get_connection_stats` | Volume and failure-rate summary | Yes |
+| `list_activity_log` | Events sent to destinations, with status and match quality | Yes |
+| `get_activity_log_entry` | One Activity Log event in full: payloads and the destination's response | Yes |
 | `get_pipeline_config` | Read pipeline stage config | Yes |
 | `update_pipeline_config` | Replace pipeline stage config | No |
+| `get_business_profile` | Read the business profile | Yes |
+| `update_business_profile` | Edit the business profile | No |
+| `get_brand_kit` | Read the brand kit | Yes |
+| `get_creative_brief` | Read the Creative Brief | Yes |
+| `refresh_creative_brief` | Rebuild the Creative Brief | No |
+| `get_slack_settings` | Read Slack notification settings | Yes |
+| `list_slack_channels` | List Slack channels | Yes |
+| `update_slack_settings` | Edit Slack notification settings | No |
+| `send_slack_test_message` | Post a test message to Slack | No |
+| `disconnect_slack` | Disconnect Slack — **destructive** | No |
 | `report_bug` | File a bug report — writes, but allowed from read-only keys | Yes |
+| `check_bug_reports` | List this project's bug reports and the team's replies | Yes |
 
 <Callout kind="alert">
   The three destructive tools each require `confirm` set to literally `true`. There is no undo, no soft delete, no second prompt. Deleting a destination deletes every connection pointing at it; replacing pipeline config deletes the pipeline-managed connections it no longer wants.
@@ -425,6 +426,32 @@ Returns `{ message, id, name }`.
 Project-wide connection health. No parameters. Read-only.
 
 Returns `{ active_connections, total_connections, events_24h, failures_24h, failure_rate_24h }`, the last as a percentage to two decimal places. The 24-hour counts come from Redis hourly counters; if Redis is unreadable they return `0` rather than erroring, so a flat zero on a busy project means "counters unreadable" — cross-check the [Activity Log](/conversion-tracking/activity-history).
+
+### Activity log
+
+The same events as [Activity Log](/conversion-tracking/activity-history): what each workflow connection sent to Meta, Google Ads, a webhook or PostHog, and what happened. Both tools are read-only.
+
+#### `list_activity_log`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `status` | `delivered` \| `failed` \| `filtered` \| `skipped` | No | Only events with this status. |
+| `event_type` | string | No | Source event key such as `made_purchase`, `contact_created`, `tag_added`, or raw event types. Comma-separated. |
+| `event_name` | string | No | Event names sent to the destination, e.g. `Purchase,Lead`. |
+| `connection_id` | string (UUID) | No | Only events from this connection. |
+| `search` | string | No | Contact name or email contains. |
+| `before` | string | No | Only events before this time. Pass `next_cursor` from the previous page. |
+| `limit` | number | No | Default 25, max 50. |
+
+Returns `{ entries, has_more, next_cursor }`, newest first. Each entry has `id`, `created_at` (UTC), `status`, `source_event_type`, `event_name`, `provider`, `connection_id`, `destination_id`, `contact_name`, `email`, `amount`, `utm_source`, `utm_medium`, `utm_campaign`, `has_fbc`, `has_fbp`, `has_gclid`, `match_quality` (0–100, Meta only), `match_params`, `http_status`, `error_message` and `duration_ms`. There is no date filter; page back with `before`.
+
+#### `get_activity_log_entry`
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `id` | string | Yes | Entry `id` from `list_activity_log`. |
+
+Returns `{ entry }`: every `list_activity_log` field plus `source_event_id`, `source_payload` (as received), `enriched_payload` (after attribution and contact enrichment), `sent_payload` (the request sent; identifiers are hashed for Meta) and `destination_response`. Payloads over 20,000 characters are cut.
 
 ### Pipelines
 

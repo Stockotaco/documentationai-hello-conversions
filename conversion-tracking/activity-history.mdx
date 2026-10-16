@@ -9,10 +9,10 @@ Every delivery attempt Hello Conversions makes is recorded at **Reporting → Wo
 
 <Steps>
   <Step title="Narrow by event type, event name, or status">
-    The chips across the top filter to **Purchase**, **Tag Added**, or **Contact Created**. The **All Event Names** dropdown filters to the name the event was sent under at the destination — **Purchase**, **Lead**, **Schedule**, or whatever your connections use — listing every name seen in the last 30 days. The status dropdown filters to **Delivered** or **Failed**, and shows the failure count next to it.
+    The chips across the top filter to **Purchase**, **Tag Added**, or **Contact Created**. The **All Event Names** dropdown filters to the name the event was sent under at the destination — **Purchase**, **Lead**, **Schedule**, or whatever your connections use — listing every name seen in the last 30 days. The status dropdown starts on **Delivered**; switch it to **Failed** (it shows the failure count) or **All Status**.
   </Step>
   <Step title="Search for the person">
-    The search box matches on contact name or email, across the rows currently loaded rather than all of history — so for an older event, filter first and page back to roughly the right time, then search.
+    The search box matches contact name or email across the whole log, combined with the filters above.
   </Step>
   <Step title="Read the row">
     Each row shows the contact, the event, the amount, the destination, and how long ago it was processed. Hover the timestamp for the exact time in the project's timezone.
@@ -28,12 +28,12 @@ The log auto-refreshes every 30 seconds, which is useful while waiting on a test
 
 | What you see | What it means |
 | --- | --- |
-| Green dot | Delivered. |
-| Red dot, plus a **failed** badge | The destination rejected it. |
-| Grey dot, plus a **filtered** badge | It matched the connection's event but not its filter rules, so nothing was sent. Normal, not an error. |
+| Green check | Delivered. |
+| Red ✕ | Failed: the destination rejected it. |
+| Grey dashed circle | Filtered: it matched the connection's event but not its filter rules, so nothing was sent. Normal, not an error. |
 | A number badge (e.g. `62`) | Meta match quality for that delivery — green at 50 and above, amber from 30, red below. Hover it to see which parameters were sent. See [Match Quality](/conversion-tracking/match-quality). |
 | Meta and Google icons on the right | Lit when that click ID was present on the event (`fbc`/`fbp` for Meta, `gclid` for Google), dimmed when it wasn't. |
-| The @ and screen icons | Lit when an email, and UTM data, were available. The UTM source and medium are printed next to them. |
+| The @ and screen icons | Lit when an email, and UTM data, were available. The UTM source and medium are in the **Source** column. |
 
 The counters above the rows summarize the same window: total events, success rate, the failure count (click it to filter to failures), and average Meta match quality across the last 7 days of scored events.
 
@@ -70,6 +70,10 @@ No run means the event never reached a connection. Work backwards:
 2. Was the connection paused at the time? Events that fire while a connection is off are not sent and not retained.
 3. Did the event qualify? An order that isn't in a completed state never becomes a purchase event — see [Event Types](/conversion-tracking/event-types).
 4. Is Lead Connector still connected, under **Settings → Integrations → Sources**?
+
+## From an AI assistant
+
+The Assistant and [MCP](/mcp/tools#activity-log) read the same log with `list_activity_log` (filter by status, event, connection or contact) and `get_activity_log_entry` (what was sent and the destination's response), so you can ask "which recent purchases failed to reach Meta, and why?"
 
 ## The bigger picture
 

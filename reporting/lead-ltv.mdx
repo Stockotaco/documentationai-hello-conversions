@@ -98,7 +98,7 @@ Clicking a **New Leads** figure — on a KPI or any breakdown row — opens the 
 
 ## Freshness
 
-Lead LTV reads a snapshot rebuilt **once a day, at a set hour in the project's own timezone**. The header chip shows the last successful rebuild.
+Lead LTV reads a snapshot rebuilt **once a day, at a set hour in the project's own timezone**. When a connected ad or Stripe account [syncs every 12 or 6 hours](/connect/sources/meta-ads#how-often-it-syncs), it is also rebuilt about 10 minutes after each sync. The header chip shows the last successful rebuild.
 
 <Callout kind="note">
   The refresh button re-runs the queries against the current snapshot; it does not rebuild it. If the header shows **Refresh failed**, you're on the last good build until the next scheduled rebuild succeeds.
