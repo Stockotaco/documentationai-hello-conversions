@@ -221,6 +221,7 @@ Sorted by spend descending. Dates match the ad platform's own reporting date, no
 | `get_activity_log_entry` | One Activity Log event in full: payloads and the destination's response | Yes |
 | `get_pipeline_config` | Read pipeline stage config | Yes |
 | `update_pipeline_config` | Replace pipeline stage config | No |
+| `upsert_pipeline_stages` | Add or change some pipeline stages | No |
 | `get_business_profile` | Read the business profile | Yes |
 | `update_business_profile` | Edit the business profile | No |
 | `get_brand_kit` | Read the brand kit | Yes |
@@ -463,20 +464,23 @@ Reads the mapping from CRM pipeline stages to conversion events and destinations
 | --- | --- | --- | --- |
 | `pipelineId` | string | No | Every stage, enabled and disabled, for one GHL pipeline. |
 | `includeDisabled` | boolean | No | Every stage in the project. Default `false`. |
+| `for_update` | boolean | No | The complete list (every pipeline, enabled and disabled) to edit and send to `update_pipeline_config`. Overrides the other two. |
 
-Read-only. Returns `{ stages, total_stages, enabled_stages, returned }`, plus a `pipelines` rollup of `{ pipelineId, pipelineName, stageCount, enabledCount }` when not scoped to one `pipelineId`.
+Read-only. Returns `{ stages, total_stages, enabled_stages, returned, updated_at }`, plus a `pipelines` rollup of `{ pipelineId, pipelineName, stageCount, enabledCount }` when not scoped to one `pipelineId`.
 
 **Returns only enabled stages by default.** Projects routinely carry hundreds of disabled ones, so `returned` will be smaller than `total_stages`. Use the rollup to see what exists, then drill in with `pipelineId`.
 
 #### `update_pipeline_config`
 
-Replaces the stage configuration and re-syncs the connections it manages.
+Replaces the stage configuration and re-syncs the connections it manages. To add or change a few stages, use `upsert_pipeline_stages` instead.
 
 | Parameter | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `stages` | array of stage objects | Yes | The complete stage list. |
+| `expected_updated_at` | string | Yes | The `updated_at` from `get_pipeline_config` (`"never"` when it was `null`). If the stages were saved since, the update is refused with `pipeline_config_conflict`. |
+| `allow_removal` | boolean | No | Required to delete stages that exist today. Without it, a list missing any saved stage is refused. |
 
-Every stage object requires all nine fields:
+Every stage object requires these nine fields:
 
 <ParamField path="pipelineId" type="string" required>
   GHL pipeline ID.
@@ -511,16 +515,35 @@ Every stage object requires all nine fields:
 </ParamField>
 
 <ParamField path="destinationIds" type="string[]" required>
-  Destination UUIDs to route this stage to.
+  Destination UUIDs to route this stage to. Each must belong to the project.
+</ParamField>
+
+<ParamField path="destinationConversionActions" type="object">
+  Map of destination ID to Google Ads conversion action resource name. Needed for `google_ads` destinations.
 </ParamField>
 
 Each enabled stage with at least one destination gets exactly one `managed_by: "pipeline"` connection per destination, filtered to that pipeline and stage on `opportunity_changed`. Managed connections no longer matching a stage/destination pair are deleted.
 
-Returns `{ stages, sync_failed, message }`. `sync_failed: true` means **the config saved but the connections did not reconcile** — delivery no longer matches the stored config. Retry the call or fix it in the web UI.
+Returns `{ stages, sync_failed, sync_error, message, updated_at }`. `sync_failed: true` means **the config saved but the connections did not reconcile**, so delivery no longer matches the stored config. Retry the call or fix it in the web UI.
 
 <Callout kind="alert">
-  **Full replace, not a merge.** Any stage missing from the array you send is gone. Call `get_pipeline_config` with `includeDisabled: true` first, edit that array, send it back whole.
+  **Full replace, not a merge.** Call `get_pipeline_config` with `for_update: true` first, edit that array, and send it back whole with its `updated_at`. On a large project that list can be too big for an MCP client or gateway to pass through. Use `upsert_pipeline_stages` there.
 </Callout>
+
+#### `upsert_pipeline_stages`
+
+Adds or changes specific stages without sending the full list. Each stage is matched by `pipelineId` + `stageId`: a saved stage is replaced by the one you send, and a new one is added. Stages you don't send stay as they are, and nothing is removed. Set `enabled: false` to stop a stage routing.
+
+| Parameter | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `stages` | array of 1 to 200 stage objects | Yes | The stages to add or replace, with the same fields as `update_pipeline_config`. Send complete objects. |
+| `expected_updated_at` | string | No | Refuse the change if the stages were saved since this `updated_at`. Omit it to merge into the latest saved stages. |
+
+To change a saved stage, read it with `get_pipeline_config` and `pipelineId`, edit it, and send it back. A new stage needs its GHL pipeline and stage IDs and names.
+
+Returns `{ stages, added, updated, unchanged, total_stages, sync_failed, sync_error, message, updated_at }`. `stages` holds only the stages you sent. If every stage you sent already matches, nothing is saved.
+
+The connections the stages manage are re-synced the same way as `update_pipeline_config`, so disabling a stage or dropping a destination deletes that connection. Only the stages you send are checked: every destination ID must belong to the project, and a stage can't appear twice.
 
 ### Bug reports
 
