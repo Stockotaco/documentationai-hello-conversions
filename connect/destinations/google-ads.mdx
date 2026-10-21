@@ -13,7 +13,7 @@ A lead that closes a week later, an opportunity moved to Won, a purchase recorde
 
 - The **Customer ID** of the Google Ads account, with or without dashes. It's at the top of the Google Ads dashboard, formatted like `123-456-7890`.
 - Access to that account with permission to accept a manager account request.
-- Two settings inside the Google Ads account, covered in [Account requirements](#account-requirements): **enhanced conversions** turned on and the **customer data terms** accepted. Without them Google accepts the uploads but cannot match most CRM events to a click.
+- Two settings inside the Google Ads account, covered in [Account requirements](#account-requirements): **enhanced conversions** turned on and the **customer data terms** accepted. Without them Google refuses uploads that carry an email or phone, so only events with a Google click ID can be sent.
 
 ## Link the account
 
@@ -69,7 +69,7 @@ Google accepts an upload whenever the request is well formed. Whether it then be
 
 | Setting | Where in Google Ads | Why it matters |
 | --- | --- | --- |
-| **Enhanced conversions** turned on | **Goals → Settings → Enhanced conversions** | With it off, Google only matches uploads that carry a Google click ID. Most CRM events (a lead from a form, a pipeline stage change, a sale recorded weeks later) have none, so they would never match. With it on, Google matches the hashed email and phone we send against signed-in users who clicked your ad. |
+| **Enhanced conversions** turned on | **Goals → Settings → Enhanced conversions** | With it off, Google refuses uploads that carry an email or phone, so Hello Conversions sends only events with a Google click ID and skips the rest. Most CRM events (a lead from a form, a pipeline stage change, a sale recorded weeks later) have no click ID, so they would never reach Google. With it on, Google matches the hashed email and phone we send against signed-in users who clicked your ad. |
 | **Customer data terms** accepted | **Goals → Settings → Customer data terms**, or the prompt when you turn on enhanced conversions | Google refuses uploads that carry email or phone from accounts that have not accepted the terms. |
 | Conversion actions exist and are **Website (Import from clicks)** | **Goals → Conversions → Summary** | The actions we created are this type. One deleted in Google Ads, or swapped for a tag-based action, cannot receive uploads. |
 
@@ -97,7 +97,7 @@ Uploads go through Google's Data Manager API as enhanced conversions for leads. 
 The transaction ID is what stops double-counting: a retry, a replay, or the same sale counted by a tag on your site all collapse into one conversion.
 
 <Callout kind="alert">
-  **An event with no identifier at all cannot be uploaded.** Google needs a click ID or an email or phone to match on. An event with none, such as an anonymous walk-in or a contact with no contact details, is skipped before the request is made and logged as `filtered` with the reason "No usable identifier for ingestion". An event with an email or phone but no click ID is uploaded, and matches only when [enhanced conversions](#account-requirements) is on.
+  **An event with no identifier at all cannot be uploaded.** Google needs a click ID or an email or phone to match on. An event with none, such as an anonymous walk-in or a contact with no contact details, is skipped before the request is made and logged as `filtered` with the reason "No usable identifier for ingestion". An event with an email or phone but no click ID is uploaded when [enhanced conversions](#account-requirements) is on and the customer data terms are accepted. Until then it is skipped and logged as `filtered` with the reason "Google Ads account has not turned on enhanced conversions or accepted the customer data terms", and the destination card shows what to turn on.
 </Callout>
 
 Events are also skipped, with their own reason in the Activity Log, when the destination's link is pending or revoked, or when it has no conversion action.
