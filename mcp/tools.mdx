@@ -297,13 +297,13 @@ Returns the created destination — `connected` if you supplied credentials, `di
 | --- | --- | --- | --- |
 | `destination_id` | string (UUID) | Yes | Destination to update. |
 | `name` | string (1–100) | No | New name. |
-| `config` | object of strings | No | Replaces the whole config object. |
+| `config` | object of strings | No | Keys to change. Merged into the saved config: keys you leave out keep their value, so a Google Ads destination's link status and conversion actions survive. |
 | `credentials` | object of strings | No | Replaces the whole credentials object. |
 | `event_filters` | array of strings | No | Replaces the filter list. |
 | `field_mapping` | array of `{ source, target }` | No | Replaces the mapping list. |
 | `status` | string | No | Set manually, e.g. `connected`, `disconnected`. |
 
-Each supplied field replaces its stored value — send the complete object, not a patch. Credentials on a `disconnected` destination auto-promote it to `connected` and clear the error message. Delivery caches are invalidated immediately.
+`config` is merged; every other supplied field replaces its stored value, so send those complete. Credentials on a `disconnected` destination auto-promote it to `connected` and clear the error message. Delivery caches are invalidated immediately.
 
 #### `delete_destination`
 

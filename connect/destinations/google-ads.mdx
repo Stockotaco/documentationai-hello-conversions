@@ -13,12 +13,15 @@ A lead that closes a week later, an opportunity moved to Won, a purchase recorde
 
 - The **Customer ID** of the Google Ads account, with or without dashes. It's at the top of the Google Ads dashboard, formatted like `123-456-7890`.
 - Access to that account with permission to accept a manager account request.
+- Two settings inside the Google Ads account, covered in [Account requirements](#account-requirements): **enhanced conversions** turned on and the **customer data terms** accepted. Without them Google accepts the uploads but cannot match most CRM events to a click.
 
 ## Link the account
 
 <Steps>
   <Step title="Add the destination">
     At **Settings → Integrations → Destinations**, click **Add Destination** and choose **Google Ads**. Give it a name, enter the **Customer ID**, and click **Create**.
+
+    **User consent** can stay at *Not set* unless your site collects consent for ad user data and ad personalization. Choose *Granted* only when it does: it is what Google needs to use conversions from people in the EEA, UK and Switzerland for personalization.
   </Step>
   <Step title="Send the link request">
     The destination shows as **Not Linked** with a **Send Link Request** button. Click it, and the status changes to **Pending Approval**.
@@ -58,34 +61,55 @@ You can create a new one from that dropdown, choosing the name, category, counti
 | **Static** | Always uses the default value you set, ignoring the uploaded value. |
 | **None** | Uses a default value of zero. |
 
-With no conversion action set on a connection, uploads fall back to a default: `contact_created` events go to the New Contacts action, everything else to the Purchases action.
+With no conversion action set on a connection, uploads fall back to a default: `contact_created` events go to the New Contacts action, everything else to the Purchases action. A destination with no conversion action at all (the link was approved before actions were created, or they were deleted in Google Ads) skips every event with the reason "No Google Ads conversion action configured for this event" until one is set.
+
+## Account requirements
+
+Google accepts an upload whenever the request is well formed. Whether it then becomes a conversion in your reports depends on settings inside the Google Ads account. Hello Conversions reads them once a day for every linked destination, and again each time you click **Test Connection**. Anything wrong shows on the destination card as **Needs attention in Google Ads**.
+
+| Setting | Where in Google Ads | Why it matters |
+| --- | --- | --- |
+| **Enhanced conversions** turned on | **Goals → Settings → Enhanced conversions** | With it off, Google only matches uploads that carry a Google click ID. Most CRM events (a lead from a form, a pipeline stage change, a sale recorded weeks later) have none, so they would never match. With it on, Google matches the hashed email and phone we send against signed-in users who clicked your ad. |
+| **Customer data terms** accepted | **Goals → Settings → Customer data terms**, or the prompt when you turn on enhanced conversions | Google refuses uploads that carry email or phone from accounts that have not accepted the terms. |
+| Conversion actions exist and are **Website (Import from clicks)** | **Goals → Conversions → Summary** | The actions we created are this type. One deleted in Google Ads, or swapped for a tag-based action, cannot receive uploads. |
+
+Matching with email and phone works best when a Google tag on your site also collects the same user-provided data at the form or checkout. If you run the Google tag, turn on **Form interactions** under its automatic event detection so Google can pair the on-site visit with the upload.
+
+<Callout kind="note">
+  These are settings in the client's Google Ads account, not in Hello Conversions. Someone with admin access to the account has to change them. After changing a setting, click **Test Connection** on the destination to clear the warning right away instead of waiting for the daily check.
+</Callout>
 
 ## What gets uploaded
 
-Each delivered event becomes one offline click conversion upload containing:
+Uploads go through Google's Data Manager API as enhanced conversions for leads. Each delivered event becomes one conversion event containing:
 
 | Field | Source |
 | --- | --- |
-| Click ID | `gclid` from the event, or `gbraid` / `wbraid` for iOS app clicks |
+| Click ID | `gclid` from the event, or `gbraid` / `wbraid` for iOS app clicks, when the event has one |
+| User data | SHA-256 hashes of the email and phone, normalized the way Google requires (lowercase, Gmail dots and plus-suffixes removed, phone in E.164). Name plus country and postal code are added when all three are present. Nothing is sent in the clear. |
 | Conversion action | The connection's action, or the fallback above |
 | Conversion time | The event's timestamp |
+| Event source | Always `WEB`: every event we forward started on a website lead form or checkout |
 | Value and currency | The event's value. Currency is the transaction's own currency, then the linked account's currency, then USD |
-| Order ID | The order ID — or the transaction ID for subscription rebills, since rebills reuse the original order's ID |
+| Transaction ID | The order ID for sales (the transaction ID for subscription rebills, since rebills reuse the original order's ID), otherwise the source event's own ID |
+| Consent | Sent as granted only when the destination's **User consent** is set to *Granted* |
 
-The order ID is what stops double-counting: if the same sale is also counted by a tag on your site, Google collapses the two.
+The transaction ID is what stops double-counting: a retry, a replay, or the same sale counted by a tag on your site all collapse into one conversion.
 
 <Callout kind="alert">
-  **An event with no Google click ID cannot be uploaded.** Google's offline conversion import requires a `gclid`, `gbraid` or `wbraid`. An event with none — a lead from Meta, a pipeline stage change on a contact with no ad click, a walk-in — is skipped before the request is made and logged as `filtered`, with the reason "No usable identifier for ingestion". This is expected, not an error: only the share of your CRM events that started with a Google ad click can be sent.
+  **An event with no identifier at all cannot be uploaded.** Google needs a click ID or an email or phone to match on. An event with none, such as an anonymous walk-in or a contact with no contact details, is skipped before the request is made and logged as `filtered` with the reason "No usable identifier for ingestion". An event with an email or phone but no click ID is uploaded, and matches only when [enhanced conversions](#account-requirements) is on.
 </Callout>
+
+Events are also skipped, with their own reason in the Activity Log, when the destination's link is pending or revoked, or when it has no conversion action.
 
 ## Confirm it's working
 
 <Steps>
   <Step title="Check the destination status">
-    On **Settings → Integrations → Destinations**, the card shows **Connected**, **Pending Approval**, **Access Revoked** or **Not Linked**, along with the customer ID it sends to. Use **Test Connection** on the edit panel to confirm the link is live.
+    On **Settings → Integrations → Destinations**, the card shows **Connected**, **Pending Approval**, **Access Revoked** or **Not Linked**, along with the customer ID it sends to and how many events were delivered in the last 30 days. A **Needs attention in Google Ads** box lists any [account requirement](#account-requirements) that is not met. Use **Test Connection** on the edit panel to confirm the link is live: it also sends Google a validate-only event, so a permission or payload problem shows up here rather than on the first real conversion.
   </Step>
   <Step title="Check the Activity Log">
-    **Reporting → Workflows → Activity Log** shows each event with its status and the exact payload we sent. `delivered` means Google accepted the upload; `filtered` usually means no click ID. See [Activity history](/conversion-tracking/activity-history).
+    **Reporting → Workflows → Activity Log** shows each event with its status and the exact payload we sent. `delivered` means Google accepted the upload; `filtered` carries the reason it was skipped. See [Activity history](/conversion-tracking/activity-history).
   </Step>
   <Step title="Check Google Ads">
     Open the conversion action and look at its recorded conversions. Offline conversion imports are not instant in reporting — give it time before concluding nothing arrived.
@@ -93,7 +117,7 @@ The order ID is what stops double-counting: if the same sale is also counted by 
 </Steps>
 
 <Callout kind="note">
-  Google reports an upload as accepted at the moment of the request. Accepted is not attributed: if the click ID is older than the conversion action's 30-day click-through window, or belongs to a different account, Google accepts the upload and then doesn't count it.
+  Google accepts uploads for processing and reports the real outcome later. Accepted is not attributed: a click ID older than the conversion action's 30-day click-through window, a click from a different account, or an email that matches no signed-in user is accepted and then not counted. Hello Conversions records Google's request ID for every upload and checks the processing result afterwards, so a batch Google later rejects is noticed.
 </Callout>
 
 ## If the link is removed
