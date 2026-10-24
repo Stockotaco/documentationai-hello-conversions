@@ -5,6 +5,8 @@ description: Symptom-by-symptom causes for disputed figures in every Hello Conve
 
 Find the report, find the symptom. Most disputed numbers are a definition difference rather than a bug.
 
+A page that says **your first sync is still running** isn't broken: the source it reads (Lead Connector for Revenue Overview and Marketing Efficiency, Meta Ads for Creatives, Frameworks, Brief and Tracking) is connected but its first sync hasn't landed. The page updates on its own.
+
 ## Two reports disagree
 
 The most common complaint, and usually neither report is wrong.
@@ -21,7 +23,7 @@ The most common complaint, and usually neither report is wrong.
 
 | Symptom | Cause |
 | --- | --- |
-| Everything is zero | No revenue source connected, or the first sync hasn't landed. Check **Settings → Integrations → Sources** |
+| Everything is zero | No revenue source connected. Check **Settings → Integrations → Sources** |
 | Revenue is there but forms and products are empty | The project is on Stripe alone; those panels are built from GoHighLevel data |
 | Page views, unique visitors and conversion rate are zero | No website activity is being captured on the pages people land on — contact support if traffic is flowing and the report stays empty |
 | Page views right for recent dates, gone for older ones | Website activity data only reaches back **90 days**; revenue goes back as far as your source synced. A 6-month range shows revenue throughout and page views only recently, which also drags conversion rate |
@@ -57,7 +59,7 @@ The most common complaint, and usually neither report is wrong.
 | --- | --- |
 | Every conversion, cost-per and ROAS is zero | Wrong objective for the account — a lead-gen account left on the default Purchases never records `purchase` results |
 | ROAS column missing entirely | Objective is not Purchases. Expected |
-| Report is completely empty | No spend in the range, or the first Meta sync hasn't finished |
+| Report is completely empty | No spend in the range |
 | A creative you know is running isn't listed | It spent nothing in the range, or its spend landed after the last sync |
 | Yesterday's spend missing | No sync has run since that spend was recorded. On the default once-a-day sync (02:00 UTC) that can be most of a day; [every 6 hours](/connect/sources/meta-ads#how-often-it-syncs) shortens it |
 | Numbers changed since this morning | Meta revised its own attribution, or the 15-minute cache expired |
@@ -70,7 +72,7 @@ The most common complaint, and usually neither report is wrong.
 
 | Symptom | Cause |
 | --- | --- |
-| Table is empty | No creative spent in the range, or the first Meta sync hasn't finished |
+| Table is empty | No creative spent in the range |
 | A creative you fixed still shows red | The fix hasn't synced yet. Meta syncs at 02:00 UTC by default (or every 12 or 6 hours if set), and the result cache clears when a sync finishes |
 | A tagged creative shows as untagged | The parameters were appended to the website URL rather than entered in the URL parameters field |
 | Missing UTMs card is lower than the Issues row count | The card counts creatives with *no* UTM at all; Issues counts any missing one, so a creative with only `utm_source` is in Issues but not on the card |
