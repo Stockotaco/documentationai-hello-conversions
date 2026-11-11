@@ -1,0 +1,108 @@
+---
+title: Connect Claude
+description: Add Hello Conversions to Claude with OAuth. Sign in, pick one organization and an access level, and approve. No API key to copy.
+---
+
+Claude connects to Hello Conversions with OAuth. You sign in, choose what Claude can reach, and approve. There is no key to copy or paste.
+
+```
+https://mcp.helloconversions.com/mcp
+```
+
+## Add the connector
+
+<Tabs>
+  <Tab title="Claude (web and desktop)">
+
+    Find **Hello Conversions** in the Claude connectors directory and click **Connect**.
+
+    Or add it yourself: **Settings → Connectors → Add custom connector**, and paste `https://mcp.helloconversions.com/mcp` as the URL.
+
+  </Tab>
+
+  <Tab title="Claude Code">
+
+    ```bash
+    claude mcp add --transport http hello-conversions https://mcp.helloconversions.com/mcp
+    ```
+
+    Then run `/mcp` in Claude Code, pick `hello-conversions`, and authenticate. A browser window opens for the steps below.
+
+  </Tab>
+</Tabs>
+
+## Sign in and approve
+
+<Steps>
+  <Step title="Sign in" icon="log-in">
+    Claude opens a Hello Conversions page. Sign in with your usual account if you aren't already.
+  </Step>
+  <Step title="Pick an organization" icon="building">
+    Choose the one organization Claude can use.
+  </Step>
+  <Step title="Pick the access level" icon="shield">
+    **Read only** or **Read and write**. See the table below.
+  </Step>
+  <Step title="Approve" icon="circle-check">
+    You return to Claude, and the tools are ready.
+  </Step>
+</Steps>
+
+## What each access level allows
+
+| | Read only | Read and write |
+| --- | --- | --- |
+| Reports, contacts, transactions, ad spend, SQL `query` | Yes | Yes |
+| View sources, destinations, connections, pipelines, activity log | Yes | Yes |
+| Create, change or delete destinations, connections and pipelines | No | Yes |
+| Test a destination, disconnect an integration | No | Yes |
+
+On a read only connection, write tools are refused and nothing changes. On read and write, Claude asks you to confirm before it runs a tool that changes something. Every change is written to the project's activity log under your name, with MCP as the source.
+
+## What Claude can see
+
+| Your role | Projects Claude can use |
+| --- | --- |
+| Organization owner | Every project in the organization |
+| Member | Only the projects you belong to |
+
+Claude calls `list_projects` to see them, then names one project on each call.
+
+**One connection covers one organization.** To use a different organization, remove the connector in Claude, add it again, and pick the other organization.
+
+## Example prompts
+
+| Prompt | Tools Claude uses |
+| --- | --- |
+| "For Acme Dental, show revenue, ad spend and ROAS for the last 30 days, with spend split between Meta and Google." | `list_projects`, `get_daily_kpis`, `get_ad_spend` |
+| "Why are conversions not reaching Meta for Acme Dental?" | `list_destinations`, `list_connections`, `get_connection_stats`, `list_activity_log`, `get_activity_log_entry` |
+| "List the destinations for Acme Dental and how their deliveries went in the last 24 hours." | `list_destinations`, `get_connection_stats`, `list_activity_log` |
+
+Replace Acme Dental with one of your project names. Full list: [Tool reference](/mcp/tools).
+
+## Tokens and revoking
+
+Claude's access token lasts 1 hour and renews on its own. The refresh token lasts 90 days and is replaced each time it is used, so a connection in regular use stays signed in.
+
+To disconnect, do either:
+
+- In Hello Conversions, go to **Account settings → Connected apps** ([cloud.helloconversions.com/account/settings](https://cloud.helloconversions.com/account/settings)) and click **Revoke**. Claude is cut off on its next request.
+- In Claude, remove the connector.
+
+Usage and the rate limit are counted per connection. See [Usage and limits](/mcp/usage-limits).
+
+## Troubleshooting
+
+| What you see | What to do |
+| --- | --- |
+| "This request has expired" | A connection request lasts 30 minutes and works once. Go back to Claude and connect again. |
+| "This request was already answered with a different choice" | Start the connection again from Claude. |
+| "You are not a member of any organization yet" | Create an organization or ask to be invited, then connect again. |
+| Claude reads the wrong organization | Remove the connector in Claude, add it again, and pick the right organization. Revoke the old one under **Connected apps**. |
+| `list_projects` returns no projects, or a project is missing | As a member, you only see projects you belong to. Ask the organization owner to add you, or check you picked the right organization. |
+| "modifies data and this connection is read-only" | Remove the connector, add it again, and choose **Read and write**. |
+| "This connection cannot access project `<id>`" | The project is in another organization, or you are not a member of it. |
+
+<Callout kind="note">
+  OAuth works only at `https://mcp.helloconversions.com/mcp`. A per-project URL (`/mcp/<project id>`) needs an [API key](/mcp/authentication).
+</Callout>

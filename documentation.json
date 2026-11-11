@@ -222,6 +222,11 @@
                 "icon": "home"
               },
               {
+                "title": "Connect Claude",
+                "path": "mcp/claude",
+                "icon": "bot"
+              },
+              {
                 "title": "Connect Your AI Client",
                 "path": "mcp/connect",
                 "icon": "zap"

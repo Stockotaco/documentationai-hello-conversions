@@ -1,11 +1,35 @@
 ---
 title: Authentication
-description: How Hello Conversions API keys work — project and organization scoping, the read-only option and exactly what it blocks, optional expiry, revocation, and how to rotate a key safely.
+description: How MCP clients sign in to Hello Conversions. OAuth for Claude and other clients that support it, and API keys with project and organization scoping, the read-only option and exactly what it blocks, optional expiry, revocation, and how to rotate a key safely.
 ---
 
-Every MCP call is authenticated with an API key. There are two kinds, and which one you mint decides how much a client holding it can reach.
+Every MCP call is authenticated with OAuth or an API key.
+
+| | OAuth | API key |
+| --- | --- | --- |
+| Use it for | Claude, and other MCP clients that support OAuth (recommended) | Clients without OAuth, scripts, and per-project URLs |
+| How you connect | Add the URL, sign in, pick one organization and an access level, approve | Mint a key in the app and paste it into the client |
+| Reaches | The projects you can access in that one organization | One project, or every project in the organization for an organization key |
+| Connects at | `/mcp` only | `/mcp` or `/mcp/<project id>` |
+| Lifetime | 1-hour access token, renewed by a 90-day refresh token that rotates on each use | Until revoked, or until an optional expiry date |
+| Revoke | **Account settings → Connected apps**, or remove the connector in the client | **Revoke** on the key list |
+
+## OAuth
+
+The client sends you to a Hello Conversions page. You sign in, pick **one organization**, choose **Read only** or **Read and write**, and approve. Setup for Claude: [Connect Claude](/mcp/claude).
+
+- **One connection, one organization.** To switch organizations, reconnect and pick the other one.
+- **It acts as you.** An organization owner sees every project in the organization. A member sees only the projects they belong to.
+- **Read only blocks the same tools** as a read-only key. See **Read-only keys** below.
+- **Changes are logged under your name**, with MCP as the source, in the project's activity log.
+- **Usage and the rate limit are per connection.**
+- **OAuth works only at `/mcp`.** Per-project URLs (`/mcp/<project id>`) need an API key.
+
+Your connections are listed under **Account settings → Connected apps** with their organization, access level and last use. **Revoke** stops a connection on its next request.
 
 ## Project keys and organization keys
+
+There are two kinds of API key, and which one you mint decides how much a client holding it can reach.
 
 | | Project key | Organization key |
 | --- | --- | --- |
