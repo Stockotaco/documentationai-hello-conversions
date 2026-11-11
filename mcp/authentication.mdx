@@ -12,7 +12,7 @@ Every MCP call is authenticated with OAuth or an API key.
 | Reaches | The projects you can access in that one organization | One project, or every project in the organization for an organization key |
 | Connects at | `/mcp` only | `/mcp` or `/mcp/<project id>` |
 | Lifetime | 1-hour access token, renewed by a 90-day refresh token that rotates on each use | Until revoked, or until an optional expiry date |
-| Revoke | **Account settings → Connected apps**, or remove the connector in the client | **Revoke** on the key list |
+| Revoke | **Account settings → Connected apps** (removing the connector in Claude does not revoke it) | **Revoke** on the key list |
 
 ## OAuth
 

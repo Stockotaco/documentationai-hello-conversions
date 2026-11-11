@@ -84,10 +84,9 @@ Replace Acme Dental with one of your project names. Full list: [Tool reference](
 
 Claude's access token lasts 1 hour and renews on its own. The refresh token lasts 90 days and is replaced each time it is used, so a connection in regular use stays signed in.
 
-To disconnect, do either:
+To end access, go to **Account settings → Connected apps** ([cloud.helloconversions.com/account/settings](https://cloud.helloconversions.com/account/settings)) and click **Revoke**. Claude is cut off on its next request.
 
-- In Hello Conversions, go to **Account settings → Connected apps** ([cloud.helloconversions.com/account/settings](https://cloud.helloconversions.com/account/settings)) and click **Revoke**. Claude is cut off on its next request.
-- In Claude, remove the connector.
+Removing or disconnecting the connector in Claude only stops Claude from using it. Claude does not tell Hello Conversions, so the connection stays active until you revoke it under **Connected apps** or its refresh token expires after 90 days unused. In Claude Code, `claude mcp logout hello-conversions` does revoke it; `claude mcp remove` alone does not.
 
 Usage and the rate limit are counted per connection. See [Usage and limits](/mcp/usage-limits).
 
@@ -98,7 +97,7 @@ Usage and the rate limit are counted per connection. See [Usage and limits](/mcp
 | "This request has expired" | A connection request lasts 30 minutes and works once. Go back to Claude and connect again. |
 | "This request was already answered with a different choice" | Start the connection again from Claude. |
 | "You are not a member of any organization yet" | Create an organization or ask to be invited, then connect again. |
-| Claude reads the wrong organization | Remove the connector in Claude, add it again, and pick the right organization. Revoke the old one under **Connected apps**. |
+| Claude reads the wrong organization | Revoke the connection under **Connected apps**, then remove the connector in Claude, add it again, and pick the right organization. |
 | `list_projects` returns no projects, or a project is missing | As a member, you only see projects you belong to. Ask the organization owner to add you, or check you picked the right organization. |
 | "modifies data and this connection is read-only" | Remove the connector, add it again, and choose **Read and write**. |
 | "This connection cannot access project `<id>`" | The project is in another organization, or you are not a member of it. |
